@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "ai-service"
+version = "0.1.0"
+description = ""
+authors = ["thwolter <thwolter@gmail.com>"]
+readme = "README.md"
+packages = [{include = "ai_service"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.2"
+uvicorn = "^0.31.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
