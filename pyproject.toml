@@ -8,9 +8,12 @@ packages = [{include = "ai_service"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.115.2"
+fastapi = {extras = ["standard"], version = "^0.115.2"}
 uvicorn = "^0.31.1"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
 
 [build-system]
 requires = ["poetry-core"]
