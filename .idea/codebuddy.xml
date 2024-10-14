@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CodebuddyPersistentProjectState">
+    <option name="promptHistory">
+      <list>
+        <option value="check the RiskDefinitionService and propose modifications. The Service shall take a risk desctiption as text and shall return an indicator if the risk definition is ok or required modification to correspond to a good risk description. If is not yet well defined a proposal and classifiction shall be returned. Write a route which is using this service" />
+        <option value="ok make this modifications" />
+        <option value="add types in service" />
+        <option value="integrate a PydanticOutputParser" />
+        <option value="create tests using pytest for RiskDefinitionService" />
+      </list>
+    </option>
+    <option name="selectedModel" value="codebuddy:GPT4_V6" />
+  </component>
+</project>

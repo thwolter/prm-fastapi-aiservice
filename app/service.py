@@ -1,52 +1,34 @@
 import os
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
+
+from langchain import hub
+from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
-from langchain.output_parsers import OutputParser
+from langchain_openai import ChatOpenAI
+from pydantic import BaseModel, Field
 
 
-def read_text_file(file_name: str) -> str:
-    file_path = os.path.join(os.path.dirname(__file__), 'prompts', file_name)
-    with open(file_path, 'r') as file:
-        text = file.read()
-    return text
+class RiskDefinitionCheck(BaseModel):
+    is_valid: bool = Field(..., description="Whether the text is valid or not.")
+    classification: str = Field(..., description="The classification of the text.")
+    original: str = Field(..., description="The original text.")
+    suggestion: str = Field(..., description="Suggestions for a revised risk definition.")
+    explanation: str = Field(..., description="Explanation of the classification.")
 
 
-class RiskAssessmentService:
-    txt_definitions = 'definitions.txt'
-    risk_prompt = 'risk_prompt.txt'
+class RiskDefinitionService:
 
-    def __init__(self, model_name="gpt-4"):
+    def __init__(self, model_name: str = "gpt-4o") -> None:
         self.model = ChatOpenAI(model=model_name)
-        self.prompt_template = self.create_prompt()
-        self.output_parser = OutputParser()
+        self.parser = PydanticOutputParser(pydantic_object=RiskDefinitionCheck)
+        self.prompt = self.create_prompt()
 
-    def create_prompt(self):
-        template = read_text_file(self.risk_prompt)
-        return PromptTemplate(
-            template=template,
-            input_variables=["text", "definitions"]
+    def create_prompt(self) -> PromptTemplate:
+        template = hub.pull("risk-definition-check").template
+        return PromptTemplate.from_template(
+            template,
+            partial_variables={"format_instructions": self.parser.get_format_instructions()},
         )
 
-    def assess_text(self, text: str, definitions: str) -> dict:
-        prompt = self.prompt_template.render(text=text, definitions=definitions)
-        messages = [
-            SystemMessage(content=prompt),
-            HumanMessage(content=text),
-        ]
-        response = self.model.invoke(messages)
-        return self.parse_response(response)
-
-    def parse_response(self, response: str) -> dict:
-        parsed_output = self.output_parser.parse(response)
-        return {
-            "is_risk": parsed_output.get("is_risk", False),
-            "category": parsed_output.get("category", "unknown"),
-            "original": parsed_output.get("original", ""),
-            "modified": parsed_output.get("modified", "")
-        }
-
-# Example usage:
-# service = RiskAssessmentService()
-# result = service.assess_text("The project might face delays due to unforeseen circumstances.")
-# print(result)
+    def assess_definition(self, text: str) -> RiskDefinitionCheck:
+        chain = self.prompt | self.model | self.parser
+        return chain.invoke({'text': text})
