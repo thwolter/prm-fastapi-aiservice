@@ -1,0 +1,5 @@
+Risk: A risk is the uncertainty about and severity of an activity's events and consequences (or outcomes) concerning something humans value.
+Issue: An issue is a matter of concern or something that has occurred and requires escalation.
+Problem: A problem is a realised risk which must be addressed immediately.
+Cause: A cause describes existing conditions that might give rise to risk.
+Effect: An effect occurs as the result of risk realisation.

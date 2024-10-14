@@ -1,0 +1,8 @@
+
+ Remember the following definitions of risks, issues, problems, causes, and effects:
+ {{definitions}}
+ I will provide you with a text; your task is to check if the text describes a risk. Clearly distinguish between the definitions above. If the text is not a risk description, explain it and provide a reformulation.
+
+ Text: {{text}}
+
+ Response:
