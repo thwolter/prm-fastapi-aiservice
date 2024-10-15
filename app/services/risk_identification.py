@@ -13,6 +13,7 @@ class Risk(BaseModel):
     title: str = Field(..., description="The title of the risk.")
     description: str = Field(..., description="The description of the risk.")
 
+
 class RiskIdentificationResult(BaseModel):
     risks: list[Risk] = Field(..., description="The list of risks identified.")
 

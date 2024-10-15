@@ -1,4 +1,5 @@
 from abc import ABC
+
 from langchain import hub
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate

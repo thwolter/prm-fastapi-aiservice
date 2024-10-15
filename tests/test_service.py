@@ -1,15 +1,9 @@
-from unittest.mock import patch
-from app.services.risk_definition_check import (
-    RiskDefinitionService,
-    RiskDefinitionCheckResult,
-    RiskDefinitionCheckQuery,
-)
-from app.services.risk_identification import (
-    RiskIdentificationService,
-    RiskIdentificationQuery,
-    RiskIdentificationResult,
-    Risk,
-)
+from app.services.risk_definition_check import (RiskDefinitionCheckQuery,
+                                                RiskDefinitionCheckResult,
+                                                RiskDefinitionService)
+from app.services.risk_identification import (Risk, RiskIdentificationQuery,
+                                              RiskIdentificationResult,
+                                              RiskIdentificationService)
 
 
 def test_service_initialization():
@@ -26,6 +20,7 @@ def test_risk_definition_check():
     assert result.is_valid is True
     assert result.classification == "Risk"
     assert result.original == 'The project might face delays due to unforeseen circumstances.'
+
 
 def test_identify_risks():
     service = RiskIdentificationService()

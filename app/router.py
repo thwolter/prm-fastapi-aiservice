@@ -1,14 +1,16 @@
-from fastapi import APIRouter
-from fastapi import HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.services.risk_definition_check import RiskDefinitionService
-from app.services.risk_definition_check import RiskDefinitionCheckQuery
+
+from app.services.risk_definition_check import (RiskDefinitionCheckQuery,
+                                                RiskDefinitionService)
 
 router = APIRouter(
     prefix="/api",
     tags=["api"],
     responses={404: {"description": "Not found"}},
 )
+
+#todo: adjust code for routers
 
 class RiskDescriptionRequest(BaseModel):
     text: str

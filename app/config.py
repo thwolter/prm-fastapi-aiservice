@@ -1,8 +1,8 @@
-import os
 from pathlib import Path
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 def find_dotenv():
     current_dir = Path(__file__).resolve().parent
