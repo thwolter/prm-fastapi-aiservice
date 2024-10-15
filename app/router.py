@@ -1,8 +1,12 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Depends
+import logging
 
-from app.services.risk_definition_check import (RiskDefinitionCheckQuery,
-                                                RiskDefinitionService)
+from app.dependencies import get_risk_definition_service
+from app.services.risk_definition_check import (
+    RiskDefinitionCheckQuery,
+    RiskDefinitionService,
+    RiskDefinitionCheckResult,
+)
 
 router = APIRouter(
     prefix="/api",
@@ -10,23 +14,21 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-#todo: adjust code for routers
+class RiskDefinitionCheckRequest(RiskDefinitionCheckQuery):
+    pass
 
-class RiskDescriptionRequest(BaseModel):
-    text: str
+class RiskDefinitionCheckResponse(RiskDefinitionCheckResult):
+    pass
 
-class RiskDescriptionResponse(BaseModel):
-    is_valid: bool
-    classification: str
-    original: str
-    suggestions: str
 
-service = RiskDefinitionService()
-
-@router.post('/risk-definition/check/')
-def check_risk_definition(request: RiskDescriptionRequest) -> RiskDescriptionResponse:
+@router.post('/risk-definition/check/', response_model=RiskDefinitionCheckResponse)
+def check_risk_definition(
+    request: RiskDefinitionCheckRequest,
+    service: RiskDefinitionService = Depends(get_risk_definition_service)
+) -> RiskDefinitionCheckResponse:
     try:
         result = service.execute_query(RiskDefinitionCheckQuery(text=request.text))
-        return RiskDescriptionResponse(**result.dict())
+        return RiskDefinitionCheckResponse(**result.model_dump())
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"Error in check_risk_definition: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")

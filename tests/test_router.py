@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from app.router import RiskDefinitionCheckResponse
 from main import app
 
 client = TestClient(app)
@@ -7,10 +8,13 @@ client = TestClient(app)
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "Hello, World!"}
+    assert response.json() == {"message": "Hello World"}
 
 
 def test_risk_definition_check():
-    response = client.post("/api/risk-definition/check/")
+    request_data = {
+        "text": "The project might face delays due to unforeseen circumstances."
+    }
+    response = client.post("/api/risk-definition/check/", json=request_data)
     assert response.status_code == 200
-    assert response.json() == {"result": "ok"}
+    assert isinstance(RiskDefinitionCheckResponse(**response.json()), RiskDefinitionCheckResponse)
