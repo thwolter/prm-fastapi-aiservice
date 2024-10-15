@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from fastapi import HTTPException
 from pydantic import BaseModel
-from app.service import RiskDefinitionService
+from app.services.risk_definition_check import RiskDefinitionService
+from app.services.risk_definition_check import RiskDefinitionCheckQuery
 
 router = APIRouter(
     prefix="/api",
@@ -20,10 +21,10 @@ class RiskDescriptionResponse(BaseModel):
 
 service = RiskDefinitionService()
 
-@router.post('/check/risk-definition/')
+@router.post('/risk-definition/check/')
 def check_risk_definition(request: RiskDescriptionRequest) -> RiskDescriptionResponse:
     try:
-        result = service.assess_text(request.text)
-        return RiskDescriptionResponse(**result)
+        result = service.execute_query(RiskDefinitionCheckQuery(text=request.text))
+        return RiskDescriptionResponse(**result.dict())
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

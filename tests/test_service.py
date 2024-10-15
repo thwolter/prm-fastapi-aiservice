@@ -1,17 +1,40 @@
-from app.service import RiskDefinitionService, RiskDefinitionCheck
+from unittest.mock import patch
+from app.services.risk_definition_check import (
+    RiskDefinitionService,
+    RiskDefinitionCheckResult,
+    RiskDefinitionCheckQuery,
+)
+from app.services.risk_identification import (
+    RiskIdentificationService,
+    RiskIdentificationQuery,
+    RiskIdentificationResult,
+    Risk,
+)
 
 
 def test_service_initialization():
     service = RiskDefinitionService()
-    assert service.model is not None
+    assert service.model is not None, "Model should be initialized"
     assert service.prompt is not None
     assert service.parser is not None
 
 
-def test_assess_test_live():
+def test_risk_definition_check():
     service = RiskDefinitionService()
-    text = 'The project might face delays due to unforeseen circumstances.'
-    result: RiskDefinitionCheck = service.assess_definition(text)
+    query = RiskDefinitionCheckQuery(text='The project might face delays due to unforeseen circumstances.')
+    result = service.execute_query(query)
+    assert isinstance(result, RiskDefinitionCheckResult)
     assert result.is_valid is True
     assert result.classification == "Risk"
-    assert result.original == text
+    assert result.original == 'The project might face delays due to unforeseen circumstances.'
+
+def test_identify_risks():
+    service = RiskIdentificationService()
+    query = RiskIdentificationQuery(category='Project', subcategory='Delays')
+    result = service.execute_query(query)
+    assert isinstance(result, RiskIdentificationResult)
+    assert result.risks is not None
+    assert len(result.risks) > 0
+    assert all(isinstance(risk, Risk) for risk in result.risks)
+    assert all(risk.title is not None for risk in result.risks)
+    assert all(risk.description is not None for risk in result.risks)
