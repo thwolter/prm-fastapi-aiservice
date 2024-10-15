@@ -17,20 +17,18 @@ class BaseAIService(ABC):
     def __init__(self) -> None:
         self.model = ChatOpenAI(model=self.model_name, api_key=settings.OPENAI_API_KEY)
         self.parser = PydanticOutputParser(pydantic_object=self.ResultModel)
-        self.prompt = self.create_prompt()
 
-    def create_prompt(self) -> PromptTemplate:
-        template = hub.pull(self.get_prompt_name()).template
+    def create_prompt(self, query: QueryModel) -> PromptTemplate:
+        template = hub.pull(self.get_prompt_name(query)).template
         return PromptTemplate.from_template(
             template,
             partial_variables={"format_instructions": self.parser.get_format_instructions()},
         )
 
-    def get_prompt_name(self) -> str:
-        if not self.prompt_name:
-            raise ValueError("Prompt name must be set")
+    def get_prompt_name(self, query: QueryModel) -> str:
         return self.prompt_name
 
     def execute_query(self, query: QueryModel) -> ResultModel:
-        chain = self.prompt | self.model | self.parser
+        prompt = self.create_prompt(query)
+        chain = prompt | self.model | self.parser
         return chain.invoke(query.model_dump())
