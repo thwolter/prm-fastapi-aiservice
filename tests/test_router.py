@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.router import RiskDefinitionCheckResponse
+from app.models import RiskDefinitionCheckResponse
 from main import app
 
 client = TestClient(app)

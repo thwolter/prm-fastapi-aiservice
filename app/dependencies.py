@@ -1,4 +1,4 @@
-from app.services.risk_definition_check import RiskDefinitionService
+from app.services.services import RiskDefinitionService
 
 
 def get_risk_definition_service() -> RiskDefinitionService:

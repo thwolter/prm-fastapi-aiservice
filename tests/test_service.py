@@ -1,9 +1,8 @@
-from app.services.risk_definition_check import (RiskDefinitionCheckQuery,
-                                                RiskDefinitionCheckResult,
-                                                RiskDefinitionService)
-from app.services.risk_identification import (Risk, RiskIdentificationQuery,
-                                              RiskIdentificationResult,
-                                              RiskIdentificationService)
+from app.models import (Risk, RiskDefinitionCheckQuery,
+                        RiskDefinitionCheckResult, RiskIdentificationQuery,
+                        RiskIdentificationResult)
+from app.services.services import (RiskDefinitionService,
+                                   RiskIdentificationService)
 
 
 def test_service_initialization():

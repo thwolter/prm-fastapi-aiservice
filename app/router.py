@@ -1,24 +1,17 @@
-from fastapi import APIRouter, HTTPException, Depends
 import logging
 
+from fastapi import APIRouter, Depends, HTTPException
+
 from app.dependencies import get_risk_definition_service
-from app.services.risk_definition_check import (
-    RiskDefinitionCheckQuery,
-    RiskDefinitionService,
-    RiskDefinitionCheckResult,
-)
+from app.models import (RiskDefinitionCheckQuery, RiskDefinitionCheckRequest,
+                        RiskDefinitionCheckResponse)
+from app.services.services import RiskDefinitionService
 
 router = APIRouter(
     prefix="/api",
     tags=["api"],
     responses={404: {"description": "Not found"}},
 )
-
-class RiskDefinitionCheckRequest(RiskDefinitionCheckQuery):
-    pass
-
-class RiskDefinitionCheckResponse(RiskDefinitionCheckResult):
-    pass
 
 
 @router.post('/risk-definition/check/', response_model=RiskDefinitionCheckResponse)
