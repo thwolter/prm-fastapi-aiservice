@@ -8,8 +8,11 @@
         <option value="add types in service" />
         <option value="integrate a PydanticOutputParser" />
         <option value="create tests using pytest for RiskDefinitionService" />
+        <option value="using pytest from the console in folder ai-service is unapable to inititiate Settings with the .env variables. Make the required adjustments" />
+        <option value="check service.py and propose refactoring, including function and variable names and abstract layers" />
+        <option value="how to avoid F821: Undefined name `ResultModel` in BaseService" />
       </list>
     </option>
-    <option name="selectedModel" value="codebuddy:GPT4_V6" />
+    <option name="selectedModel" value="codebuddy:GPT4_Turbo_Haiku_V7" />
   </component>
 </project>

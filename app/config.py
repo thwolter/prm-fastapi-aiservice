@@ -19,6 +19,8 @@ load_dotenv(DOTENV)
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=DOTENV, env_file_encoding='utf-8', extra='ignore')
 
+    APP_PORT: int = 8001
+    APP_HOST: str = 'localhost'
     OPENAI_API_KEY: str
     LANGCHAIN_API_KEY: str
     LANGCHAIN_TRACING_V2: bool = False
