@@ -2,9 +2,10 @@ from unittest.mock import patch
 
 from app.models import (Risk, RiskDefinitionCheckQuery,
                         RiskDefinitionCheckResult, RiskIdentificationQuery,
-                        RiskIdentificationResult)
+                        RiskIdentificationResult, CategoriesIdentificationQuery, CategoriesIdentificationResult,
+                        Category, CategoriesIdentificationRequest)
 from app.services.services import (RiskDefinitionService,
-                                   RiskIdentificationService)
+                                   RiskIdentificationService, CategoryIdentificationService)
 
 
 def test_service_initialization():
@@ -54,4 +55,24 @@ def test_identify_risks(mock_execute_query):
     assert all(isinstance(risk, Risk) for risk in result.risks)
     assert all(risk.title is not None for risk in result.risks)
     assert all(risk.description is not None for risk in result.risks)
+    mock_execute_query.assert_called_once_with(query)
+
+
+@patch('app.services.base_service.BaseAIService.execute_query')
+def test_category_identification(mock_execute_query):
+    service = CategoryIdentificationService()
+    query = CategoriesIdentificationRequest(text='The project involves building a new infrastructure.')
+    expected_result = CategoriesIdentificationResult(
+        categories=[Category(
+            name="Infrastructure",
+            description="The text indicates a project related to building new infrastructure.",
+            examples=[]
+        )]
+    )
+    mock_execute_query.return_value = expected_result
+    result = service.execute_query(query)
+    assert isinstance(result, CategoriesIdentificationResult)
+    assert result.categories[0].name == "Infrastructure"
+    assert result.categories[0].description == "The text indicates a project related to building new infrastructure."
+    assert result.categories[0].examples == []
     mock_execute_query.assert_called_once_with(query)

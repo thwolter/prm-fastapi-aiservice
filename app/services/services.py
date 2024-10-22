@@ -1,5 +1,6 @@
 from app.models import (RiskDefinitionCheckQuery, RiskDefinitionCheckResult,
-                        RiskIdentificationQuery, RiskIdentificationResult)
+                        RiskIdentificationQuery, RiskIdentificationResult, CategoriesIdentificationQuery,
+                        CategoriesIdentificationResult)
 from app.services.base_service import BaseAIService
 
 
@@ -19,3 +20,9 @@ class RiskIdentificationService(BaseAIService):
         if query.subcategory:
             return self.prompt_name_categories
         return self.prompt_name_category
+
+
+class CategoryIdentificationService(BaseAIService):
+    prompt_name = "create-categories"
+    QueryModel = CategoriesIdentificationQuery
+    ResultModel = CategoriesIdentificationResult
