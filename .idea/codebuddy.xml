@@ -11,8 +11,9 @@
         <option value="using pytest from the console in folder ai-service is unapable to inititiate Settings with the .env variables. Make the required adjustments" />
         <option value="check service.py and propose refactoring, including function and variable names and abstract layers" />
         <option value="how to avoid F821: Undefined name `ResultModel` in BaseService" />
+        <option value="the tests for service and router should mock execute_query" />
       </list>
     </option>
-    <option name="selectedModel" value="codebuddy:GPT4_Turbo_Haiku_V7" />
+    <option name="selectedModel" value="codebuddy:GPT4_Turbo_V6" />
   </component>
 </project>
