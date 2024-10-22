@@ -1,12 +1,14 @@
 import logging
-from typing import List
+from typing import Type, TypeVar
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 
-from app.models import (RiskDefinitionCheckQuery, RiskDefinitionCheckRequest,
-                        RiskDefinitionCheckResponse, CategoriesIdentificationRequest,
-                        CategoriesIdentificationResponse)
-from app.services.services import RiskDefinitionService, CategoryIdentificationService
+from app.models import (CategoriesIdentificationRequest,
+                        CategoriesIdentificationResponse,
+                        RiskDefinitionCheckRequest,
+                        RiskDefinitionCheckResponse)
+from app.services.services import (CategoryIdentificationService,
+                                   RiskDefinitionService)
 
 router = APIRouter(
     prefix="/api",
@@ -14,24 +16,45 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+TRequest = TypeVar("TRequest")
+TResponse = TypeVar("TResponse")
 
-@router.post('/risk-definition/check/', response_model=RiskDefinitionCheckResponse)
-def check_risk_definition(request: RiskDefinitionCheckRequest) -> RiskDefinitionCheckResponse:
-    service = RiskDefinitionService()
+
+def execute_service_query(
+    service_class: Type,
+    request: TRequest,
+    query_model: Type,
+    response_model: Type[TResponse],
+) -> TResponse:
+    service = service_class()
     try:
-        result = service.execute_query(RiskDefinitionCheckQuery(text=request.text))
-        return RiskDefinitionCheckResponse(**result.model_dump())
+        query = query_model(**request.model_dump())
+        result = service.execute_query(query)
+        return response_model(**result.model_dump())
     except Exception as e:
-        logging.error(f"Error in check_risk_definition: {e}")
+        logging.error(f"Error in {service_class.__name__}: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@router.post('/categories/identify/', response_model=CategoriesIdentificationResponse)
-def identify_categories(request: CategoriesIdentificationRequest) -> CategoriesIdentificationResponse:
-    service = CategoryIdentificationService()
-    try:
-        result = service.execute_query(request)
-        return CategoriesIdentificationResponse(**result.model_dump())
-    except Exception as e:
-        logging.error(f"Error in identify_categories: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+@router.post("/risk-definition/check/", response_model=RiskDefinitionCheckResponse)
+def check_risk_definition(
+    request: RiskDefinitionCheckRequest,
+) -> RiskDefinitionCheckResponse:
+    return execute_service_query(
+        RiskDefinitionService,
+        request,
+        RiskDefinitionCheckRequest,
+        RiskDefinitionCheckResponse,
+    )
+
+
+@router.post("/categories/identify/", response_model=CategoriesIdentificationResponse)
+def identify_categories(
+    request: CategoriesIdentificationRequest,
+) -> CategoriesIdentificationResponse:
+    return execute_service_query(
+        CategoryIdentificationService,
+        request,
+        CategoriesIdentificationRequest,
+        CategoriesIdentificationResponse,
+    )

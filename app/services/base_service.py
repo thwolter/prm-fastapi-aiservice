@@ -23,7 +23,9 @@ class BaseAIService(ABC):
         template = hub.pull(self.get_prompt_name(query)).template
         return PromptTemplate.from_template(
             template,
-            partial_variables={"format_instructions": self.parser.get_format_instructions()},
+            partial_variables={
+                "format_instructions": self.parser.get_format_instructions()
+            },
         )
 
     def get_prompt_name(self, query: QueryModel) -> str:

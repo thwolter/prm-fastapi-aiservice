@@ -1,30 +1,24 @@
 from pydantic import BaseModel, Field
 
 
-class RiskDefinitionCheckResult(BaseModel):
+class RiskDefinitionCheckResponse(BaseModel):
     is_valid: bool = Field(..., description="Whether the text is valid or not.")
     classification: str = Field(..., description="The classification of the text.")
     original: str = Field(..., description="The original text.")
-    suggestion: str = Field(..., description="Suggestions for a revised risk definition.")
+    suggestion: str = Field(
+        ..., description="Suggestions for a revised risk definition."
+    )
     explanation: str = Field(..., description="Explanation of the classification.")
 
 
-class RiskDefinitionCheckQuery(BaseModel):
+class RiskDefinitionCheckRequest(BaseModel):
     text: str = Field(..., description="The text to be assessed.")
 
 
-class RiskDefinitionCheckResponse(RiskDefinitionCheckResult):
-    pass
-
-
-class RiskDefinitionCheckRequest(RiskDefinitionCheckQuery):
-    pass
-
-
 class RiskIdentificationQuery(BaseModel):
-   category: str = Field(..., description="The category of the risk.")
-   subcategory: str | None = Field(None, description="The subcategory of the risk.")
-   context: str = Field(..., description="The context of the risk.")
+    category: str = Field(..., description="The category of the risk.")
+    subcategory: str | None = Field(None, description="The subcategory of the risk.")
+    context: str = Field(..., description="The context of the risk.")
 
 
 class Risk(BaseModel):
@@ -43,9 +37,12 @@ class Category(BaseModel):
 
 
 class CategoriesIdentificationRequest(BaseModel):
-    text: str = Field(..., description="The text to be used for category identification.")
+    text: str = Field(
+        ..., description="The text to be used for category identification."
+    )
 
 
 class CategoriesIdentificationResponse(BaseModel):
-    categories: list[Category] = Field(..., description="The list of categories identified.")
-
+    categories: list[Category] = Field(
+        ..., description="The list of categories identified."
+    )

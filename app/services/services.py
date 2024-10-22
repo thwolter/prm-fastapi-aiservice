@@ -1,13 +1,15 @@
-from app.models import (RiskDefinitionCheckQuery, RiskDefinitionCheckResult,
-                        RiskIdentificationQuery, RiskIdentificationResult, CategoriesIdentificationRequest,
-                        CategoriesIdentificationResponse)
+from app.models import (CategoriesIdentificationRequest,
+                        CategoriesIdentificationResponse,
+                        RiskDefinitionCheckRequest,
+                        RiskDefinitionCheckResponse, RiskIdentificationQuery,
+                        RiskIdentificationResult)
 from app.services.base_service import BaseAIService
 
 
 class RiskDefinitionService(BaseAIService):
     prompt_name = "risk-definition-check"
-    QueryModel = RiskDefinitionCheckQuery
-    ResultModel = RiskDefinitionCheckResult
+    QueryModel = RiskDefinitionCheckRequest
+    ResultModel = RiskDefinitionCheckResponse
 
 
 class RiskIdentificationService(BaseAIService):

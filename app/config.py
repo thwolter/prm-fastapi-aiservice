@@ -7,20 +7,24 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 def find_dotenv():
     current_dir = Path(__file__).resolve().parent
     while current_dir != current_dir.root:
-        dotenv_path = current_dir / '.env'
+        dotenv_path = current_dir / ".env"
         if dotenv_path.exists():
             return str(dotenv_path)
         current_dir = current_dir.parent
     raise FileNotFoundError(".env file not found")
 
+
 DOTENV = find_dotenv()
 load_dotenv(DOTENV)
 
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=DOTENV, env_file_encoding='utf-8', extra='ignore')
+    model_config = SettingsConfigDict(
+        env_file=DOTENV, env_file_encoding="utf-8", extra="ignore"
+    )
 
     APP_PORT: int = 8001
-    APP_HOST: str = 'localhost'
+    APP_HOST: str = "localhost"
     OPENAI_API_KEY: str
     LANGCHAIN_API_KEY: str
     LANGCHAIN_TRACING_V2: bool = False
@@ -30,6 +34,7 @@ class Settings(BaseSettings):
     @classmethod
     def from_env(cls):
         return cls()
+
 
 try:
     settings = Settings.from_env()
