@@ -1,8 +1,8 @@
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 
-from app.models import RiskDefinitionCheckResponse, CategoriesIdentificationQuery, CategoriesIdentificationRequest, \
-    CategoriesIdentificationResult, Category
+from app.models import RiskDefinitionCheckResponse, CategoriesIdentificationRequest, Category, \
+    CategoriesIdentificationResponse
 from app.main import app
 
 client = TestClient(app)
@@ -61,7 +61,7 @@ def risk_definition_check_invalid_text_type(mock_execute_query):
 @patch('app.services.services.CategoryIdentificationService.execute_query')
 def test_category_identification(mock_execute_query):
     data = CategoriesIdentificationRequest(text="This is a sample text to identify categories.")
-    mock_execute_query.return_value = CategoriesIdentificationResult(
+    mock_execute_query.return_value = CategoriesIdentificationResponse(
         categories=[
             Category(name="Sample", description="A sample category.", examples=["Example 1", "Example 2"]),
             Category(name="Text", description="A text category.", examples=["Example 3", "Example 4"])
@@ -71,7 +71,7 @@ def test_category_identification(mock_execute_query):
     assert response.status_code == 200
     mock_execute_query.assert_called_once()
     response_data = response.json()
-    assert isinstance(CategoriesIdentificationResult(**response_data), CategoriesIdentificationResult)
+    assert isinstance(CategoriesIdentificationResponse(**response_data), CategoriesIdentificationResponse)
     assert len(response_data["categories"]) == 2
     assert response_data["categories"][0]["name"] == "Sample"
     assert response_data["categories"][1]["name"] == "Text"

@@ -4,8 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.models import (RiskDefinitionCheckQuery, RiskDefinitionCheckRequest,
-                        RiskDefinitionCheckResponse, Category, CategoriesIdentificationQuery,
-                        CategoriesIdentificationResult, CategoriesIdentificationRequest,
+                        RiskDefinitionCheckResponse, CategoriesIdentificationRequest,
                         CategoriesIdentificationResponse)
 from app.services.services import RiskDefinitionService, CategoryIdentificationService
 

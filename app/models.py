@@ -36,22 +36,16 @@ class RiskIdentificationResult(BaseModel):
     risks: list[Risk] = Field(..., description="The list of risks identified.")
 
 
-class CategoriesIdentificationQuery(BaseModel):
-    text: str = Field(..., description="The text to be used for category identification.")
-
-
 class Category(BaseModel):
     name: str = Field(..., description="The name of the category.")
     description: str = Field(..., description="The description of the category.")
     examples: list[str] = Field(..., description="Examples of the category.")
 
 
-class CategoriesIdentificationResult(BaseModel):
+class CategoriesIdentificationRequest(BaseModel):
+    text: str = Field(..., description="The text to be used for category identification.")
+
+
+class CategoriesIdentificationResponse(BaseModel):
     categories: list[Category] = Field(..., description="The list of categories identified.")
 
-
-class CategoriesIdentificationResponse(CategoriesIdentificationResult):
-    pass
-
-class CategoriesIdentificationRequest(CategoriesIdentificationQuery):
-    pass
