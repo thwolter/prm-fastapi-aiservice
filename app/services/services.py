@@ -1,8 +1,8 @@
-from app.models import (CategoriesIdentificationRequest,
-                        CategoriesIdentificationResponse,
-                        RiskDefinitionCheckRequest,
-                        RiskDefinitionCheckResponse, RiskIdentificationQuery,
-                        RiskIdentificationResult)
+from app.services.models import (CategoriesIdentificationRequest,
+                                 CategoriesIdentificationResponse,
+                                 RiskDefinitionCheckRequest,
+                                 RiskDefinitionCheckResponse, RiskIdentificationQuery,
+                                 RiskIdentificationResult)
 from app.services.base_service import BaseAIService
 
 

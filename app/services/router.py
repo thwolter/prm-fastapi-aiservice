@@ -3,10 +3,10 @@ from typing import Type, TypeVar
 
 from fastapi import APIRouter, HTTPException
 
-from app.models import (CategoriesIdentificationRequest,
-                        CategoriesIdentificationResponse,
-                        RiskDefinitionCheckRequest,
-                        RiskDefinitionCheckResponse)
+from app.services.models import (CategoriesIdentificationRequest,
+                                 CategoriesIdentificationResponse,
+                                 RiskDefinitionCheckRequest,
+                                 RiskDefinitionCheckResponse)
 from app.services.services import (CategoryIdentificationService,
                                    RiskDefinitionService)
 

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.router import router as service_router
+from app.services.router import router as service_router
 from app.keywords.router import router as keywords_router
 
 app = FastAPI()

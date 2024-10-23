@@ -3,9 +3,9 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.models import (CategoriesIdentificationRequest,
-                        CategoriesIdentificationResponse, Category,
-                        RiskDefinitionCheckResponse)
+from app.services.models import (CategoriesIdentificationRequest,
+                                 CategoriesIdentificationResponse, Category,
+                                 RiskDefinitionCheckResponse)
 
 client = TestClient(app)
 
