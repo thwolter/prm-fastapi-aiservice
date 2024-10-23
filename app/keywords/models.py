@@ -8,8 +8,10 @@ class KeywordRequest(BaseModel):
     deduplication_threshold: Optional[float] = 0.9
     deduplication_algo: Optional[str] = 'seqm'
     window_size: Optional[int] = 1
-    max_Keywords: Optional[int] = 20
+    max_keywords: Optional[int] = 20
     min_score: Optional[float] = 0.0
+    features: Optional[list[str]] = None
+    stopwords: Optional[list[str]] = None
 
 
 class KeywordResponse(BaseModel):

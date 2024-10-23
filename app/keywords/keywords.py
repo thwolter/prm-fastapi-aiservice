@@ -8,16 +8,20 @@ th = TextHighlighter(max_ngram_size = 3)
 
 
 def get_keywords(request: KeywordRequest) -> KeywordResponse:
-    kw_extractor.language = request.language
-    kw_extractor.max_ngram_size = request.max_ngram_size
-    kw_extractor.deduplication_threshold = request.deduplication_threshold
-    kw_extractor.deduplication_algo = request.deduplication_algo
-    kw_extractor.windowSize = request.window_size
-    kw_extractor.numOfKeywords = request.max_Keywords
-    kw_extractor.min_score = request.min_score
+    kw_extractor = yake.KeywordExtractor(
+        lan=request.language,
+        n=request.max_ngram_size,
+        dedupLim=request.deduplication_threshold,
+        dedupFunc=request.deduplication_algo,
+        windowsSize=request.window_size,
+        top=request.max_keywords,
+        features=request.features,
+        stopwords=request.stopwords,
+    )
 
-    extracted_keywords = kw_extractor.extract_keywords(request.text)
-    keywords = [(kw, score) for kw, score in extracted_keywords]
+    extracted_keywords = sorted(kw_extractor.extract_keywords(request.text), key=lambda x: x[1], reverse=True)
+    keywords = [(kw, score) for kw, score in extracted_keywords if score >= request.min_score]
+
     highlighted_text = th.highlight(request.text, keywords)
     return KeywordResponse(
         keywords=[kw for kw, _ in keywords],
