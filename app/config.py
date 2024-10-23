@@ -1,6 +1,8 @@
 from pathlib import Path
+from typing import Literal, Annotated, Any
 
 from dotenv import load_dotenv
+from pydantic import AnyUrl, BeforeValidator, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,10 +20,20 @@ DOTENV = find_dotenv()
 load_dotenv(DOTENV)
 
 
+def parse_cors(v: Any) -> list[str] | str:
+    if isinstance(v, str) and not v.startswith('['):
+        return [i.strip() for i in v.split(',')]
+    elif isinstance(v, list | str):
+        return v
+    raise ValueError(v)
+
+
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=DOTENV, env_file_encoding="utf-8", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file='.env', env_ignore_empty=True, extra='ignore')
+    DOMAIN: str = 'localhost'
+    ENVIRONMENT: Literal['local', 'staging', 'production'] = 'local'
+
+    BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
     APP_PORT: int = 8001
     APP_HOST: str = "localhost"
@@ -31,13 +43,17 @@ class Settings(BaseSettings):
     LANGCHAIN_CALLBACKS_BACKGROUND: bool = False
     LANGCHAIN_PROJECT: str
 
+    @computed_field
+    @property
+    def server_host(self) -> str:
+        # Use HTTPS for anything other than local development
+        if self.ENVIRONMENT == 'local':
+            return f'http://{self.DOMAIN}'
+        return f'https://{self.DOMAIN}'
+
     @classmethod
     def from_env(cls):
         return cls()
 
 
-try:
-    settings = Settings.from_env()
-except Exception as e:
-    print(f"Error loading settings: {e}")
-    raise
+settings = Settings()
