@@ -51,4 +51,6 @@ class CheckProjectContextResponse(BaseModel):
     is_valid: bool = Field(..., description='Whether the project context is valid or not.')
     suggestion: str = Field(..., description='Suggestions for a revised project context.')
     explanation: str = Field(..., description='Explanation of the classification.')
-    missing: list[str] = Field(..., description='The list of missing elements in the project context.')
+    missing: list[str] = Field(
+        ..., description='The list of missing elements in the project context.'
+    )

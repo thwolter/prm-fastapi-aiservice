@@ -6,7 +6,9 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.services.models import (CategoriesIdentificationRequest,
                                  CategoriesIdentificationResponse, Category,
-                                 RiskDefinitionCheckResponse, CheckProjectContextResponse, CheckProjectContextRequest)
+                                 CheckProjectContextRequest,
+                                 CheckProjectContextResponse,
+                                 RiskDefinitionCheckResponse)
 
 client = TestClient(app)
 
@@ -37,6 +39,7 @@ def test_risk_definition_check_valid_input(mock_execute_query):
         response_data['explanation']
         == 'Delays can occur due to unforeseen circumstances, and having a buffer can mitigate this risk.'
     )
+
 
 @skip
 def test_Live_risk_definition_check_valid_input():
@@ -100,16 +103,15 @@ def test_category_identification(mock_execute_query):
 
 @patch('app.services.services.CheckProjectContextService.execute_query')
 def test_check_project_context_valid_input(mock_execute_query):
-    request_data = CheckProjectContextRequest(**{
-        'project_context': 'This is a valid project context.',
-        'project_name': 'Project Alpha'
-    }).model_dump()
+    request_data = CheckProjectContextRequest(
+        **{'project_context': 'This is a valid project context.', 'project_name': 'Project Alpha'}
+    ).model_dump()
     mock_execute_query.return_value = CheckProjectContextResponse(
         is_valid=True,
         project_name=request_data['project_name'],
         suggestion='No changes needed.',
         explanation='The project context is well-defined.',
-        missing=[]
+        missing=[],
     )
     response = client.post('/api/project/check/context/', json=request_data)
     assert response.status_code == 200
@@ -120,11 +122,12 @@ def test_check_project_context_valid_input(mock_execute_query):
     assert response_data['explanation'] == 'The project context is well-defined.'
     assert response_data['missing'] == []
 
+
 @skip
 def test_live_check_project_context_valid_input():
     request_data = {
         'project_name': 'H2 Project',
-        'project_context': 'Building a H2 cavern at an existing salt cavern site in the Netherlands. The budget is 100M EUR.'
+        'project_context': 'Building a H2 cavern at an existing salt cavern site in the Netherlands. The budget is 100M EUR.',
     }
     response = client.post('/api/project/check/context/', json=request_data)
     assert response.status_code == 200

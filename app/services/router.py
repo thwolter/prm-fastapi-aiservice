@@ -5,10 +5,13 @@ from fastapi import APIRouter, HTTPException
 
 from app.services.models import (CategoriesIdentificationRequest,
                                  CategoriesIdentificationResponse,
+                                 CheckProjectContextRequest,
+                                 CheckProjectContextResponse,
                                  RiskDefinitionCheckRequest,
-                                 RiskDefinitionCheckResponse, CheckProjectContextRequest, CheckProjectContextResponse)
+                                 RiskDefinitionCheckResponse)
 from app.services.services import (CategoryIdentificationService,
-                                   RiskDefinitionService, CheckProjectContextService)
+                                   CheckProjectContextService,
+                                   RiskDefinitionService)
 
 router = APIRouter(
     prefix='/api',

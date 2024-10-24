@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.core.health_checks import router as core_router
 from app.keywords.router import router as keywords_router
 from app.services.router import router as service_router
-from app.core.health_checks import router as core_router
 
 app = FastAPI()
 

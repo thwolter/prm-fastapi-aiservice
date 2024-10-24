@@ -46,5 +46,24 @@ def lint():
     subprocess.run(['isort', '.'])
 
 
+@cmd.command(name='list-prompts')
+def list_prompts():
+    """List all prompt names from services"""
+    import inspect
+
+    from app.services import services
+
+    prompt_names = []
+    for name, obj in inspect.getmembers(services, inspect.isclass):
+        if hasattr(obj, 'prompt_name'):
+            prompt_names.append(obj.prompt_name)
+        elif hasattr(obj, 'prompt_name_category') and hasattr(obj, 'prompt_name_categories'):
+            prompt_names.append(obj.prompt_name_category)
+            prompt_names.append(obj.prompt_name_categories)
+
+    for prompt in prompt_names:
+        print(prompt)
+
+
 if __name__ == '__main__':
     cmd()

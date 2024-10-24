@@ -1,10 +1,12 @@
 from app.services.base_service import BaseAIService
 from app.services.models import (CategoriesIdentificationRequest,
                                  CategoriesIdentificationResponse,
+                                 CheckProjectContextRequest,
+                                 CheckProjectContextResponse,
                                  RiskDefinitionCheckRequest,
                                  RiskDefinitionCheckResponse,
                                  RiskIdentificationQuery,
-                                 RiskIdentificationResult, CheckProjectContextRequest, CheckProjectContextResponse)
+                                 RiskIdentificationResult)
 
 
 class RiskDefinitionService(BaseAIService):
