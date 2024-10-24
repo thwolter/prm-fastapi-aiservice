@@ -4,7 +4,7 @@ from app.services.models import (CategoriesIdentificationRequest,
                                  RiskDefinitionCheckRequest,
                                  RiskDefinitionCheckResponse,
                                  RiskIdentificationQuery,
-                                 RiskIdentificationResult)
+                                 RiskIdentificationResult, CheckProjectContextRequest, CheckProjectContextResponse)
 
 
 class RiskDefinitionService(BaseAIService):
@@ -29,3 +29,9 @@ class CategoryIdentificationService(BaseAIService):
     prompt_name = 'create-categories'
     QueryModel = CategoriesIdentificationRequest
     ResultModel = CategoriesIdentificationResponse
+
+
+class CheckProjectContextService(BaseAIService):
+    prompt_name = 'check-project-context'
+    QueryModel = CheckProjectContextRequest
+    ResultModel = CheckProjectContextResponse

@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.services.models import (CategoriesIdentificationRequest,
                                  CategoriesIdentificationResponse, Category,
-                                 RiskDefinitionCheckResponse)
+                                 RiskDefinitionCheckResponse, CheckProjectContextResponse, CheckProjectContextRequest)
 
 client = TestClient(app)
 
@@ -87,3 +87,29 @@ def test_category_identification(mock_execute_query):
     assert len(response_data['categories']) == 2
     assert response_data['categories'][0]['name'] == 'Sample'
     assert response_data['categories'][1]['name'] == 'Text'
+
+
+@patch('app.services.services.CheckProjectContextService.execute_query')
+def test_check_project_context_valid_input(mock_execute_query):
+    request_data = CheckProjectContextRequest(**{
+        'project_context': 'This is a valid project context.',
+        'project_name': 'Project Alpha'
+    }).model_dump()
+    mock_execute_query.return_value = CheckProjectContextResponse(
+        is_valid=True,
+        project_name=request_data['project_name'],
+        original=request_data['project_context'],
+        suggestion='No changes needed.',
+        explanation='The project context is well-defined.',
+        missing=[]
+    )
+    response = client.post('/api/project/check/context/', json=request_data)
+    assert response.status_code == 200
+    mock_execute_query.assert_called_once()
+    response_data = response.json()
+    assert response_data['is_valid'] is True
+    assert response_data['project_name'] == request_data['project_name']
+    assert response_data['original'] == request_data['project_context']
+    assert response_data['suggestion'] == 'No changes needed.'
+    assert response_data['explanation'] == 'The project context is well-defined.'
+    assert response_data['missing'] == []

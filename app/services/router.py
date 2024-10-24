@@ -6,9 +6,9 @@ from fastapi import APIRouter, HTTPException
 from app.services.models import (CategoriesIdentificationRequest,
                                  CategoriesIdentificationResponse,
                                  RiskDefinitionCheckRequest,
-                                 RiskDefinitionCheckResponse)
+                                 RiskDefinitionCheckResponse, CheckProjectContextRequest, CheckProjectContextResponse)
 from app.services.services import (CategoryIdentificationService,
-                                   RiskDefinitionService)
+                                   RiskDefinitionService, CheckProjectContextService)
 
 router = APIRouter(
     prefix='/api',
@@ -57,4 +57,16 @@ def identify_categories(
         request,
         CategoriesIdentificationRequest,
         CategoriesIdentificationResponse,
+    )
+
+
+@router.post('/project/check/context/', response_model=CheckProjectContextResponse)
+def check_project_context(
+    request: CheckProjectContextRequest,
+) -> CheckProjectContextResponse:
+    return execute_service_query(
+        CheckProjectContextService,
+        request,
+        CheckProjectContextRequest,
+        CheckProjectContextResponse,
     )
