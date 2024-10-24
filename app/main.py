@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from app.config import settings
+from app.core.config import settings
 from app.keywords.router import router as keywords_router
 from app.services.router import router as service_router
 

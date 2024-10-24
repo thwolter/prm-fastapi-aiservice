@@ -4,7 +4,7 @@ import subprocess  # nosec
 import typer
 import uvicorn
 
-from app.config import settings
+from app.core.config import settings
 
 cmd = typer.Typer(no_args_is_help=True)
 

@@ -6,7 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-from app.config import settings
+from app.core.config import settings
 
 
 class BaseAIService(ABC):
