@@ -112,6 +112,7 @@ def test_check_project_context_valid_input(mock_execute_query):
         suggestion='No changes needed.',
         explanation='The project context is well-defined.',
         missing=[],
+        context_example='This is a valid project context.',
     )
     response = client.post('/api/project/check/context/', json=request_data)
     assert response.status_code == 200
