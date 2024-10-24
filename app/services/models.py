@@ -54,3 +54,4 @@ class CheckProjectContextResponse(BaseModel):
     missing: list[str] = Field(
         ..., description='The list of missing elements in the project context.'
     )
+    context_example: str = Field(..., description='An example of a valid project context.')
