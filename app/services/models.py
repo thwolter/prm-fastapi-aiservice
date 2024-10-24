@@ -43,13 +43,12 @@ class CategoriesIdentificationResponse(BaseModel):
 
 
 class CheckProjectContextRequest(BaseModel):
-    project_context: str = Field(..., description='The project context to be checked.')
     project_name: str = Field(..., description='The name of the project.')
+    project_context: str = Field(..., description='The project context to be checked.')
+
 
 class CheckProjectContextResponse(BaseModel):
     is_valid: bool = Field(..., description='Whether the project context is valid or not.')
-    project_name: str = Field(..., description='The name of the project.')
-    original: str = Field(..., description='The original project context.')
     suggestion: str = Field(..., description='Suggestions for a revised project context.')
     explanation: str = Field(..., description='Explanation of the classification.')
     missing: list[str] = Field(..., description='The list of missing elements in the project context.')

@@ -1,3 +1,4 @@
+from unittest import skip
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
@@ -36,6 +37,14 @@ def test_risk_definition_check_valid_input(mock_execute_query):
         response_data['explanation']
         == 'Delays can occur due to unforeseen circumstances, and having a buffer can mitigate this risk.'
     )
+
+@skip
+def test_Live_risk_definition_check_valid_input():
+    request_data = {'text': 'The project might face delays due to unforeseen circumstances.'}
+    response = client.post('/api/risk-definition/check/', json=request_data)
+    assert response.status_code == 200
+    response_data = response.json()
+    assert isinstance(RiskDefinitionCheckResponse(**response_data), RiskDefinitionCheckResponse)
 
 
 @patch('app.services.services.RiskDefinitionService.execute_query')
@@ -98,7 +107,6 @@ def test_check_project_context_valid_input(mock_execute_query):
     mock_execute_query.return_value = CheckProjectContextResponse(
         is_valid=True,
         project_name=request_data['project_name'],
-        original=request_data['project_context'],
         suggestion='No changes needed.',
         explanation='The project context is well-defined.',
         missing=[]
@@ -108,8 +116,15 @@ def test_check_project_context_valid_input(mock_execute_query):
     mock_execute_query.assert_called_once()
     response_data = response.json()
     assert response_data['is_valid'] is True
-    assert response_data['project_name'] == request_data['project_name']
-    assert response_data['original'] == request_data['project_context']
     assert response_data['suggestion'] == 'No changes needed.'
     assert response_data['explanation'] == 'The project context is well-defined.'
     assert response_data['missing'] == []
+
+@skip
+def test_live_check_project_context_valid_input():
+    request_data = {
+        'project_name': 'H2 Project',
+        'project_context': 'Building a H2 cavern at an existing salt cavern site in the Netherlands. The budget is 100M EUR.'
+    }
+    response = client.post('/api/project/check/context/', json=request_data)
+    assert response.status_code == 200

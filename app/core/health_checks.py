@@ -14,7 +14,7 @@ async def health_check():
 async def check_openai_connection():
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", api_key=settings.OPENAI_API_KEY)
     try:
-        response = llm(["Answer: yes"])
+        response = llm.invoke(["Answer: yes"])
         if response:
             return {"message": "OpenAI connection successful"}
         else:
