@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.services.router import router as service_router
 from app.keywords.router import router as keywords_router
+from app.services.router import router as service_router
 
 app = FastAPI()
 
@@ -21,6 +21,6 @@ app.include_router(service_router)
 app.include_router(keywords_router)
 
 
-@app.get("/")
+@app.get('/')
 async def root():
-    return {"message": "Hello World"}
+    return {'message': 'Hello World'}

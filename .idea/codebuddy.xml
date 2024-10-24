@@ -14,6 +14,6 @@
         <option value="the tests for service and router should mock execute_query" />
       </list>
     </option>
-    <option name="selectedModel" value="codebuddy:GPT4_Turbo_V6" />
+    <option name="selectedModel" value="codebuddy:GPT4_V6" />
   </component>
 </project>

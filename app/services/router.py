@@ -11,13 +11,13 @@ from app.services.services import (CategoryIdentificationService,
                                    RiskDefinitionService)
 
 router = APIRouter(
-    prefix="/api",
-    tags=["api"],
-    responses={404: {"description": "Not found"}},
+    prefix='/api',
+    tags=['api'],
+    responses={404: {'description': 'Not found'}},
 )
 
-TRequest = TypeVar("TRequest")
-TResponse = TypeVar("TResponse")
+TRequest = TypeVar('TRequest')
+TResponse = TypeVar('TResponse')
 
 
 def execute_service_query(
@@ -32,11 +32,11 @@ def execute_service_query(
         result = service.execute_query(query)
         return response_model(**result.model_dump())
     except Exception as e:
-        logging.error(f"Error in {service_class.__name__}: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        logging.error(f'Error in {service_class.__name__}: {e}')
+        raise HTTPException(status_code=500, detail='Internal Server Error')
 
 
-@router.post("/risk-definition/check/", response_model=RiskDefinitionCheckResponse)
+@router.post('/risk-definition/check/', response_model=RiskDefinitionCheckResponse)
 def check_risk_definition(
     request: RiskDefinitionCheckRequest,
 ) -> RiskDefinitionCheckResponse:
@@ -48,7 +48,7 @@ def check_risk_definition(
     )
 
 
-@router.post("/categories/identify/", response_model=CategoriesIdentificationResponse)
+@router.post('/categories/identify/', response_model=CategoriesIdentificationResponse)
 def identify_categories(
     request: CategoriesIdentificationRequest,
 ) -> CategoriesIdentificationResponse:

@@ -10,7 +10,7 @@ from app.config import settings
 
 
 class BaseAIService(ABC):
-    model_name: str = "gpt-4"
+    model_name: str = 'gpt-4'
     prompt_name: str
     QueryModel = BaseModel
     ResultModel = BaseModel
@@ -23,9 +23,7 @@ class BaseAIService(ABC):
         template = hub.pull(self.get_prompt_name(query)).template
         return PromptTemplate.from_template(
             template,
-            partial_variables={
-                "format_instructions": self.parser.get_format_instructions()
-            },
+            partial_variables={'format_instructions': self.parser.get_format_instructions()},
         )
 
     def get_prompt_name(self, query: QueryModel) -> str:

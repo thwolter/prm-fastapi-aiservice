@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, Annotated, Any
+from typing import Annotated, Any, Literal
 
 from dotenv import load_dotenv
 from pydantic import AnyUrl, BeforeValidator, computed_field
@@ -9,11 +9,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 def find_dotenv():
     current_dir = Path(__file__).resolve().parent
     while current_dir != current_dir.root:
-        dotenv_path = current_dir / ".env"
+        dotenv_path = current_dir / '.env'
         if dotenv_path.exists():
             return str(dotenv_path)
         current_dir = current_dir.parent
-    raise FileNotFoundError(".env file not found")
+    raise FileNotFoundError('.env file not found')
 
 
 DOTENV = find_dotenv()
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
     APP_PORT: int = 8001
-    APP_HOST: str = "localhost"
+    APP_HOST: str = 'localhost'
     OPENAI_API_KEY: str
     LANGCHAIN_API_KEY: str
     LANGCHAIN_TRACING_V2: bool = False
