@@ -4,6 +4,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.keywords.router import router as keywords_router
 from app.services.router import router as service_router
+from app.core.health_checks import router as core_router
 
 app = FastAPI()
 
@@ -19,6 +20,7 @@ if settings.BACKEND_CORS_ORIGINS:
 
 app.include_router(service_router)
 app.include_router(keywords_router)
+app.include_router(core_router)
 
 
 @app.get('/')
