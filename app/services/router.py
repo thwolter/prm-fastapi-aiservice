@@ -1,75 +1,97 @@
 import logging
-from typing import Type, TypeVar
-
+from typing import Type, TypeVar, Generic, Callable
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
-from app.services.models import (CategoriesIdentificationRequest,
-                                 CategoriesIdentificationResponse,
-                                 CheckProjectContextRequest,
-                                 CheckProjectContextResponse,
-                                 RiskDefinitionCheckRequest,
-                                 RiskDefinitionCheckResponse)
-from app.services.services import (CategoryIdentificationService,
-                                   CheckProjectContextService,
-                                   RiskDefinitionService)
+from app.services.models import (
+    CategoriesIdentificationRequest,
+    CategoriesIdentificationResponse,
+    CheckProjectContextRequest,
+    CheckProjectContextResponse,
+    RiskDefinitionCheckRequest,
+    RiskDefinitionCheckResponse, ProjectRequest, ProjectSummaryResponse
+)
+from app.services.services import (
+    CategoryIdentificationService,
+    CheckProjectContextService,
+    RiskDefinitionService, ProjectSummaryService
+)
 
+TRequest = TypeVar('TRequest', bound=BaseModel)
+TResponse = TypeVar('TResponse', bound=BaseModel)
+
+
+class BaseServiceHandler(Generic[TRequest, TResponse]):
+    def __init__(self, service_class: Type, request_model: Type[TRequest], response_model: Type[TResponse]):
+        self.service_class = service_class
+        self.request_model = request_model
+        self.response_model = response_model
+
+    def handle(self, request: TRequest) -> TResponse:
+        service = self.service_class()
+        try:
+            query = self.request_model(**request.model_dump())
+            result = service.execute_query(query)
+            return self.response_model(**result.model_dump())
+        except Exception as e:
+            logging.error(f'Error in {self.service_class.__name__}: {e}')
+            raise HTTPException(status_code=500, detail='Internal Server Error')
+
+
+class RouteRegistrar:
+    def __init__(self, api_router: APIRouter):
+        self.router = api_router
+
+    def register_route(
+        self,
+        path: str,
+        request_model: Type[TRequest],
+        response_model: Type[TResponse],
+        service_class: Type,
+    ):
+        handler = BaseServiceHandler(service_class, request_model, response_model)
+
+        def route_function(request: request_model) -> response_model:
+            return handler.handle(request)
+
+        self.router.post(path, response_model=response_model)(route_function)
+
+
+# Create APIRouter instance
 router = APIRouter(
     prefix='/api',
     tags=['api'],
     responses={404: {'description': 'Not found'}},
 )
 
-TRequest = TypeVar('TRequest')
-TResponse = TypeVar('TResponse')
+# Create route registrar
+registrar = RouteRegistrar(router)
 
+# Register all routes with simplified code
+registrar.register_route(
+    '/risk-definition/check/',
+    RiskDefinitionCheckRequest,
+    RiskDefinitionCheckResponse,
+    RiskDefinitionService
+)
 
-def execute_service_query(
-    service_class: Type,
-    request: TRequest,
-    query_model: Type,
-    response_model: Type[TResponse],
-) -> TResponse:
-    service = service_class()
-    try:
-        query = query_model(**request.model_dump())
-        result = service.execute_query(query)
-        return response_model(**result.model_dump())
-    except Exception as e:
-        logging.error(f'Error in {service_class.__name__}: {e}')
-        raise HTTPException(status_code=500, detail='Internal Server Error')
+registrar.register_route(
+    '/categories/identify/',
+    CategoriesIdentificationRequest,
+    CategoriesIdentificationResponse,
+    CategoryIdentificationService
+)
 
+registrar.register_route(
+    '/project/check/context/',
+    CheckProjectContextRequest,
+    CheckProjectContextResponse,
+    CheckProjectContextService
+)
 
-@router.post('/risk-definition/check/', response_model=RiskDefinitionCheckResponse)
-def check_risk_definition(
-    request: RiskDefinitionCheckRequest,
-) -> RiskDefinitionCheckResponse:
-    return execute_service_query(
-        RiskDefinitionService,
-        request,
-        RiskDefinitionCheckRequest,
-        RiskDefinitionCheckResponse,
-    )
-
-
-@router.post('/categories/identify/', response_model=CategoriesIdentificationResponse)
-def identify_categories(
-    request: CategoriesIdentificationRequest,
-) -> CategoriesIdentificationResponse:
-    return execute_service_query(
-        CategoryIdentificationService,
-        request,
-        CategoriesIdentificationRequest,
-        CategoriesIdentificationResponse,
-    )
-
-
-@router.post('/project/check/context/', response_model=CheckProjectContextResponse)
-def check_project_context(
-    request: CheckProjectContextRequest,
-) -> CheckProjectContextResponse:
-    return execute_service_query(
-        CheckProjectContextService,
-        request,
-        CheckProjectContextRequest,
-        CheckProjectContextResponse,
-    )
+registrar.register_route(
+    '/project/summary/',
+    ProjectRequest,
+    ProjectSummaryResponse,
+    ProjectSummaryService
+)

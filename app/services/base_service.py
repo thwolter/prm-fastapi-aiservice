@@ -40,3 +40,13 @@ class BaseAIService(ABC):
         prompt = self.create_prompt(query)
         chain = prompt | self.model | self.parser
         return chain.invoke(query.model_dump())
+
+
+class BaseAIServiceWithPrompt(BaseAIService):
+    prompt_name: str
+    QueryModel: type
+    ResultModel: type
+
+    def get_prompt_name(self, query: BaseModel = None) -> str:
+        """ Returns the prompt name, can be overridden by subclasses for custom behavior. """
+        return self.prompt_name

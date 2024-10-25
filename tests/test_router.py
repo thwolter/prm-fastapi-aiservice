@@ -132,3 +132,11 @@ def test_live_check_project_context_valid_input():
     }
     response = client.post('/api/project/check/context/', json=request_data)
     assert response.status_code == 200
+
+
+def test_summarize_project_valid_input(por):
+    request_data = {'project_name': 'Project Alpha', 'con'}
+    response = client.post('/api/project/summarize/', json=request_data)
+    assert response.status_code == 200
+    response_data = response.json()
+    assert response_data['project_summary'] == 'This is a summary of Project Alpha.'

@@ -55,3 +55,8 @@ class CheckProjectContextResponse(BaseModel):
         ..., description='The list of missing elements in the project context.'
     )
     context_example: str = Field(..., description='An example of a valid project context.')
+
+
+class ProjectSummaryResponse(BaseModel):
+    project_summary: str = Field(..., description='A summary of the project.')
+    project_picture_url: str = Field(..., description='URL for the project picture.')
