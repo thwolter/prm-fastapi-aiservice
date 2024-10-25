@@ -51,13 +51,16 @@ class CheckProjectContextResponse(BaseModel):
     is_valid: bool = Field(..., description='Whether the project context is valid or not.')
     suggestion: str = Field(..., description='Suggestions for a revised project context.')
     explanation: str = Field(..., description='Explanation of the classification.')
-    missing: list[str] = Field(
-        ..., description='The list of missing elements in the project context.'
-    )
+    missing: list[str] = Field(..., description='The list of missing elements in the project context.')
     context_example: str = Field(..., description='An example of a valid project context.')
     language: str = Field(..., description='The language of the project context.')
+    capabilities: list[str] = Field(..., description='The list of capabilities required for the project.')
+    challenges: list[str] = Field(..., description='The list of challenges faced by the project.')
+    budget: str = Field(..., description='The budget of the project.')
+    timeline: str = Field(..., description='The timeline of the project.')
 
 
 class ProjectSummaryResponse(BaseModel):
     summary: str = Field(..., description='A summary of the project.')
     picture_url: str = Field(..., description='URL for the project picture.')
+    tags: list[str] = Field(..., description='Tags associated with the project.')
