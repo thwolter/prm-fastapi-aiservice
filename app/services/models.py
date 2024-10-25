@@ -55,6 +55,7 @@ class CheckProjectContextResponse(BaseModel):
         ..., description='The list of missing elements in the project context.'
     )
     context_example: str = Field(..., description='An example of a valid project context.')
+    language: str = Field(..., description='The language of the project context.')
 
 
 class ProjectSummaryResponse(BaseModel):

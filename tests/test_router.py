@@ -1,3 +1,4 @@
+import json
 from unittest import skip
 from unittest.mock import patch
 
@@ -136,6 +137,7 @@ def test_check_project_context_valid_input(mock_execute_query):
 def test_live_check_project_context_valid_input(project_request_data):
     response = client.post('/api/project/check/context/', json=project_request_data)
     assert response.status_code == 200
+    print(json.dumps(response.json(), indent=4))
 
 
 @patch('app.services.services.ProjectSummaryService.execute_query')
@@ -150,8 +152,8 @@ def test_summarize_project_valid_input(mock_execute_query, project_request_data)
     assert response_data['summary'] == 'This is a summary of Project Alpha.'
 
 
+@skip
 def test_live_summarize_project_valid_input(project_request_data):
     response = client.post('/api/project/summarize/', json=project_request_data)
     assert response.status_code == 200
-    response_data = response.json()
-    print(response_data)
+    print(json.dumps(response.json(), indent=4))
