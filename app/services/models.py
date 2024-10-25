@@ -42,9 +42,9 @@ class CategoriesIdentificationResponse(BaseModel):
     categories: list[Category] = Field(..., description='The list of categories identified.')
 
 
-class CheckProjectContextRequest(BaseModel):
-    project_name: str = Field(..., description='The name of the project.')
-    project_context: str = Field(..., description='The project context to be checked.')
+class BaseProjectRequest(BaseModel):
+    name: str = Field(..., description='The name of the project.')
+    context: str = Field(..., description='The project context to be checked.')
 
 
 class CheckProjectContextResponse(BaseModel):
@@ -58,5 +58,5 @@ class CheckProjectContextResponse(BaseModel):
 
 
 class ProjectSummaryResponse(BaseModel):
-    project_summary: str = Field(..., description='A summary of the project.')
-    project_picture_url: str = Field(..., description='URL for the project picture.')
+    summary: str = Field(..., description='A summary of the project.')
+    picture_url: str = Field(..., description='URL for the project picture.')

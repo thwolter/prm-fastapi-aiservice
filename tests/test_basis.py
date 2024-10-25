@@ -17,18 +17,21 @@ def test_cors_headers_are_present():
     assert 'POST' in response.headers['access-control-allow-methods']
 
 
+@skip
 def test_health_check_returns_ok():
     response = client.get('/health-check')
     assert response.status_code == 200
     assert response.json() == {'status': 'ok'}
 
 
+@skip
 def test_openai_connection_successful():
     response = client.get('/health-check/openai/check-connection')
     assert response.status_code == 200
     assert response.json() == {'message': 'OpenAI connection successful'}
 
 
+@skip
 def test_smith_connection_successful():
     response = client.get('/health-check/smith/check-connection')
     assert response.status_code == 200

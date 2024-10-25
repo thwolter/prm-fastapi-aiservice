@@ -2,13 +2,12 @@ from app.services.base_service import BaseAIServiceWithPrompt
 from app.services.models import (
     CategoriesIdentificationRequest,
     CategoriesIdentificationResponse,
-    CheckProjectContextRequest,
+    BaseProjectRequest,
     CheckProjectContextResponse,
     RiskDefinitionCheckRequest,
     RiskDefinitionCheckResponse,
     RiskIdentificationQuery,
     RiskIdentificationResult,
-    ProjectRequest,
     ProjectSummaryResponse
 )
 
@@ -40,11 +39,11 @@ class CategoryIdentificationService(BaseAIServiceWithPrompt):
 
 class CheckProjectContextService(BaseAIServiceWithPrompt):
     prompt_name = 'check-project-context'
-    QueryModel = CheckProjectContextRequest
+    QueryModel = BaseProjectRequest
     ResultModel = CheckProjectContextResponse
 
 
 class ProjectSummaryService(BaseAIServiceWithPrompt):
     prompt_name = 'summarize-project'
-    QueryModel = ProjectRequest
+    QueryModel = BaseProjectRequest
     ResultModel = ProjectSummaryResponse

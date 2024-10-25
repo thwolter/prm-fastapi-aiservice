@@ -6,10 +6,10 @@ from pydantic import BaseModel
 from app.services.models import (
     CategoriesIdentificationRequest,
     CategoriesIdentificationResponse,
-    CheckProjectContextRequest,
+    BaseProjectRequest,
     CheckProjectContextResponse,
     RiskDefinitionCheckRequest,
-    RiskDefinitionCheckResponse, ProjectRequest, ProjectSummaryResponse
+    RiskDefinitionCheckResponse, ProjectSummaryResponse
 )
 from app.services.services import (
     CategoryIdentificationService,
@@ -84,14 +84,14 @@ registrar.register_route(
 
 registrar.register_route(
     '/project/check/context/',
-    CheckProjectContextRequest,
+    BaseProjectRequest,
     CheckProjectContextResponse,
     CheckProjectContextService
 )
 
 registrar.register_route(
-    '/project/summary/',
-    ProjectRequest,
+    '/project/summarize/',
+    BaseProjectRequest,
     ProjectSummaryResponse,
     ProjectSummaryService
 )
