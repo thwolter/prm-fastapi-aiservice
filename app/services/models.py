@@ -38,8 +38,15 @@ class CategoriesIdentificationRequest(BaseModel):
     text: str = Field(..., description='The text to be used for category identification.')
 
 
+class IdentifiedCategory(Category):
+    confidence: float = Field(..., description='The confidence score of the identification.')
+    subcategories: list['Category'] = Field(default_factory=list, description='List of subcategories.')
+
+
 class CategoriesIdentificationResponse(BaseModel):
-    categories: list[Category] = Field(..., description='The list of categories identified.')
+    risks: list[IdentifiedCategory] = Field(..., description='The list of identified risk categories.')
+    opportunities: list[IdentifiedCategory] = Field(..., description='The list of identified opportunity categories.')
+    impact: list[IdentifiedCategory] = Field(..., description='The list of identified impact categories.')
 
 
 class BaseProjectRequest(BaseModel):
