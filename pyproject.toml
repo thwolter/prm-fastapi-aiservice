@@ -33,3 +33,10 @@ target-version = "py312"
 
 [tool.ruff.format]
 quote-style = "single"
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "webtest: marks tests that access external APIs (select with '-m webtest')",
+    "tryfirst: marks tests that should be run first",
+]

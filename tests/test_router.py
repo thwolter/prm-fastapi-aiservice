@@ -50,7 +50,7 @@ def test_risk_definition_check_valid_input(mock_execute_query):
     )
 
 
-@skip
+@pytest.mark.webtest
 def test_Live_risk_definition_check_valid_input():
     request_data = {'text': 'The project might face delays due to unforeseen circumstances.'}
     response = client.post('/api/risk-definition/check/', json=request_data)
@@ -122,6 +122,11 @@ def test_check_project_context_valid_input(mock_execute_query):
         explanation='The project context is well-defined.',
         missing=[],
         context_example='This is a valid project context.',
+        language='en',
+        capabilities=['Capability 1', 'Capability 2'],
+        challenges=['Challenge 1', 'Challenge 2'],
+        budget='100M EUR',
+        timeline='Q1 2024',
     )
     response = client.post('/api/project/check/context/', json=request_data)
     assert response.status_code == 200
@@ -132,7 +137,7 @@ def test_check_project_context_valid_input(mock_execute_query):
     assert response_data['explanation'] == 'The project context is well-defined.'
     assert response_data['missing'] == []
 
-@skip
+@pytest.mark.webtest
 def test_live_check_project_context_valid_input(project_request_data):
     response = client.post('/api/project/check/context/', json=project_request_data)
     assert response.status_code == 200
@@ -144,6 +149,7 @@ def test_summarize_project_valid_input(mock_execute_query, project_request_data)
     mock_execute_query.return_value = ProjectSummaryResponse(
         summary='This is a summary of Project Alpha.',
         picture_url='https://example.com/project-alpha.jpg',
+        tags=['Alpha', 'Project', 'Summary']
     )
     response = client.post('/api/project/summarize/', json=project_request_data)
     assert response.status_code == 200
@@ -151,6 +157,7 @@ def test_summarize_project_valid_input(mock_execute_query, project_request_data)
     assert response_data['summary'] == 'This is a summary of Project Alpha.'
 
 
+@pytest.mark.webtest
 def test_live_summarize_project_valid_input(project_request_data):
     response = client.post('/api/project/summarize/', json=project_request_data)
     assert response.status_code == 200
