@@ -76,7 +76,7 @@ registrar.register_route(
 )
 
 registrar.register_route(
-    '/categories/identify/',
+    '/categories/create/',
     CategoriesIdentificationRequest,
     CategoriesIdentificationResponse,
     CategoryIdentificationService

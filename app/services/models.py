@@ -62,5 +62,5 @@ class CheckProjectContextResponse(BaseModel):
 
 class ProjectSummaryResponse(BaseModel):
     summary: str = Field(..., description='A summary of the project.')
-    picture_url: str = Field(..., description='URL for the project picture.')
+    image_url: str = Field(..., description='URL for the project picture.')
     tags: list[str] = Field(..., description='Tags associated with the project.')

@@ -97,7 +97,7 @@ def test_category_identification(mock_execute_query):
             ),
         ]
     )
-    response = client.post('/api/categories/identify/', json=data.model_dump())
+    response = client.post('/api/categories/create/', json=data.model_dump())
     assert response.status_code == 200
     mock_execute_query.assert_called_once()
     response_data = response.json()
@@ -149,7 +149,8 @@ def test_summarize_project_valid_input(mock_execute_query, project_request_data)
     mock_execute_query.return_value = ProjectSummaryResponse(
         summary='This is a summary of Project Alpha.',
         picture_url='https://example.com/project-alpha.jpg',
-        tags=['Alpha', 'Project', 'Summary']
+        tags=['Alpha', 'Project', 'Summary'],
+        image_url='https://example.com/project-alpha.jpg',
     )
     response = client.post('/api/project/summarize/', json=project_request_data)
     assert response.status_code == 200
