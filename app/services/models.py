@@ -40,7 +40,7 @@ class CategoriesIdentificationRequest(BaseModel):
 
 class IdentifiedCategory(Category):
     confidence: float = Field(..., description='The confidence score of the identification.')
-    subcategories: list['Category'] = Field(default_factory=list, description='List of subcategories.')
+    subcategories: list['IdentifiedCategory'] = Field(default_factory=list, description='List of subcategories.')
 
 
 class CategoriesIdentificationResponse(BaseModel):

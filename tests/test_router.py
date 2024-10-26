@@ -1,5 +1,4 @@
 import json
-from unittest import skip
 from unittest.mock import patch
 
 import pytest
@@ -7,12 +6,12 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.services.models import (CategoriesIdentificationRequest,
-                                 CategoriesIdentificationResponse, Category,
-                                 BaseProjectRequest,
+                                 CategoriesIdentificationResponse, BaseProjectRequest,
                                  CheckProjectContextResponse,
-                                 RiskDefinitionCheckResponse, ProjectSummaryResponse)
+                                 RiskDefinitionCheckResponse, ProjectSummaryResponse, IdentifiedCategory)
 
 client = TestClient(app)
+
 
 @pytest.fixture(scope='function')
 def project_request_data():
@@ -45,8 +44,8 @@ def test_risk_definition_check_valid_input(mock_execute_query):
     assert isinstance(RiskDefinitionCheckResponse(**response_data), RiskDefinitionCheckResponse)
     assert response_data['suggestion'] == 'Consider adding buffer time to the project schedule.'
     assert (
-        response_data['explanation']
-        == 'Delays can occur due to unforeseen circumstances, and having a buffer can mitigate this risk.'
+            response_data['explanation']
+            == 'Delays can occur due to unforeseen circumstances, and having a buffer can mitigate this risk.'
     )
 
 
@@ -82,19 +81,41 @@ def risk_definition_check_invalid_text_type(mock_execute_query):
 
 @patch('app.services.services.CategoryIdentificationService.execute_query')
 def test_category_identification(mock_execute_query):
-    data = CategoriesIdentificationRequest(text='This is a sample text to identify categories.')
+    data = BaseProjectRequest(name='Removal of a wasp nest.', context='Removal of a wasp nest by a service company within the next week.')
     mock_execute_query.return_value = CategoriesIdentificationResponse(
-        categories=[
-            Category(
+        risks=[
+            IdentifiedCategory(
                 name='Sample',
                 description='A sample category.',
                 examples=['Example 1', 'Example 2'],
+                confidence=0.95,
+                subcategories=[]
             ),
-            Category(
+            IdentifiedCategory(
                 name='Text',
                 description='A text category.',
                 examples=['Example 3', 'Example 4'],
+                confidence=0.85,
+                subcategories=[]
             ),
+        ],
+        opportunities=[
+            IdentifiedCategory(
+                name='Sample',
+                description='A sample category.',
+                examples=['Example 1', 'Example 2'],
+                confidence=0.90,
+                subcategories=[]
+            )
+        ],
+        impact=[
+            IdentifiedCategory(
+                name='Sample',
+                description='A sample category.',
+                examples=['Example 1', 'Example 2'],
+                confidence=0.88,
+                subcategories=[]
+            )
         ]
     )
     response = client.post('/api/categories/create/', json=data.model_dump())
@@ -105,9 +126,9 @@ def test_category_identification(mock_execute_query):
         CategoriesIdentificationResponse(**response_data),
         CategoriesIdentificationResponse,
     )
-    assert len(response_data['categories']) == 2
-    assert response_data['categories'][0]['name'] == 'Sample'
-    assert response_data['categories'][1]['name'] == 'Text'
+    assert len(response_data['risks']) == 2
+    assert response_data['risks'][0]['name'] == 'Sample'
+    assert response_data['impact'][0]['name'] == 'Sample'
 
 
 @patch('app.services.services.CheckProjectContextService.execute_query')
@@ -136,6 +157,7 @@ def test_check_project_context_valid_input(mock_execute_query):
     assert response_data['suggestion'] == 'No changes needed.'
     assert response_data['explanation'] == 'The project context is well-defined.'
     assert response_data['missing'] == []
+
 
 @pytest.mark.webtest
 def test_live_check_project_context_valid_input(project_request_data):
