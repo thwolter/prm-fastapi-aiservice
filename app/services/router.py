@@ -4,17 +4,16 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.services.models import (
-    CategoriesIdentificationRequest,
     CategoriesIdentificationResponse,
     BaseProjectRequest,
     CheckProjectContextResponse,
     RiskDefinitionCheckRequest,
-    RiskDefinitionCheckResponse, ProjectSummaryResponse
+    RiskDefinitionCheckResponse, ProjectSummaryResponse, CategoryAddRequest, CategoryAddResponse
 )
 from app.services.services import (
     CategoryIdentificationService,
     CheckProjectContextService,
-    RiskDefinitionService, ProjectSummaryService
+    RiskDefinitionService, ProjectSummaryService, CategoryAddService
 )
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
@@ -80,6 +79,13 @@ registrar.register_route(
     BaseProjectRequest,
     CategoriesIdentificationResponse,
     CategoryIdentificationService
+)
+
+registrar.register_route(
+    '/categories/add/',
+    CategoryAddRequest,
+    CategoriesIdentificationResponse,
+    CategoryAddService
 )
 
 registrar.register_route(

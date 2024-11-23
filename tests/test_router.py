@@ -5,8 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.services.models import (CategoriesIdentificationRequest,
-                                 CategoriesIdentificationResponse, BaseProjectRequest,
+from app.services.models import (CategoriesIdentificationResponse, BaseProjectRequest,
                                  CheckProjectContextResponse,
                                  RiskDefinitionCheckResponse, ProjectSummaryResponse, IdentifiedCategory)
 

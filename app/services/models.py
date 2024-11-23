@@ -50,11 +50,9 @@ class CategoriesIdentificationResponse(BaseModel):
     opportunities: list[IdentifiedCategory] = Field(..., description='The list of identified opportunity categories.')
     impact: list[IdentifiedCategory] = Field(..., description='The list of identified impact categories.')
 
-
 class BaseProjectRequest(BaseModel):
     name: str = Field(..., description='The name of the project.')
     context: str = Field(..., description='The project context to be checked.')
-
 
 class CheckProjectContextResponse(BaseModel):
     is_valid: bool = Field(..., description='Whether the project context is valid or not.')
@@ -75,3 +73,10 @@ class ProjectSummaryResponse(BaseModel):
     summary: str = Field(..., description='A summary of the project.')
     image_url: str = Field(..., description='URL for the project picture.')
     tags: list[str] = Field(..., description='Tags associated with the project.')
+
+class CategoryAddRequest(BaseProjectRequest):
+    type: str = Field(..., description='The type of category to be added.')
+    existing: list[Category] = Field(..., description='Existing categories which must be excluded from the identification.')
+
+class CategoryAddResponse(BaseModel):
+    categories: list[IdentifiedCategory] = Field(..., description='The list of identified categories.')

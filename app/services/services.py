@@ -37,6 +37,12 @@ class CategoryIdentificationService(BaseAIServiceWithPrompt):
     ResultModel = CategoriesIdentificationResponse
 
 
+class CategoryAddService(BaseAIServiceWithPrompt):
+    prompt_name = 'add-categories'
+    QueryModel = CategoriesIdentificationRequest
+    ResultModel = CategoriesIdentificationResponse
+
+
 class CheckProjectContextService(BaseAIServiceWithPrompt):
     prompt_name = 'check-project-context'
     QueryModel = BaseProjectRequest
