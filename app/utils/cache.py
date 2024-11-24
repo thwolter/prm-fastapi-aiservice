@@ -1,7 +1,7 @@
 import logging
 
-from core.config import settings
-from core.redis import initialize_redis
+from app.core.config import settings
+from app.core.redis import initialize_redis
 
 
 def redis_cache(timeout: int = settings.CACHE_TIMEOUT, redis_client=None):

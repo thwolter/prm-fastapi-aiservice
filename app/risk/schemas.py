@@ -1,4 +1,5 @@
-from project.schemas import BaseProjectRequest
+from app.category.schemas import Category
+from app.project.schemas import BaseProjectRequest
 from pydantic import BaseModel, Field
 
 
@@ -20,7 +21,7 @@ class RiskDefinitionCheckResponse(BaseModel):
 
 
 class RiskIdentificationRequest(BaseProjectRequest):
-    category: str = Field(..., description='The category of the risk.')
+    category: Category = Field(..., description='The category of the risks to be identified.')
     existing: list[Risk] = Field([], description='The existing risks.')
 
 

@@ -12,13 +12,6 @@ class RiskDefinitionService(AIService):
 
 
 class RiskIdentificationService(AIService):
-    prompt_name_category = 'identify-risk-for-category'
-    prompt_name_categories = 'identify-risk-for-categories'
+    prompt_name = 'identify-risk-for-category'
     QueryModel = RiskIdentificationRequest
     ResultModel = RiskIdentificationResponse
-
-    def get_prompt_name(self, query: RiskIdentificationRequest = None) -> str:
-        """Custom prompt name selection based on the query details."""
-        if query and query.subcategory:
-            return self.prompt_name_categories
-        return self.prompt_name_category

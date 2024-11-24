@@ -34,7 +34,7 @@ class BaseServiceHandler(Generic[TRequest, TResponse]):
 
         except AttributeError as ae:
             logging.error(f'Attribute error in {self.service_class.__name__}: {ae}')
-            raise HTTPException(status_code=400, detail='Invalid request structure.')
+            raise HTTPException(status_code=400, detail=f'Invalid request structure: {ae}')
 
         except HTTPException as he:
             logging.warning(f'HTTPException in {self.service_class.__name__}: {he.detail}')

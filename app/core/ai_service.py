@@ -2,13 +2,12 @@ import hashlib
 import json
 from abc import ABC
 
-from core.redis import initialize_redis
 from langchain import hub
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
-from utils.cache import redis_cache
+from app.utils.cache import redis_cache
 
 from app.core.config import settings
 
@@ -25,7 +24,6 @@ class BaseAIService(ABC):
             model=self.model_name, api_key=settings.OPENAI_API_KEY, temperature=self.temperature
         )
         self.parser = PydanticOutputParser(pydantic_object=self.ResultModel)
-        self.redis = initialize_redis()
 
     def generate_cache_key(self, query: QueryModel, *args, **kwargs) -> str:
         """Generate a consistent cache key based on query content and service parameters."""
