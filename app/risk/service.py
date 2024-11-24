@@ -1,17 +1,17 @@
-from app.core.ai_service import BaseAIServiceWithPrompt
+from app.core.ai_service import AIService
 from app.risk.schemas import (RiskDefinitionCheckRequest,
                               RiskDefinitionCheckResponse,
                               RiskIdentificationRequest,
                               RiskIdentificationResponse)
 
 
-class RiskDefinitionService(BaseAIServiceWithPrompt):
+class RiskDefinitionService(AIService):
     prompt_name = 'risk-definition-check'
     QueryModel = RiskDefinitionCheckRequest
     ResultModel = RiskDefinitionCheckResponse
 
 
-class RiskIdentificationService(BaseAIServiceWithPrompt):
+class RiskIdentificationService(AIService):
     prompt_name_category = 'identify-risk-for-category'
     prompt_name_categories = 'identify-risk-for-categories'
     QueryModel = RiskIdentificationRequest

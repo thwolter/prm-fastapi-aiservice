@@ -61,7 +61,7 @@ class BaseAIService(ABC):
         return chain.invoke(query.model_dump())
 
 
-class BaseAIServiceWithPrompt(BaseAIService):
+class AIService(BaseAIService):
     prompt_name: str
     QueryModel: type
     ResultModel: type
