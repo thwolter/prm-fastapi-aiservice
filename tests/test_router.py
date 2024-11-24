@@ -146,7 +146,9 @@ def test_check_project_context_valid_input(mock_execute_query):
         capabilities=['Capability 1', 'Capability 2'],
         challenges=['Challenge 1', 'Challenge 2'],
         budget='100M EUR',
+        currency='EUR',
         timeline='Q1 2024',
+        deadline='2024-03-31',
     )
     response = client.post('/api/project/check/context/', json=request_data)
     assert response.status_code == 200
