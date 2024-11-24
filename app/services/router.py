@@ -3,13 +3,6 @@ from typing import Type, TypeVar, Generic
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from app.services.models import (
-    RiskDefinitionCheckRequest,
-    RiskDefinitionCheckResponse,
-)
-from app.services.services import (
-    RiskDefinitionService,
-)
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
 TResponse = TypeVar('TResponse', bound=BaseModel)
@@ -61,10 +54,3 @@ router = APIRouter(
 # Create route registrar
 registrar = RouteRegistrar(router)
 
-# Register all routes with simplified code
-registrar.register_route(
-    '/risk-definition/check/',
-    request_model=RiskDefinitionCheckRequest,
-    response_model=RiskDefinitionCheckResponse,
-    service_class=RiskDefinitionService
-)

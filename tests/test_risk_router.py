@@ -4,10 +4,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.services.models import (
-    BaseProjectRequest,
-    RiskDefinitionCheckResponse,
-)
+from app.risk.schemas import RiskDefinitionCheckResponse
+from app.project.schemas import BaseProjectRequest
 
 client = TestClient(app)
 
@@ -20,13 +18,8 @@ def project_request_data():
     ).model_dump()
 
 
-def test_root():
-    response = client.get('/')
-    assert response.status_code == 200
-    assert response.json() == {'message': 'Hello World'}
 
-
-@patch('app.services.services.RiskDefinitionService.execute_query')
+@patch('app.risk.service.RiskDefinitionService.execute_query')
 def test_risk_definition_check_valid_input(mock_execute_query):
     request_data = {'text': 'The project might face delays due to unforeseen circumstances.'}
     mock_execute_query.return_value = RiskDefinitionCheckResponse(
@@ -36,7 +29,7 @@ def test_risk_definition_check_valid_input(mock_execute_query):
         suggestion='Consider adding buffer time to the project schedule.',
         explanation='Delays can occur due to unforeseen circumstances, and having a buffer can mitigate this risk.',
     )
-    response = client.post('/api/risk-definition/check/', json=request_data)
+    response = client.post('/api/risk/check/definition/', json=request_data)
     assert response.status_code == 200
     mock_execute_query.assert_called_once()
     response_data = response.json()

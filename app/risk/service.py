@@ -1,5 +1,5 @@
 from app.services.base_service import BaseAIServiceWithPrompt
-from app.services.models import (
+from app.risk.schemas import (
     RiskDefinitionCheckRequest,
     RiskDefinitionCheckResponse,
     RiskIdentificationQuery,

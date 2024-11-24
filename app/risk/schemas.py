@@ -1,7 +1,4 @@
 from pydantic import BaseModel, Field
-from datetime import datetime
-
-today = datetime.now().strftime("%Y-%m-%d")
 
 class RiskDefinitionCheckResponse(BaseModel):
     is_valid: bool = Field(..., description='Whether the text is valid or not.')
@@ -28,8 +25,3 @@ class Risk(BaseModel):
 
 class RiskIdentificationResult(BaseModel):
     risks: list[Risk] = Field(..., description='The list of risks identified.')
-
-
-class BaseProjectRequest(BaseModel):
-    name: str = Field(..., description='The name of the project.')
-    context: str = Field(..., description='The project context to be checked.')
