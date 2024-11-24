@@ -1,4 +1,9 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from starlette.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
@@ -8,7 +13,12 @@ from app.project.router import router as project_router
 from app.category.router import router as category_router
 from app.risk.router import router as risk_router
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    FastAPICache.init(InMemoryBackend(), prefix='fastapi-cache')
+    yield
+app = FastAPI(listeners=lifespan)
 
 
 if settings.BACKEND_CORS_ORIGINS:

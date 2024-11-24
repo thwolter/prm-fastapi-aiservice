@@ -44,7 +44,7 @@ def test_risk_definition_check_valid_input(mock_execute_query):
 @pytest.mark.webtest
 def test_Live_risk_definition_check_valid_input():
     request_data = {'text': 'The project might face delays due to unforeseen circumstances.'}
-    response = client.post('/api/risk-definition/check/', json=request_data)
+    response = client.post('/api/risk/check/definition/', json=request_data)
     assert response.status_code == 200
     response_data = response.json()
     assert isinstance(RiskDefinitionCheckResponse(**response_data), RiskDefinitionCheckResponse)

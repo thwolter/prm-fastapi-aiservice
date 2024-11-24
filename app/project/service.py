@@ -11,4 +11,4 @@ class CheckProjectContextService(BaseAIServiceWithPrompt):
 class ProjectSummaryService(BaseAIServiceWithPrompt):
     prompt_name = 'summarize-project'
     QueryModel = BaseProjectRequest
-    ResultModel = ProjectSummaryResponseel = ProjectSummaryResponse
+    ResultModel = ProjectSummaryResponse

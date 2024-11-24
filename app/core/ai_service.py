@@ -1,4 +1,7 @@
+import hashlib
+import json
 from abc import ABC
+from diskcache import Cache
 
 from langchain import hub
 from langchain_core.output_parsers import PydanticOutputParser
@@ -21,6 +24,7 @@ class BaseAIService(ABC):
             model=self.model_name, api_key=settings.OPENAI_API_KEY, temperature=self.temperature
         )
         self.parser = PydanticOutputParser(pydantic_object=self.ResultModel)
+        self.cache = Cache(directory='.cache')
 
     def create_prompt(self, query: QueryModel) -> ChatPromptTemplate:
         template = hub.pull(self.get_prompt_name(query)).template
@@ -36,10 +40,26 @@ class BaseAIService(ABC):
     def get_prompt_name(self, query: QueryModel) -> str:
         return self.prompt_name
 
+    @staticmethod
+    def _cache_key(query: QueryModel) -> str:
+        """Generate a unique cache key based on the query."""
+        query_data = query.model_dump()
+        return hashlib.md5(json.dumps(query_data, sort_keys=True).encode('utf-8')).hexdigest()
+
     def execute_query(self, query: QueryModel) -> ResultModel:
+        cache_key = self._cache_key(query)
+
+        if cache_key in self.cache:
+            print(f"[Cache] Returning cached result for query: {cache_key}")
+            return self.cache[cache_key]
+
         prompt = self.create_prompt(query)
         chain = prompt | self.model | self.parser
-        return chain.invoke(query.model_dump())
+        result = chain.invoke(query.model_dump())
+
+        self.cache[cache_key] = result
+        print(f"[Cache] Storing result in cache for query: {cache_key}")
+        return result
 
 
 class BaseAIServiceWithPrompt(BaseAIService):
