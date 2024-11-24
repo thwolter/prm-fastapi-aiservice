@@ -1,6 +1,5 @@
 import hashlib
 import json
-import logging
 from abc import ABC
 
 from langchain import hub
@@ -11,6 +10,7 @@ from pydantic import BaseModel
 
 from app.core.config import settings
 from core.redis import initialize_redis
+from utils.cache import redis_cache
 
 
 class BaseAIService(ABC):
@@ -39,7 +39,7 @@ class BaseAIService(ABC):
 
         # Create a consistent string representation
         key_str = json.dumps(key_components, sort_keys=True)
-        return f"{self.__class__.__name__}:{hashlib.sha256(key_str.encode()).hexdigest()}"
+        return f"{self.__class__.__name__}:{hashlib.md5(key_str.encode()).hexdigest()}"
 
     def create_prompt(self, query: QueryModel) -> ChatPromptTemplate:
         template = hub.pull(self.get_prompt_name(query)).template
@@ -55,24 +55,11 @@ class BaseAIService(ABC):
     def get_prompt_name(self, query: QueryModel) -> str:
         return self.prompt_name
 
+    @redis_cache()
     async def execute_query(self, query: QueryModel) -> ResultModel:
-        try:
-            cache_key = self.generate_cache_key(query)
-            cached_result = self.redis.get(cache_key)
-            if cached_result:
-                logging.info(f"Cache hit for key: {cache_key}")
-                return self.ResultModel.parse_raw(cached_result)
-
-            prompt = self.create_prompt(query)
-            chain = prompt | self.model | self.parser
-            result = chain.invoke(query.model_dump())
-            self.redis.set(cache_key, result.json(), ex=settings.CACHE_TIMEOUT)
-            logging.info(f"Cache miss, key stored: {cache_key}")
-            return result
-
-        except Exception as e:
-            logging.error(f"Error executing query: {str(e)}")
-            raise e
+        prompt = self.create_prompt(query)
+        chain = prompt | self.model | self.parser
+        return chain.invoke(query.model_dump())
 
 class BaseAIServiceWithPrompt(BaseAIService):
     prompt_name: str

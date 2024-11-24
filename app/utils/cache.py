@@ -1,30 +1,31 @@
-from typing import Optional, Tuple, Any, Dict, Union, Awaitable
+import logging
 
-from starlette.requests import Request
-from starlette.responses import Response
+from core.config import settings
+from core.redis import initialize_redis
 
 
-def request_key_builder(
-    __function,
-    __namespace: str = "",
-    *,
-    request: Optional[Request] = None,
-    response: Optional[Response] = None,
-    args: Tuple[Any, ...],
-    kwargs: Dict[str, Any],
-) -> Union[Awaitable[str], str]:
-    """Build a cache key based on the request details."""
-    # Safely build the cache key using request attributes
-    if request:
-        method = request.method.lower()
-        path = request.url.path
-        query_params = repr(sorted(request.query_params.items()))
-    else:
-        # Fallback if request is None
-        method = "no-method"
-        path = "no-path"
-        query_params = "no-query-params"
+def redis_cache(timeout: int = settings.CACHE_TIMEOUT, redis_client=None):
+    """
+    Decorator for caching results in Redis with default timeout and client.
 
-    # Construct the key
-    key = ":".join([__namespace, method, path, query_params])
-    return key
+    :param redis_client: Redis client instance (default: initializes a new client).
+    :param timeout: Cache expiration time in seconds (default: 300 seconds).
+    """
+    if redis_client is None:
+        redis_client = initialize_redis()
+    def decorator(func):
+        async def wrapper(self, query, *args, **kwargs):
+            # Generate a cache key based on the query and service parameters
+            # the class must define a `generate_cache_key` method
+            cache_key = self.generate_cache_key(query, *args, **kwargs)
+            cached_result = redis_client.get(cache_key)
+            if cached_result:
+                logging.info(f"Cache hit for key: {cache_key}")
+                return self.ResultModel.parse_raw(cached_result)
+
+            result = await func(self, query, *args, **kwargs)
+            redis_client.set(cache_key, result.json(), ex=timeout)
+            logging.info(f"Cache miss, key stored: {cache_key}")
+            return result
+        return wrapper
+    return decorator
