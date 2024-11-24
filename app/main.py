@@ -27,6 +27,6 @@ app.include_router(category_router)
 app.include_router(risk_router)
 
 
-@app.get('/')
+@app.get('/', tags=['Health Check'])
 async def root():
     return {'message': 'Hello World'}

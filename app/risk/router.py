@@ -5,7 +5,7 @@ from app.risk.schemas import (
     RiskDefinitionCheckRequest,
     RiskDefinitionCheckResponse,
 )
-from app.services.router import RouteRegistrar
+from app.core.registrar import RouteRegistrar
 from app.risk.service import (
     RiskDefinitionService,
 )

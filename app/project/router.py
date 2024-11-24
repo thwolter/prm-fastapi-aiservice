@@ -6,7 +6,7 @@ from app.project.schemas import (
     CheckProjectContextResponse,
     ProjectSummaryResponse
 )
-from app.services.router import RouteRegistrar
+from app.core.registrar import RouteRegistrar
 from app.project.service import CheckProjectContextService, ProjectSummaryService
 
 

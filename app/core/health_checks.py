@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI
 
 from app.core.config import settings
 
-router = APIRouter()
+router = APIRouter(tags=['Health Check'])
 
 
 @router.get('/health-check')

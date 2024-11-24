@@ -6,7 +6,7 @@ from app.category.schemas import (
     BaseProjectRequest,
     CategoryAddRequest
 )
-from app.services.router import RouteRegistrar
+from app.core.registrar import RouteRegistrar
 from app.category.service import (
     CategoryIdentificationService,
     CategoryAddService

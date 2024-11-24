@@ -1,4 +1,4 @@
-from app.services.base_service import BaseAIServiceWithPrompt
+from app.core.ai_service import BaseAIServiceWithPrompt
 from app.category.schemas import (
     CategoriesIdentificationRequest,
     CategoriesIdentificationResponse,
