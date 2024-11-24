@@ -1,19 +1,14 @@
 import logging
-from typing import Type, TypeVar, Generic, Callable
+from typing import Type, TypeVar, Generic
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.services.models import (
-    CategoriesIdentificationResponse,
-    BaseProjectRequest,
     RiskDefinitionCheckRequest,
     RiskDefinitionCheckResponse,
-    CategoryAddRequest
 )
 from app.services.services import (
-    CategoryIdentificationService,
     RiskDefinitionService,
-    CategoryAddService
 )
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
@@ -72,18 +67,4 @@ registrar.register_route(
     request_model=RiskDefinitionCheckRequest,
     response_model=RiskDefinitionCheckResponse,
     service_class=RiskDefinitionService
-)
-
-registrar.register_route(
-    '/categories/create/',
-    request_model=BaseProjectRequest,
-    response_model=CategoriesIdentificationResponse,
-    service_class=CategoryIdentificationService
-)
-
-registrar.register_route(
-    '/categories/add/',
-    request_model=CategoryAddRequest,
-    response_model=CategoriesIdentificationResponse,
-    service_class=CategoryAddService
 )
