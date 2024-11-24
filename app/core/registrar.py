@@ -1,7 +1,8 @@
 import logging
 from typing import Type, TypeVar, Generic
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel, ValidationError
+
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
 TResponse = TypeVar('TResponse', bound=BaseModel)
@@ -13,14 +14,14 @@ class BaseServiceHandler(Generic[TRequest, TResponse]):
         self.request_model = request_model
         self.response_model = response_model
 
-    def handle(self, request: TRequest) -> TResponse:
+    async def handle(self, request: TRequest) -> TResponse:
         service = self.service_class()
         try:
             # Validate the request data
             query = self.request_model(**request.model_dump())
 
             # Execute the service logic
-            result = service.execute_query(query)
+            result = await service.execute_query(query)
 
             # Validate and return the response
             return self.response_model(**result.model_dump())
@@ -58,7 +59,7 @@ class RouteRegistrar:
         async def route_function(request: request_model, req: Request) -> response_model:
             logging.info(f"Processing request at {path} with data: {await req.json()}")
             try:
-                return handler.handle(request)
+                return await handler.handle(request)
             except HTTPException as he:
                 logging.warning(f"HTTPException: {he.detail}")
                 raise he

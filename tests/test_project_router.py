@@ -55,9 +55,10 @@ def test_check_project_context_valid_input(mock_execute_query):
 
 @pytest.mark.webtest
 def test_live_check_project_context_valid_input(project_request_data):
-    response = client.post('/api/project/check/context/', json=project_request_data)
-    assert response.status_code == 200
-    print(json.dumps(response.json(), indent=4))
+    with TestClient(app) as client:
+        response = client.post('/api/project/check/context/', json=project_request_data)
+        assert response.status_code == 200
+        print(json.dumps(response.json(), indent=4))
 
 
 @patch('app.project.service.ProjectSummaryService.execute_query')

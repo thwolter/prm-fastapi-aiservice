@@ -1,7 +1,7 @@
 import hashlib
 import json
+import logging
 from abc import ABC
-from diskcache import Cache
 
 from langchain import hub
 from langchain_core.output_parsers import PydanticOutputParser
@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
 from app.core.config import settings
+from core.redis import initialize_redis
 
 
 class BaseAIService(ABC):
@@ -24,7 +25,21 @@ class BaseAIService(ABC):
             model=self.model_name, api_key=settings.OPENAI_API_KEY, temperature=self.temperature
         )
         self.parser = PydanticOutputParser(pydantic_object=self.ResultModel)
-        self.cache = Cache(directory='.cache')
+        self.redis = initialize_redis()
+
+
+    def generate_cache_key(self, query: QueryModel, *args, **kwargs) -> str:
+        """Generate a consistent cache key based on query content and service parameters."""
+        key_components = {
+            'model_name': self.model_name,
+            'prompt_name': self.get_prompt_name(query),
+            'temperature': self.temperature,
+            'query': query.model_dump(),
+        }
+
+        # Create a consistent string representation
+        key_str = json.dumps(key_components, sort_keys=True)
+        return f"{self.__class__.__name__}:{hashlib.sha256(key_str.encode()).hexdigest()}"
 
     def create_prompt(self, query: QueryModel) -> ChatPromptTemplate:
         template = hub.pull(self.get_prompt_name(query)).template
@@ -40,27 +55,24 @@ class BaseAIService(ABC):
     def get_prompt_name(self, query: QueryModel) -> str:
         return self.prompt_name
 
-    @staticmethod
-    def _cache_key(query: QueryModel) -> str:
-        """Generate a unique cache key based on the query."""
-        query_data = query.model_dump()
-        return hashlib.md5(json.dumps(query_data, sort_keys=True).encode('utf-8')).hexdigest()
+    async def execute_query(self, query: QueryModel) -> ResultModel:
+        try:
+            cache_key = self.generate_cache_key(query)
+            cached_result = self.redis.get(cache_key)
+            if cached_result:
+                logging.info(f"Cache hit for key: {cache_key}")
+                return self.ResultModel.parse_raw(cached_result)
 
-    def execute_query(self, query: QueryModel) -> ResultModel:
-        cache_key = self._cache_key(query)
+            prompt = self.create_prompt(query)
+            chain = prompt | self.model | self.parser
+            result = chain.invoke(query.model_dump())
+            self.redis.set(cache_key, result.json(), ex=settings.CACHE_TIMEOUT)
+            logging.info(f"Cache miss, key stored: {cache_key}")
+            return result
 
-        if cache_key in self.cache:
-            print(f"[Cache] Returning cached result for query: {cache_key}")
-            return self.cache[cache_key]
-
-        prompt = self.create_prompt(query)
-        chain = prompt | self.model | self.parser
-        result = chain.invoke(query.model_dump())
-
-        self.cache[cache_key] = result
-        print(f"[Cache] Storing result in cache for query: {cache_key}")
-        return result
-
+        except Exception as e:
+            logging.error(f"Error executing query: {str(e)}")
+            raise e
 
 class BaseAIServiceWithPrompt(BaseAIService):
     prompt_name: str

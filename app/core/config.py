@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     LANGCHAIN_CALLBACKS_BACKGROUND: bool = False
     LANGCHAIN_PROJECT: str
 
+    REDIS_URL: str = 'redis://localhost:6379/0'
+    CACHE_TIMEOUT: int = 60 * 60 * 24
+
     @computed_field
     @property
     def server_host(self) -> str:
