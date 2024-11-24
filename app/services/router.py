@@ -6,14 +6,14 @@ from pydantic import BaseModel
 from app.services.models import (
     CategoriesIdentificationResponse,
     BaseProjectRequest,
-    CheckProjectContextResponse,
     RiskDefinitionCheckRequest,
-    RiskDefinitionCheckResponse, ProjectSummaryResponse, CategoryAddRequest, CategoryAddResponse
+    RiskDefinitionCheckResponse,
+    CategoryAddRequest
 )
 from app.services.services import (
     CategoryIdentificationService,
-    CheckProjectContextService,
-    RiskDefinitionService, ProjectSummaryService, CategoryAddService
+    RiskDefinitionService,
+    CategoryAddService
 )
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
@@ -69,35 +69,21 @@ registrar = RouteRegistrar(router)
 # Register all routes with simplified code
 registrar.register_route(
     '/risk-definition/check/',
-    RiskDefinitionCheckRequest,
-    RiskDefinitionCheckResponse,
-    RiskDefinitionService
+    request_model=RiskDefinitionCheckRequest,
+    response_model=RiskDefinitionCheckResponse,
+    service_class=RiskDefinitionService
 )
 
 registrar.register_route(
     '/categories/create/',
-    BaseProjectRequest,
-    CategoriesIdentificationResponse,
-    CategoryIdentificationService
+    request_model=BaseProjectRequest,
+    response_model=CategoriesIdentificationResponse,
+    service_class=CategoryIdentificationService
 )
 
 registrar.register_route(
     '/categories/add/',
-    CategoryAddRequest,
-    CategoriesIdentificationResponse,
-    CategoryAddService
-)
-
-registrar.register_route(
-    '/project/check/context/',
-    BaseProjectRequest,
-    CheckProjectContextResponse,
-    CheckProjectContextService
-)
-
-registrar.register_route(
-    '/project/summarize/',
-    BaseProjectRequest,
-    ProjectSummaryResponse,
-    ProjectSummaryService
+    request_model=CategoryAddRequest,
+    response_model=CategoriesIdentificationResponse,
+    service_class=CategoryAddService
 )
