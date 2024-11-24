@@ -2,15 +2,15 @@ import hashlib
 import json
 from abc import ABC
 
+from core.redis import initialize_redis
 from langchain import hub
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
+from utils.cache import redis_cache
 
 from app.core.config import settings
-from core.redis import initialize_redis
-from utils.cache import redis_cache
 
 
 class BaseAIService(ABC):
@@ -27,7 +27,6 @@ class BaseAIService(ABC):
         self.parser = PydanticOutputParser(pydantic_object=self.ResultModel)
         self.redis = initialize_redis()
 
-
     def generate_cache_key(self, query: QueryModel, *args, **kwargs) -> str:
         """Generate a consistent cache key based on query content and service parameters."""
         key_components = {
@@ -39,7 +38,7 @@ class BaseAIService(ABC):
 
         # Create a consistent string representation
         key_str = json.dumps(key_components, sort_keys=True)
-        return f"{self.__class__.__name__}:{hashlib.md5(key_str.encode()).hexdigest()}"
+        return f'{self.__class__.__name__}:{hashlib.md5(key_str.encode()).hexdigest()}'
 
     def create_prompt(self, query: QueryModel) -> ChatPromptTemplate:
         template = hub.pull(self.get_prompt_name(query)).template
@@ -61,11 +60,12 @@ class BaseAIService(ABC):
         chain = prompt | self.model | self.parser
         return chain.invoke(query.model_dump())
 
+
 class BaseAIServiceWithPrompt(BaseAIService):
     prompt_name: str
     QueryModel: type
     ResultModel: type
 
     def get_prompt_name(self, query: BaseModel = None) -> str:
-        """ Returns the prompt name, can be overridden by subclasses for custom behavior. """
+        """Returns the prompt name, can be overridden by subclasses for custom behavior."""
         return self.prompt_name

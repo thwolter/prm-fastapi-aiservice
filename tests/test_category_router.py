@@ -3,8 +3,10 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
+from app.category.schemas import (BaseProjectRequest,
+                                  CategoriesIdentificationResponse,
+                                  IdentifiedCategory)
 from app.main import app
-from app.category.schemas import BaseProjectRequest, CategoriesIdentificationResponse, IdentifiedCategory
 
 client = TestClient(app)
 
@@ -17,10 +19,12 @@ def project_request_data():
     ).model_dump()
 
 
-
 @patch('app.category.service.CategoryIdentificationService.execute_query')
 def test_category_identification(mock_execute_query):
-    data = BaseProjectRequest(name='Removal of a wasp nest.', context='Removal of a wasp nest by a service company within the next week.')
+    data = BaseProjectRequest(
+        name='Removal of a wasp nest.',
+        context='Removal of a wasp nest by a service company within the next week.',
+    )
     mock_execute_query.return_value = CategoriesIdentificationResponse(
         risks=[
             IdentifiedCategory(
@@ -28,14 +32,14 @@ def test_category_identification(mock_execute_query):
                 description='A sample category.',
                 examples=['Example 1', 'Example 2'],
                 confidence=0.95,
-                subcategories=[]
+                subcategories=[],
             ),
             IdentifiedCategory(
                 name='Text',
                 description='A text category.',
                 examples=['Example 3', 'Example 4'],
                 confidence=0.85,
-                subcategories=[]
+                subcategories=[],
             ),
         ],
         opportunities=[
@@ -44,7 +48,7 @@ def test_category_identification(mock_execute_query):
                 description='A sample category.',
                 examples=['Example 1', 'Example 2'],
                 confidence=0.90,
-                subcategories=[]
+                subcategories=[],
             )
         ],
         impact=[
@@ -53,9 +57,9 @@ def test_category_identification(mock_execute_query):
                 description='A sample category.',
                 examples=['Example 1', 'Example 2'],
                 confidence=0.88,
-                subcategories=[]
+                subcategories=[],
             )
-        ]
+        ],
     )
     response = client.post('/api/categories/create/', json=data.model_dump())
     assert response.status_code == 200
@@ -68,4 +72,3 @@ def test_category_identification(mock_execute_query):
     assert len(response_data['risks']) == 2
     assert response_data['risks'][0]['name'] == 'Sample'
     assert response_data['impact'][0]['name'] == 'Sample'
-

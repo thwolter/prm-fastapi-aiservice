@@ -42,5 +42,3 @@ def test_smith_connection_successful():
     response = client.get('/health-check/smith/check-connection')
     assert response.status_code == 200
     assert response.json() == {'message': 'Smith connection successful'}
-
-

@@ -5,11 +5,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.project.schemas import (
-    BaseProjectRequest,
-    CheckProjectContextResponse,
-    ProjectSummaryResponse
-)
+from app.project.schemas import (BaseProjectRequest,
+                                 CheckProjectContextResponse,
+                                 ProjectSummaryResponse)
 
 client = TestClient(app)
 
@@ -20,7 +18,6 @@ def project_request_data():
         name='H2 Project',
         context='Building a H2 cavern at an existing salt cavern site in the Netherlands. The budget is 100M EUR.',
     ).model_dump()
-
 
 
 @patch('app.project.service.CheckProjectContextService.execute_query')

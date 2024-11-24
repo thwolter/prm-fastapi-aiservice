@@ -1,5 +1,9 @@
 #!/usr/bin/env python
+import importlib
+import inspect
+import pkgutil
 import subprocess  # nosec
+from pathlib import Path
 
 import typer
 import uvicorn
@@ -49,17 +53,25 @@ def lint():
 @cmd.command(name='list-prompts')
 def list_prompts():
     """List all prompt names from services"""
-    import inspect
-
-    from app.services import services
-
+    services = []
     prompt_names = []
-    for name, obj in inspect.getmembers(services, inspect.isclass):
-        if hasattr(obj, 'prompt_name'):
-            prompt_names.append(obj.prompt_name)
-        elif hasattr(obj, 'prompt_name_category') and hasattr(obj, 'prompt_name_categories'):
-            prompt_names.append(obj.prompt_name_category)
-            prompt_names.append(obj.prompt_name_categories)
+
+    # Discover and import all service modules
+    package_dir = Path(__file__).resolve().parent / 'app' / 'risk'
+    for _, module_name, _ in pkgutil.iter_modules([str(package_dir)]):
+        if module_name.endswith('service'):
+            module = importlib.import_module(f'app.risk.{module_name}')
+            for name, obj in inspect.getmembers(module, inspect.isclass):
+                if name.endswith('Service'):
+                    services.append(obj)
+
+    # Collect prompt names from services
+    for service in services:
+        if hasattr(service, 'prompt_name'):
+            prompt_names.append(service.prompt_name)
+        if hasattr(service, 'prompt_name_category') and hasattr(service, 'prompt_name_categories'):
+            prompt_names.append(service.prompt_name_category)
+            prompt_names.append(service.prompt_name_categories)
 
     for prompt in prompt_names:
         print(prompt)

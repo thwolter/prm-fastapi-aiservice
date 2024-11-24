@@ -1,14 +1,11 @@
-import logging
 from fastapi import APIRouter
 
-from app.risk.schemas import (
-    RiskDefinitionCheckRequest,
-    RiskDefinitionCheckResponse,
-)
 from app.core.registrar import RouteRegistrar
-from app.risk.service import (
-    RiskDefinitionService,
-)
+from app.risk.schemas import (RiskDefinitionCheckRequest,
+                              RiskDefinitionCheckResponse,
+                              RiskIdentificationRequest,
+                              RiskIdentificationResponse)
+from app.risk.service import RiskDefinitionService, RiskIdentificationService
 
 # Create APIRouter instance
 router = APIRouter(
@@ -25,5 +22,12 @@ registrar.register_route(
     '/check/definition/',
     request_model=RiskDefinitionCheckRequest,
     response_model=RiskDefinitionCheckResponse,
-    service_class=RiskDefinitionService
+    service_class=RiskDefinitionService,
+)
+
+registrar.register_route(
+    '/identify/',
+    request_model=RiskIdentificationRequest,
+    response_model=RiskIdentificationResponse,
+    service_class=RiskIdentificationService,
 )

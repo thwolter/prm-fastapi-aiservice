@@ -1,5 +1,7 @@
-from app.project.schemas import CheckProjectContextResponse, BaseProjectRequest, ProjectSummaryResponse
 from app.core.ai_service import BaseAIServiceWithPrompt
+from app.project.schemas import (BaseProjectRequest,
+                                 CheckProjectContextResponse,
+                                 ProjectSummaryResponse)
 
 
 class CheckProjectContextService(BaseAIServiceWithPrompt):

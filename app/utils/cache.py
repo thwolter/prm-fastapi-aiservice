@@ -13,6 +13,7 @@ def redis_cache(timeout: int = settings.CACHE_TIMEOUT, redis_client=None):
     """
     if redis_client is None:
         redis_client = initialize_redis()
+
     def decorator(func):
         async def wrapper(self, query, *args, **kwargs):
             # Generate a cache key based on the query and service parameters
@@ -20,12 +21,14 @@ def redis_cache(timeout: int = settings.CACHE_TIMEOUT, redis_client=None):
             cache_key = self.generate_cache_key(query, *args, **kwargs)
             cached_result = redis_client.get(cache_key)
             if cached_result:
-                logging.info(f"Cache hit for key: {cache_key}")
+                logging.info(f'Cache hit for key: {cache_key}')
                 return self.ResultModel.parse_raw(cached_result)
 
             result = await func(self, query, *args, **kwargs)
             redis_client.set(cache_key, result.json(), ex=timeout)
-            logging.info(f"Cache miss, key stored: {cache_key}")
+            logging.info(f'Cache miss, key stored: {cache_key}')
             return result
+
         return wrapper
+
     return decorator

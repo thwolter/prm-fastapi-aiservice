@@ -1,14 +1,11 @@
-import logging
 from fastapi import APIRouter
 
-from app.project.schemas import (
-    BaseProjectRequest,
-    CheckProjectContextResponse,
-    ProjectSummaryResponse
-)
 from app.core.registrar import RouteRegistrar
-from app.project.service import CheckProjectContextService, ProjectSummaryService
-
+from app.project.schemas import (BaseProjectRequest,
+                                 CheckProjectContextResponse,
+                                 ProjectSummaryResponse)
+from app.project.service import (CheckProjectContextService,
+                                 ProjectSummaryService)
 
 # Create APIRouter instance
 router = APIRouter(
@@ -24,12 +21,12 @@ registrar.register_route(
     '/check/context/',
     request_model=BaseProjectRequest,
     response_model=CheckProjectContextResponse,
-    service_class=CheckProjectContextService
+    service_class=CheckProjectContextService,
 )
 
 registrar.register_route(
     '/summarize/',
     request_model=BaseProjectRequest,
     response_model=ProjectSummaryResponse,
-    service_class=ProjectSummaryService
+    service_class=ProjectSummaryService,
 )

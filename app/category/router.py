@@ -1,17 +1,11 @@
-import logging
 from fastapi import APIRouter
 
-from app.category.schemas import (
-    CategoriesIdentificationResponse,
-    BaseProjectRequest,
-    CategoryAddRequest
-)
+from app.category.schemas import (BaseProjectRequest,
+                                  CategoriesIdentificationResponse,
+                                  CategoryAddRequest)
+from app.category.service import (CategoryAddService,
+                                  CategoryIdentificationService)
 from app.core.registrar import RouteRegistrar
-from app.category.service import (
-    CategoryIdentificationService,
-    CategoryAddService
-)
-
 
 # Create APIRouter instance
 router = APIRouter(
@@ -27,12 +21,12 @@ registrar.register_route(
     '/create/',
     request_model=BaseProjectRequest,
     response_model=CategoriesIdentificationResponse,
-    service_class=CategoryIdentificationService
+    service_class=CategoryIdentificationService,
 )
 
 registrar.register_route(
     '/add/',
     request_model=CategoryAddRequest,
     response_model=CategoriesIdentificationResponse,
-    service_class=CategoryAddService
+    service_class=CategoryAddService,
 )

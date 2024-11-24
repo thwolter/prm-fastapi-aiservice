@@ -1,4 +1,15 @@
+from project.schemas import BaseProjectRequest
 from pydantic import BaseModel, Field
+
+
+class Risk(BaseModel):
+    title: str = Field(..., description='The title of the risk.')
+    description: str = Field(..., description='The description of the risk.')
+
+
+class RiskDefinitionCheckRequest(BaseModel):
+    text: str = Field(..., description='The text to be assessed.')
+
 
 class RiskDefinitionCheckResponse(BaseModel):
     is_valid: bool = Field(..., description='Whether the text is valid or not.')
@@ -8,20 +19,10 @@ class RiskDefinitionCheckResponse(BaseModel):
     explanation: str = Field(..., description='Explanation of the classification.')
 
 
-class RiskDefinitionCheckRequest(BaseModel):
-    text: str = Field(..., description='The text to be assessed.')
-
-
-class RiskIdentificationQuery(BaseModel):
+class RiskIdentificationRequest(BaseProjectRequest):
     category: str = Field(..., description='The category of the risk.')
-    subcategory: str | None = Field(None, description='The subcategory of the risk.')
-    context: str = Field(..., description='The context of the risk.')
+    existing: list[Risk] = Field([], description='The existing risks.')
 
 
-class Risk(BaseModel):
-    title: str = Field(..., description='The title of the risk.')
-    description: str = Field(..., description='The description of the risk.')
-
-
-class RiskIdentificationResult(BaseModel):
+class RiskIdentificationResponse(BaseModel):
     risks: list[Risk] = Field(..., description='The list of risks identified.')
