@@ -21,12 +21,12 @@ registrar.register_route(
     '/check/context/',
     request_model=BaseProjectRequest,
     response_model=CheckProjectContextResponse,
-    service_class=CheckProjectContextService,
+    service_factory=CheckProjectContextService,
 )
 
 registrar.register_route(
     '/summarize/',
     request_model=BaseProjectRequest,
     response_model=ProjectSummaryResponse,
-    service_class=ProjectSummaryService,
+    service_factory=ProjectSummaryService,
 )

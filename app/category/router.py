@@ -21,12 +21,12 @@ registrar.register_route(
     '/create/',
     request_model=BaseProjectRequest,
     response_model=CategoriesIdentificationResponse,
-    service_class=CategoryIdentificationService,
+    service_factory=CategoryIdentificationService,
 )
 
 registrar.register_route(
     '/add/',
     request_model=CategoryAddRequest,
     response_model=CategoriesIdentificationResponse,
-    service_class=CategoryAddService,
+    service_factory=CategoryAddService,
 )
