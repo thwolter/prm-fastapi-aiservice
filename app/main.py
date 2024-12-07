@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from urllib.request import Request
 
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
@@ -10,6 +11,7 @@ from app.core.health_checks import router as core_router
 from app.keywords.router import router as keywords_router
 from app.project.router import router as project_router
 from app.risk.router import router as risk_router
+from middleware import custom_error_format_middleware
 
 
 @asynccontextmanager
@@ -28,6 +30,10 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_methods=['*'],
         allow_headers=['*'],
     )
+
+@app.middleware("http")
+async def custom_middleware(request: Request, call_next):
+    return await custom_error_format_middleware(request, call_next)
 
 app.include_router(keywords_router)
 app.include_router(core_router)

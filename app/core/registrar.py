@@ -40,6 +40,10 @@ class BaseServiceHandler(Generic[TRequest, TResponse]):
             logging.warning(f'HTTPException in {self.service_class.__name__}: {he.detail}')
             raise
 
+        except TypeError as te:
+            logging.error(f'Type error in {self.service_class.__name__}: {te}')
+            raise HTTPException(status_code=400, detail=f'Invalid request structure: {te}')
+
         except Exception as e:
             logging.error(f'Unexpected error in {self.service_class.__name__}: {e}')
             raise HTTPException(status_code=500, detail='Internal Server Error')

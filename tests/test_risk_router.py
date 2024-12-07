@@ -76,13 +76,19 @@ def risk_definition_check_invalid_text_type(mock_execute_query):
 
 @pytest.fixture(scope='function')
 def risk_identification_request_data():
-    return {
-        'category': 'Operational',
-        'existing': [
+    return RiskIdentificationRequest(
+        name = 'Going out for dinner.',
+        context = 'Going out for dinner with friends at a local restaurant.',
+        category = Category(
+            name = 'Operational',
+            description = 'Challenges in securing a reservation at the desired restaurant.',
+            examples = ['Fully booked restaurants.', 'Limited seating capacity.']
+        ),
+        existing = [
             {'title': 'Risk 1', 'description': 'Description of Risk 1'},
             {'title': 'Risk 2', 'description': 'Description of Risk 2'}
         ]
-    }
+    ).model_dump()
 
 
 @patch('app.risk.service.RiskIdentificationService.execute_query')
@@ -110,8 +116,15 @@ def test_risk_identification_missing_category(mock_execute_query):
 
 
 @patch('app.risk.service.RiskIdentificationService.execute_query')
-def test_risk_identification_empty_existing(mock_execute_query):
-    request_data = {'category': 'Operational', 'existing': []}
+def test_risk_identification_empty_existing(mock_execute_query, risk_identification_request_data):
+    mock_execute_query.return_value = RiskIdentificationResponse(
+        risks=[
+            Risk(title='Identified Risk 1', description='Description of Identified Risk 1'),
+            Risk(title='Identified Risk 2', description='Description of Identified Risk 2')
+        ]
+    )
+    request_data = risk_identification_request_data
+    request_data['existing'] = []
     response = client.post('/api/risk/identify/', json=request_data)
     assert response.status_code == 200
     mock_execute_query.assert_called_once()
