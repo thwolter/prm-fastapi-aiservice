@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from app.core.registrar import RouteRegistrar
-from app.risk.service import RiskDefinitionService, RiskIdentificationService
+from app.risk.service import RiskDefinitionService, RiskIdentificationService, RiskDriverService, RiskLikelihoodService, \
+    RiskImpactService, RiskMitigationService
 from app.project.service import CheckProjectContextService, ProjectSummaryService
 from app.category.service import CategoryIdentificationService, CategoryAddService
 
@@ -9,6 +10,10 @@ services = [
     ProjectSummaryService,
     RiskDefinitionService,
     RiskIdentificationService,
+    RiskDriverService,
+    RiskLikelihoodService,
+    RiskImpactService,
+    RiskMitigationService,
     CategoryIdentificationService,
     CategoryAddService
 ]

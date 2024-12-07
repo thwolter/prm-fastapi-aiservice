@@ -41,6 +41,7 @@ class RiskDriversResponse(BaseModel):
 
 class RiskLikelihoodRequest(BaseProjectRequest):
     risk: Risk = Field(..., description='The risk to be assessed.')
+    drivers: list[str] = Field(..., description='The drivers of the risk.')
 
 
 class RiskLikelihoodResponse(BaseModel):
@@ -51,6 +52,7 @@ class RiskLikelihoodResponse(BaseModel):
 
 class RiskImpactRequest(BaseProjectRequest):
     risk: Risk = Field(..., description='The risk to be assessed.')
+    drivers: list[str] = Field(..., description='The drivers of the risk.')
 
 
 class RiskImpactResponse(BaseModel):
@@ -61,6 +63,7 @@ class RiskImpactResponse(BaseModel):
 
 class RiskMitigationRequest(BaseProjectRequest):
     risk: Risk = Field(..., description='The risk to be assessed.')
+    drivers: list[str] = Field(..., description='The drivers of the risk.')
 
 
 class RiskMitigationResponse(BaseModel):

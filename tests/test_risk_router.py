@@ -6,9 +6,10 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.project.schemas import BaseProjectRequest
-from app.risk.schemas import RiskDefinitionCheckResponse, RiskIdentificationResponse, Risk
+from app.risk.schemas import RiskDefinitionCheckResponse, RiskIdentificationResponse, Risk, RiskDriversRequest
 from app.category.schemas import Category
 from app.risk.schemas import RiskIdentificationRequest
+from risk.schemas import RiskDriversResponse, RiskLikelihoodResponse, RiskImpactResponse, RiskMitigationResponse
 
 client = TestClient(app)
 
@@ -180,3 +181,74 @@ def test_live_risk_identification_valid_input_existing_risks():
     assert response.status_code == 200
     response_data = response.json()
     assert isinstance(RiskIdentificationResponse(**response_data), RiskIdentificationResponse)
+
+
+@pytest.mark.webtest
+def test_live_risk_drivers(project_request_data):
+    request_data = RiskDriversRequest(
+        name='Going our for dinner.',
+        context='Going out for dinner with friends at a local restaurant.',
+        risk = Risk(
+            title='Last-Minute Cancellations',
+            description='Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.'
+        ).model_dump()
+    )
+    response = client.post('/api/risk/drivers/', json=request_data.model_dump())
+    assert response.status_code == 200
+    response_data = response.json()
+    print(json.dumps(response_data, indent=2))
+    assert isinstance(RiskDriversResponse(**response_data), RiskDriversResponse)
+
+
+@pytest.mark.webtest
+def test_live_risk_likelihood(project_request_data):
+    request_data = {
+        'name': 'Going out for dinner.',
+        'context': 'Going out for dinner with friends at a local restaurant.',
+        'risk': {
+            'title': 'Last-Minute Cancellations',
+            'description': 'Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.'
+        },
+        'drivers': ['Last-Minute Cancellations']
+    }
+    response = client.post('/api/risk/likelihood/', json=request_data)
+    assert response.status_code == 200
+    response_data = response.json()
+    print(json.dumps(response_data, indent=2))
+    assert isinstance(RiskLikelihoodResponse(**response_data), RiskLikelihoodResponse)
+
+
+@pytest.mark.webtest
+def test_live_risk_impact(project_request_data):
+    request_data = {
+        'name': 'Going out for dinner.',
+        'context': 'Going out for dinner with friends at a local restaurant.',
+        'risk': {
+            'title': 'Last-Minute Cancellations',
+            'description': 'Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.'
+        },
+        'drivers': ['Last-Minute Cancellations']
+    }
+    response = client.post('/api/risk/impact/', json=request_data)
+    assert response.status_code == 200
+    response_data = response.json()
+    print(json.dumps(response_data, indent=2))
+    assert isinstance(RiskImpactResponse(**response_data), RiskImpactResponse)
+
+
+@pytest.mark.webtest
+def test_live_risk_mitigation(project_request_data):
+    request_data = {
+        'name': 'Going out for dinner.',
+        'context': 'Going out for dinner with friends at a local restaurant.',
+        'risk': {
+            'title': 'Last-Minute Cancellations',
+            'description': 'Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.'
+        },
+        'drivers': ['Last-Minute Cancellations']
+    }
+    response = client.post('/api/risk/mitigation/', json=request_data)
+    assert response.status_code == 200
+    response_data = response.json()
+    print(json.dumps(response_data, indent=2))
+    assert isinstance(RiskMitigationResponse(**response_data), RiskMitigationResponse)
