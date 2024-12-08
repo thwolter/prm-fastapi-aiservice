@@ -10,7 +10,8 @@ class Category(BaseModel):
 
 
 class CategoriesIdentificationRequest(BaseModel):
-    text: str = Field(..., description='The text to be used for category identification.')
+    name: str = Field(..., description='The name of the project.')
+    context: str = Field(..., description='The context of the project.')
 
 
 class IdentifiedCategory(Category):
