@@ -41,22 +41,21 @@ class RiskDriversResponse(BaseModel):
 
 class RiskLikelihoodRequest(BaseProjectRequest):
     risk: Risk = Field(..., description='The risk to be assessed.')
-    drivers: list[str] = Field(..., description='The drivers of the risk.')
 
 
 class RiskLikelihoodResponse(BaseModel):
-    likelihood: str = Field(..., description='The likelihood of the risk.')
+    likelihood: str = Field(..., description='The likelihood of the risk: low, medium, high.')
     explanation: str = Field(..., description='Explanation of the likelihood classification.')
     sources: list[str] = Field(..., description='The sources of the likelihood classification.')
 
 
 class RiskImpactRequest(BaseProjectRequest):
     risk: Risk = Field(..., description='The risk to be assessed.')
-    drivers: list[str] = Field(..., description='The drivers of the risk.')
 
 
 class RiskImpactResponse(BaseModel):
-    impact: str = Field(..., description='The impact of the risk.')
+    impacts: list[str] = Field(..., description='The impacts of the risk.')
+    level: str = Field(..., description='The level of the impact: low, medium, high.')
     explanation: str = Field(..., description='Explanation of the impact classification.')
     sources: list[str] = Field(..., description='The sources of the impact classification.')
 
