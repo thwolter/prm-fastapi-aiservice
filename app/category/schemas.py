@@ -6,12 +6,6 @@ from app.project.schemas import BaseProjectRequest
 class Category(BaseModel):
     name: str = Field(..., description='The name of the category.')
     description: str = Field(..., description='The description of the category.')
-    examples: list[str] = Field(..., description='Examples of the category.')
-
-
-class CategoriesIdentificationRequest(BaseModel):
-    name: str = Field(..., description='The name of the project.')
-    context: str = Field(..., description='The context of the project.')
 
 
 class IdentifiedCategory(Category):
@@ -21,26 +15,17 @@ class IdentifiedCategory(Category):
     )
 
 
-class CategoriesIdentificationResponse(BaseModel):
-    risks: list[IdentifiedCategory] = Field(
-        ..., description='The list of identified risk categories.'
-    )
-    opportunities: list[IdentifiedCategory] = Field(
-        ..., description='The list of identified opportunity categories.'
-    )
-    impact: list[IdentifiedCategory] = Field(
-        ..., description='The list of identified impact categories.'
-    )
+class CreateCategoriesRequest(BaseProjectRequest):
+    pass
 
 
-class CategoryAddRequest(BaseProjectRequest):
-    type: str = Field(..., description='The type of category to be added.')
+class AddCategoriesRequest(BaseProjectRequest):
     existing: list[Category] = Field(
         ..., description='Existing categories which must be excluded from the identification.'
     )
 
 
-class CategoryAddResponse(BaseModel):
+class CategoriesResponse(BaseModel):
     categories: list[IdentifiedCategory] = Field(
-        ..., description='The list of identified categories.'
+        ..., description='The list of identified risk categories.'
     )
