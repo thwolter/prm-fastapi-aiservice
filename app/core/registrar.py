@@ -59,6 +59,7 @@ class RouteRegistrar:
         request_model: Type[TRequest],
         response_model: Type[TResponse],
         service_factory: Callable[[], object],
+        tags: list[str] = None,
     ):
         handler = BaseServiceHandler(service_factory, request_model, response_model)
 
@@ -66,7 +67,7 @@ class RouteRegistrar:
             logging.info(f'Processing request at {path}')
             return await handler.handle(request)
 
-        self.router.post(path, response_model=response_model)(route_function)
+        self.router.post(path, response_model=response_model, tags=tags)(route_function)
 
 
 # Create APIRouter instance
