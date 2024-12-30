@@ -1,7 +1,10 @@
 from pydantic import BaseModel, Field
 
 from app.project.schemas import BaseProjectRequest
+from app.utils.schema import BaseResponseModel
 
+
+### no longer needed? ###
 
 class Category(BaseModel):
     name: str = Field(..., description='The name of the category.')
@@ -14,6 +17,8 @@ class IdentifiedCategory(Category):
         default_factory=list, description='List of subcategories.'
     )
 
+### above is no longer needed? ###
+
 
 class CreateCategoriesRequest(BaseProjectRequest):
     pass
@@ -25,7 +30,7 @@ class AddCategoriesRequest(BaseProjectRequest):
     )
 
 
-class CategoriesResponse(BaseModel):
+class CategoriesResponse(BaseResponseModel):
     categories: list[IdentifiedCategory] = Field(
         ..., description='The list of identified risk categories.'
     )

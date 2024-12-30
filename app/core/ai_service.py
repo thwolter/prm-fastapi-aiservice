@@ -6,6 +6,7 @@ from langchain import hub
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain_community.callbacks import get_openai_callback
 from pydantic import BaseModel
 from app.utils.cache import redis_cache
 
@@ -56,7 +57,11 @@ class BaseAIService(ABC):
     async def execute_query(self, query: QueryModel) -> ResultModel:
         prompt = self.create_prompt(query)
         chain = prompt | self.model | self.parser
-        return chain.invoke(query.model_dump())
+        with get_openai_callback() as cb:
+            result = chain.invoke(query.model_dump())
+            result.total_tokens = cb.total_tokens
+            result.total_cost = cb.total_cost
+        return result
 
 
 class AIService(BaseAIService):

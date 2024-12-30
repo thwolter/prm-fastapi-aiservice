@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from app.utils.schema import BaseResponseModel
+
 today = datetime.now().strftime('%Y-%m-%d')
 
 
@@ -10,7 +12,7 @@ class BaseProjectRequest(BaseModel):
     context: str = Field(..., description='The project context to be checked.')
 
 
-class CheckProjectContextResponse(BaseModel):
+class CheckProjectContextResponse(BaseResponseModel):
     is_valid: bool = Field(..., description='Whether the project context is valid or not.')
     suggestion: str = Field(..., description='Suggestions for a revised project context.')
     explanation: str = Field(..., description='Explanation of the classification.')
@@ -34,7 +36,7 @@ class CheckProjectContextResponse(BaseModel):
     )
 
 
-class ProjectSummaryResponse(BaseModel):
+class ProjectSummaryResponse(BaseResponseModel):
     summary: str = Field(..., description='A summary of the project.')
     image_url: str = Field(..., description='URL for the project picture.')
     tags: list[str] = Field(..., description='Tags associated with the project.')
