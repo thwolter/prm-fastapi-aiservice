@@ -59,8 +59,11 @@ class BaseAIService(ABC):
         chain = prompt | self.model | self.parser
         with get_openai_callback() as cb:
             result = chain.invoke(query.model_dump())
-            result.total_tokens = cb.total_tokens
-            result.total_cost = cb.total_cost
+            result.tokens = {
+                'token': cb.total_tokens,
+                'cost': cb.total_cost,
+                'query': self.prompt_name,
+            }
         return result
 
 
