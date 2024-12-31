@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     REDIS_URL: str = 'redis://localhost:6379/0'
     CACHE_TIMEOUT: int = 60 * 60 * 24
 
+    SECRET_KEY: str
+    DATASERVICE_URL: AnyUrl
+
     @computed_field
     @property
     def server_host(self) -> str:

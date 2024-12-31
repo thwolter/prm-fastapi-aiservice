@@ -20,6 +20,7 @@ fastapi-cache2 = {extras = ["redis"], version = "^0.2.2"}
 diskcache = "^5.6.3"
 aioredis = "^2.0.1"
 langchain-community = "^0.3.13"
+pyjwt = "^2.10.1"
 
 
 [tool.poetry.group.dev.dependencies]
