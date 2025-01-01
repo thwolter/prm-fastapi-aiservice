@@ -12,7 +12,7 @@ async def enforce_quota(request: Request, call_next):
     Middleware to enforce token quotas.
     """
     # Bypass public routes
-    if is_public_route(request.url.path):
+    if is_public_route(request.url.path) or request.method == "OPTIONS":
         return await call_next(request)
 
     try:
