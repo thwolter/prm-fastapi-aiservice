@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "ai_service"}]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 fastapi = {extras = ["standard"], version = "^0.115.2"}
 uvicorn = "^0.31.1"
 langchain = "^0.3.3"
