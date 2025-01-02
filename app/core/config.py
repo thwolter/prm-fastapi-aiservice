@@ -31,9 +31,14 @@ def parse_cors(v: Any) -> list[str] | str:
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_ignore_empty=True, extra='ignore')
     DOMAIN: str = 'localhost'
-    ENVIRONMENT: Literal['local', 'staging', 'production'] = 'local'
+    ENVIRONMENT: Literal['local', 'staging', 'production'] = 'production'
 
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
+
+    @computed_field
+    @property
+    def IS_PRODUCTION(self) -> bool:
+        return self.ENVIRONMENT == 'production'
 
     APP_PORT: int = 8001
     APP_HOST: str = 'localhost'
@@ -48,6 +53,7 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
     DATASERVICE_URL: AnyUrl
+    SENTRY_DSN: str
 
     @computed_field
     @property

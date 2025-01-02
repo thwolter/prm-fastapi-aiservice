@@ -14,11 +14,26 @@ from app.router import router as base_router
 
 from app.auth.router import router as auth_router
 from app.middleware.enforce_quota import enforce_quota
-
+import sentry_sdk
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
+
+
+if settings.IS_PRODUCTION:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for tracing.
+        traces_sample_rate=1.0,
+        _experiments={
+            # Set continuous_profiling_auto_start to True
+            # to automatically start the profiler on when
+            # possible.
+            "continuous_profiling_auto_start": True,
+        },
+    )
 
 
 app = FastAPI(lifespan=lifespan)
@@ -46,7 +61,13 @@ app.include_router(base_router)
 app.include_router(keywords_router)
 app.include_router(core_router)
 app.include_router(auth_router)
+
 @app.get('/', tags=['Health Check'])
+async def root():
+    return {'message': 'Hello World'}
+
+
+@app.get('/health-check', tags=['Health Check'])
 async def root():
     return {'message': 'Hello World'}
 
