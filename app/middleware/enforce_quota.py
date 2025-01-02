@@ -46,7 +46,7 @@ def is_public_route(path: str) -> bool:
     """
     Check if the request path is for a public route that doesn't require quota checks.
     """
-    public_routes = ["/docs", "/openapi.json", "/auth/login", "/auth/logout"]
+    public_routes = ["/docs", "/openapi.json", "/auth/login", "/auth/logout", "/api/health-check"]
     return path in public_routes
 
 

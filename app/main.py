@@ -67,7 +67,7 @@ async def root():
     return {'message': 'Hello World'}
 
 
-@app.get('/health-check', tags=['Health Check'])
+@app.get('/api/health-check', tags=['Health Check'])
 async def root():
     return {'message': 'Hello World'}
 
