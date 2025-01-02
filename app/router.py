@@ -1,10 +1,9 @@
-import importlib
 import inspect
 
 from fastapi import APIRouter
-from app.core.registrar import RouteRegistrar
 
 from app.category import service as category_service
+from app.core.registrar import RouteRegistrar
 from app.project import service as project_service
 from app.risk import service as risk_service
 
@@ -20,7 +19,8 @@ services = []
 for module in modules:
     # Filter out the service classes
     services.extend(
-        member for name, member in inspect.getmembers(module, inspect.isclass)
+        member
+        for name, member in inspect.getmembers(module, inspect.isclass)
         if member.__module__ == module.__name__
     )
 

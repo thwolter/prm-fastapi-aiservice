@@ -3,13 +3,15 @@ from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
+from risk.schemas import (RiskDriversResponse, RiskImpactResponse,
+                          RiskLikelihoodResponse, RiskMitigationResponse)
 
+from app.category.schemas import Category
 from app.main import app
 from app.project.schemas import BaseProjectRequest
-from app.risk.schemas import RiskDefinitionCheckResponse, RiskIdentificationResponse, Risk, RiskDriversRequest
-from app.category.schemas import Category
-from app.risk.schemas import RiskIdentificationRequest
-from risk.schemas import RiskDriversResponse, RiskLikelihoodResponse, RiskImpactResponse, RiskMitigationResponse
+from app.risk.schemas import (Risk, RiskDefinitionCheckResponse,
+                              RiskDriversRequest, RiskIdentificationRequest,
+                              RiskIdentificationResponse)
 
 client = TestClient(app)
 
@@ -74,21 +76,20 @@ def risk_definition_check_invalid_text_type(mock_execute_query):
     assert response.status_code == 422
 
 
-
 @pytest.fixture(scope='function')
 def risk_identification_request_data():
     return RiskIdentificationRequest(
-        name = 'Going out for dinner.',
-        context = 'Going out for dinner with friends at a local restaurant.',
-        category = Category(
-            name = 'Operational',
-            description = 'Challenges in securing a reservation at the desired restaurant.',
-            examples = ['Fully booked restaurants.', 'Limited seating capacity.']
+        name='Going out for dinner.',
+        context='Going out for dinner with friends at a local restaurant.',
+        category=Category(
+            name='Operational',
+            description='Challenges in securing a reservation at the desired restaurant.',
+            examples=['Fully booked restaurants.', 'Limited seating capacity.'],
         ),
-        existing = [
+        existing=[
             {'title': 'Risk 1', 'description': 'Description of Risk 1'},
-            {'title': 'Risk 2', 'description': 'Description of Risk 2'}
-        ]
+            {'title': 'Risk 2', 'description': 'Description of Risk 2'},
+        ],
     ).model_dump()
 
 
@@ -97,7 +98,7 @@ def test_risk_identification_valid_input(mock_execute_query, risk_identification
     mock_execute_query.return_value = RiskIdentificationResponse(
         risks=[
             Risk(title='Identified Risk 1', description='Description of Identified Risk 1'),
-            Risk(title='Identified Risk 2', description='Description of Identified Risk 2')
+            Risk(title='Identified Risk 2', description='Description of Identified Risk 2'),
         ]
     )
     response = client.post('/api/risk/identify/', json=risk_identification_request_data)
@@ -121,7 +122,7 @@ def test_risk_identification_empty_existing(mock_execute_query, risk_identificat
     mock_execute_query.return_value = RiskIdentificationResponse(
         risks=[
             Risk(title='Identified Risk 1', description='Description of Identified Risk 1'),
-            Risk(title='Identified Risk 2', description='Description of Identified Risk 2')
+            Risk(title='Identified Risk 2', description='Description of Identified Risk 2'),
         ]
     )
     request_data = risk_identification_request_data
@@ -140,13 +141,12 @@ def test_risk_identification_invalid_existing_type(mock_execute_query):
     assert response.status_code == 422
 
 
-
 @pytest.mark.webtest
 def test_live_risk_identification_valid_input():
     category = Category(
         name='Reservation Availability',
         description='Challenges in securing a reservation at the desired restaurant.',
-        examples=['Fully booked restaurants.', 'Limited seating capacity.']
+        examples=['Fully booked restaurants.', 'Limited seating capacity.'],
     )
     request_data = RiskIdentificationRequest(
         name='Going our for dinner.',
@@ -159,23 +159,22 @@ def test_live_risk_identification_valid_input():
     assert isinstance(RiskIdentificationResponse(**response_data), RiskIdentificationResponse)
 
 
-
 @pytest.mark.webtest
 def test_live_risk_identification_valid_input_existing_risks():
     category = Category(
         name='Reservation Availability',
         description='Challenges in securing a reservation at the desired restaurant.',
-        examples=['Fully booked restaurants.', 'Limited seating capacity.']
+        examples=['Fully booked restaurants.', 'Limited seating capacity.'],
     )
     risk1 = Risk(
         title='Last-Minute Cancellations',
-        description='Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.'
+        description='Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.',
     )
     request_data = RiskIdentificationRequest(
         name='Going our for dinner.',
         context='Going out for dinner with friends at a local restaurant.',
         category=category.model_dump(),
-        existing=[risk1.model_dump()]
+        existing=[risk1.model_dump()],
     )
     response = client.post('/api/risk/identify/', json=request_data.model_dump())
     assert response.status_code == 200
@@ -188,10 +187,10 @@ def test_live_risk_drivers(project_request_data):
     request_data = RiskDriversRequest(
         name='Going our for dinner.',
         context='Going out for dinner with friends at a local restaurant.',
-        risk = Risk(
+        risk=Risk(
             title='Last-Minute Cancellations',
-            description='Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.'
-        ).model_dump()
+            description='Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.',
+        ).model_dump(),
     )
     response = client.post('/api/risk/drivers/', json=request_data.model_dump())
     assert response.status_code == 200
@@ -207,9 +206,9 @@ def test_live_risk_likelihood(project_request_data):
         'context': 'Going out for dinner with friends at a local restaurant.',
         'risk': {
             'title': 'Last-Minute Cancellations',
-            'description': 'Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.'
+            'description': 'Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.',
         },
-        'drivers': ['Last-Minute Cancellations']
+        'drivers': ['Last-Minute Cancellations'],
     }
     response = client.post('/api/risk/likelihood/', json=request_data)
     assert response.status_code == 200
@@ -225,9 +224,9 @@ def test_live_risk_impact(project_request_data):
         'context': 'Going out for dinner with friends at a local restaurant.',
         'risk': {
             'title': 'Last-Minute Cancellations',
-            'description': 'Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.'
+            'description': 'Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.',
         },
-        'drivers': ['Last-Minute Cancellations']
+        'drivers': ['Last-Minute Cancellations'],
     }
     response = client.post('/api/risk/impact/', json=request_data)
     assert response.status_code == 200
@@ -243,9 +242,9 @@ def test_live_risk_mitigation(project_request_data):
         'context': 'Going out for dinner with friends at a local restaurant.',
         'risk': {
             'title': 'Last-Minute Cancellations',
-            'description': 'Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.'
+            'description': 'Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.',
         },
-        'drivers': ['Last-Minute Cancellations']
+        'drivers': ['Last-Minute Cancellations'],
     }
     response = client.post('/api/risk/mitigation/', json=request_data)
     assert response.status_code == 200

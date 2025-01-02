@@ -1,20 +1,19 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+import sentry_sdk
 from fastapi import FastAPI, Request
-
 from starlette.middleware.cors import CORSMiddleware
 
+from app.auth.router import router as auth_router
 from app.core.config import settings
 from app.core.health_checks import router as core_router
 from app.keywords.router import router as keywords_router
+from app.middleware.consumed_tokens import PersistConsumedTokensMiddleware
 from app.middleware.custom_error_format import custom_error_format_middleware
+from app.middleware.token_extraction import TokenExtractionMiddleware
 from app.router import router as base_router
 
-
-from app.auth.router import router as auth_router
-from app.middleware.enforce_quota import enforce_quota
-import sentry_sdk
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
@@ -31,7 +30,7 @@ if settings.IS_PRODUCTION:
             # Set continuous_profiling_auto_start to True
             # to automatically start the profiler on when
             # possible.
-            "continuous_profiling_auto_start": True,
+            'continuous_profiling_auto_start': True,
         },
     )
 
@@ -48,13 +47,13 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 
-@app.middleware("http")
+@app.middleware('http')
 async def custom_middleware(request: Request, call_next):
     return await custom_error_format_middleware(request, call_next)
 
 
-app.middleware("http")(enforce_quota)
-
+app.add_middleware(TokenExtractionMiddleware)
+app.add_middleware(PersistConsumedTokensMiddleware)
 
 
 app.include_router(base_router)
@@ -62,13 +61,7 @@ app.include_router(keywords_router)
 app.include_router(core_router)
 app.include_router(auth_router)
 
-@app.get('/', tags=['Health Check'])
-async def root():
-    return {'message': 'Hello World'}
-
 
 @app.get('/api/health-check', tags=['Health Check'])
 async def root():
-    return {'message': 'Hello World'}
-
-
+    return {'status': 'ok'}

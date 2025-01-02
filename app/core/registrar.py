@@ -1,8 +1,10 @@
 import logging
-from typing import Generic, Type, TypeVar, Callable
+from typing import Callable, Generic, Type, TypeVar
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ValidationError
+
+from app.dependencies import get_current_user
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
 TResponse = TypeVar('TResponse', bound=BaseModel)
@@ -17,9 +19,10 @@ def validate_model(data, model: Type[BaseModel]) -> BaseModel:
 
 class BaseServiceHandler(Generic[TRequest, TResponse]):
     def __init__(
-        self, service_factory: Callable[[], object],
+        self,
+        service_factory: Callable[[], object],
         request_model: Type[TRequest],
-        response_model: Type[TResponse]
+        response_model: Type[TResponse],
     ):
         self.service_factory = service_factory
         self.request_model = request_model
@@ -75,6 +78,7 @@ router = APIRouter(
     prefix='/api',
     tags=['api'],
     responses={404: {'description': 'Not found'}},
+    dependencies=[Depends(get_current_user)],
 )
 
 # Create route registrar

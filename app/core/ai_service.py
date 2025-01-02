@@ -3,14 +3,14 @@ import json
 from abc import ABC
 
 from langchain import hub
+from langchain_community.callbacks import get_openai_callback
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-from langchain_community.callbacks import get_openai_callback
 from pydantic import BaseModel
-from app.utils.cache import redis_cache
 
 from app.core.config import settings
+from app.utils.cache import redis_cache
 
 
 class BaseAIService(ABC):

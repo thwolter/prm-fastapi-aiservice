@@ -1,13 +1,11 @@
 from app.core.ai_service import AIService
-from app.risk.schemas import (
-    RiskDefinitionCheckRequest,
-    RiskDefinitionCheckResponse,
-    RiskIdentificationRequest,
-    RiskIdentificationResponse,
-    RiskDriversRequest,
-    RiskDriversResponse, RiskLikelihoodRequest, RiskLikelihoodResponse, RiskImpactRequest, RiskImpactResponse,
-    RiskMitigationRequest, RiskMitigationResponse,
-)
+from app.risk.schemas import (RiskDefinitionCheckRequest,
+                              RiskDefinitionCheckResponse, RiskDriversRequest,
+                              RiskDriversResponse, RiskIdentificationRequest,
+                              RiskIdentificationResponse, RiskImpactRequest,
+                              RiskImpactResponse, RiskLikelihoodRequest,
+                              RiskLikelihoodResponse, RiskMitigationRequest,
+                              RiskMitigationResponse)
 
 
 class RiskDefinitionService(AIService):
@@ -15,7 +13,6 @@ class RiskDefinitionService(AIService):
     route_path = '/risk/check/definition/'
     QueryModel = RiskDefinitionCheckRequest
     ResultModel = RiskDefinitionCheckResponse
-
 
 
 class RiskIdentificationService(AIService):

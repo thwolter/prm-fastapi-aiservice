@@ -1,4 +1,5 @@
-from app.category.schemas import CategoriesResponse, CreateCategoriesRequest, AddCategoriesRequest
+from app.category.schemas import (AddCategoriesRequest, CategoriesResponse,
+                                  CreateCategoriesRequest)
 from app.core.ai_service import AIService
 
 

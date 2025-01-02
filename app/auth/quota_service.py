@@ -1,8 +1,8 @@
 import httpx
 from fastapi import HTTPException
 
-from app.core.config import settings
 from app.auth.schemas import ConsumedTokensInfo
+from app.core.config import settings
 
 DATA_SERVICE_URL = settings.DATASERVICE_URL
 
@@ -13,12 +13,11 @@ async def check_token_quota(token: str) -> int:
     """
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{DATA_SERVICE_URL}/users/token/quota/",
-            headers={"Cookie": f"auth={token}"}
+            f'{DATA_SERVICE_URL}/users/token/quota/', headers={'Cookie': f'auth={token}'}
         )
         if response.status_code != 200:
-            raise HTTPException(status_code=502, detail="Failed to fetch token quota")
-        return response.json()["quota"]
+            raise HTTPException(status_code=502, detail='Failed to fetch token quota')
+        return response.json()['quota']
 
 
 async def consume_tokens(token: str, tokens_info: dict | None = None) -> None:
@@ -27,15 +26,13 @@ async def consume_tokens(token: str, tokens_info: dict | None = None) -> None:
     """
     if tokens_info is not None:
         payload = ConsumedTokensInfo(
-            token=tokens_info['token'],
-            cost=tokens_info['cost'],
-            query=tokens_info['query']
+            token=tokens_info['token'], cost=tokens_info['cost'], query=tokens_info['query']
         ).model_dump()
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{DATA_SERVICE_URL}/users/token/",
+                f'{DATA_SERVICE_URL}/users/token/',
                 json=payload,
-                headers={"Cookie": f"auth={token}"}
+                headers={'Cookie': f'auth={token}'},
             )
             if response.status_code != 201:
-                raise HTTPException(status_code=502, detail="Failed to update token quota")
+                raise HTTPException(status_code=502, detail='Failed to update token quota')

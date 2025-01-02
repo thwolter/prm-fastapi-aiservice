@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field
 from app.project.schemas import BaseProjectRequest
 from app.utils.schema import BaseResponseModel
 
-
 ### no longer needed? ###
+
 
 class Category(BaseModel):
     name: str = Field(..., description='The name of the category.')
@@ -16,6 +16,7 @@ class IdentifiedCategory(Category):
     subcategories: list['IdentifiedCategory'] = Field(
         default_factory=list, description='List of subcategories.'
     )
+
 
 ### above is no longer needed? ###
 

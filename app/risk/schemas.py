@@ -1,7 +1,7 @@
-from app.category.schemas import Category
-from app.project.schemas import BaseProjectRequest
 from pydantic import BaseModel, Field
 
+from app.category.schemas import Category
+from app.project.schemas import BaseProjectRequest
 from app.utils.schema import BaseResponseModel
 
 
