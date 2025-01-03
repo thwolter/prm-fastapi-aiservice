@@ -62,6 +62,6 @@ app.include_router(core_router)
 app.include_router(auth_router)
 
 
-@app.get('/api/health-check', tags=['Health Check'])
+@app.get('/health-check', tags=['Health Check'])
 async def root():
     return {'status': 'ok'}
