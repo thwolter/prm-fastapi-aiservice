@@ -29,6 +29,7 @@ class AddCategoriesRequest(BaseProjectRequest):
     existing: list[Category] = Field(
         ..., description='Existing categories which must be excluded from the identification.'
     )
+    type: str = Field(..., description='The type of the identification.')
 
 
 class CategoriesResponse(BaseResponseModel):
