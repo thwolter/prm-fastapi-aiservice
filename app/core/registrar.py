@@ -1,8 +1,8 @@
 import logging
 from typing import Callable, Generic, Type, TypeVar
 
-from auth.dependencies import get_current_user
-from auth.service import AuthService
+from app.auth.dependencies import get_current_user
+from app.auth.service import AuthService
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ValidationError
 
