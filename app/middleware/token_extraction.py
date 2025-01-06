@@ -1,5 +1,6 @@
 import logging
-from fastapi import Request
+
+from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
@@ -14,20 +15,19 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next) -> Response:
-        logger.debug(f"Cookies received in middleware: {request.cookies}")
+        logger.debug(f'Cookies received in middleware: {request.cookies}')
         token = request.cookies.get('auth')
 
         if not token:
-            logger.warning("No 'auth' token found in cookies")
-
-        request.state.token = token  # Attach token to request state
-        request.state.user_id = None
+            logger.debug("No 'auth' token found in cookies")
 
         if token:
             try:
                 payload = get_jwt_payload(request)
+                request.state.token = token
                 request.state.user_id = payload.get('sub')
-            except Exception as e:
-                logger.error(f"Error extracting token: {e}")
+            except HTTPException:
+                request.state.token = None
+                request.state.user_id = None
 
         return await call_next(request)

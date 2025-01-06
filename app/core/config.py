@@ -48,21 +48,20 @@ class Settings(BaseSettings):
     LANGCHAIN_CALLBACKS_BACKGROUND: bool = False
     LANGCHAIN_PROJECT: str
 
+    OPENAI_MODEL_NAME: str = 'gpt-4o-mini'
+    OPENAI_TEMPERATURE: float = 0.7
+
     REDIS_URL: str = 'redis://localhost:6379/0'
     CACHE_TIMEOUT: int = 60 * 60 * 24
 
-    SECRET_KEY: str
     DATASERVICE_URL: AnyUrl
     SENTRY_DSN: str
     LOG_LEVEL: str = 'ERROR'
 
-    @computed_field
-    @property
-    def server_host(self) -> str:
-        # Use HTTPS for anything other than local development
-        if self.ENVIRONMENT == 'local':
-            return f'http://{self.DOMAIN}'
-        return f'https://{self.DOMAIN}'
+    SECRET_KEY: str
+    AUTH_TOKEN_LEEWAY: int = -30  # in seconds
+    AUTH_TOKEN_ALGORITHM: str = 'HS256'
+    AUTH_TOKEN_AUDIENCE: str = 'fastapi-users:auth'
 
     @classmethod
     def from_env(cls):

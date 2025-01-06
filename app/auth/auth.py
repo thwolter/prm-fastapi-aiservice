@@ -3,10 +3,6 @@ from fastapi import HTTPException, Request
 
 from app.core.config import settings
 
-SECRET_KEY = settings.SECRET_KEY
-ALGORITHM = 'HS256'
-AUDIENCE = 'fastapi-users:auth'
-
 
 def get_jwt_payload(request: Request):
     """
@@ -18,9 +14,11 @@ def get_jwt_payload(request: Request):
 
     try:
         payload = jwt.decode(
-            token, SECRET_KEY,
-            algorithms=[ALGORITHM], audience=AUDIENCE,
-            options={'verify_exp': True}
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.AUTH_TOKEN_ALGORITHM],
+            audience=settings.AUTH_TOKEN_AUDIENCE,
+            leeway=settings.AUTH_TOKEN_LEEWAY,
         )
         return payload
 

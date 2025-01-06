@@ -1,10 +1,10 @@
 import logging
 from typing import Callable, Generic, Type, TypeVar
 
-from fastapi import APIRouter, Depends, Request, HTTPException
+from auth.dependencies import get_current_user
+from auth.service import AuthService
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ValidationError
-
-from app.dependencies import get_current_user
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
 TResponse = TypeVar('TResponse', bound=BaseModel)
@@ -31,7 +31,6 @@ class BaseServiceHandler(Generic[TRequest, TResponse]):
         self.response_model = response_model
 
     async def handle(self, request: TRequest) -> TResponse:
-
         service = self.service_factory()
         try:
             query = self.request_model(**request.model_dump())
@@ -69,14 +68,20 @@ class RouteRegistrar:
     ):
         handler = BaseServiceHandler(service_factory, request_model, response_model)
 
-        async def route_function(request: Request, request_model: request_model) -> response_model:
-            user_id = getattr(request.state, "user_id")
+        # We have to inject the current_user dependency to check if an auth_token is available
+        async def route_function(
+            request: Request,
+            request_model: request_model,
+            current_user: get_current_user = Depends(get_current_user),
+        ) -> response_model:
+            service = AuthService(request)
+            valid = await service.check_token_quota()
+            if not valid:
+                raise HTTPException(status_code=403, detail='Token quota exceeded')
 
-            if not user_id:
-                raise HTTPException(status_code=401, detail='Unauthorized')
-            logger.info(f'Processing request {path} for user {user_id}')
-
-            return await handler.handle(request_model)
+            result = await handler.handle(request_model)
+            await service.consume_tokens(result)
+            return result
 
         self.router.post(path, response_model=response_model, tags=tags)(route_function)
 
@@ -86,7 +91,6 @@ router = APIRouter(
     prefix='/api',
     tags=['api'],
     responses={404: {'description': 'Not found'}},
-    dependencies=[Depends(get_current_user)],
 )
 
 # Create route registrar

@@ -5,6 +5,7 @@ from .config import settings
 
 LOG_LEVEL = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
 
+
 class CustomFormatter(logging.Formatter):
     def format(self, record):
         levelname = record.levelname
@@ -21,14 +22,10 @@ class CustomFormatter(logging.Formatter):
         record.levelname = levelname
         return super().format(record)
 
+
 formatter = CustomFormatter('%(levelname)s [%(name)s] %(message)s')
 
-logging.basicConfig(
-    level=LOG_LEVEL,
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+logging.basicConfig(level=LOG_LEVEL, handlers=[logging.StreamHandler(sys.stdout)])
 
 
 for handler in logging.root.handlers:

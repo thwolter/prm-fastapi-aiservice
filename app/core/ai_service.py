@@ -14,10 +14,11 @@ from app.utils.cache import redis_cache
 
 
 class BaseAIService(ABC):
-    model_name: str = 'gpt-4o-mini'
+    model_name: str = settings.OPENAI_MODEL_NAME
+    temperature: float = settings.OPENAI_TEMPERATURE
+
     prompt_name: str
     QueryModel = BaseModel
-    temperature: float = 0.7
     ResultModel = BaseModel
 
     def __init__(self) -> None:
@@ -59,10 +60,11 @@ class BaseAIService(ABC):
         chain = prompt | self.model | self.parser
         with get_openai_callback() as cb:
             result = chain.invoke(query.model_dump())
-            result.tokens = {
-                'token': cb.total_tokens,
-                'cost': cb.total_cost,
-                'query': self.prompt_name,
+            result.tokens_info = {
+                'consumed_tokens': cb.total_tokens,
+                'total_cost': cb.total_cost,
+                'prompt_name': self.prompt_name,
+                'model_name': self.model_name,
             }
         return result
 

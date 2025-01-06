@@ -10,12 +10,14 @@ class LoginRequest(BaseModel):
 
 
 class ConsumedTokensInfo(BaseModel):
-    query: Optional[str] = None
-    token: int
-    cost: float
+    consumed_tokens: int
+    total_cost: float
+    prompt_name: str
+    model_name: str
 
 
 class TokenQuotaResponse:
-    quota: float
-    consumed: int
-    remaining: int
+    sufficient: bool
+    token_limit: int
+    consumed_tokens: int
+    remaining_tokens: int
