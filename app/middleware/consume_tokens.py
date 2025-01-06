@@ -46,10 +46,5 @@ class PersistConsumedTokensMiddleware(BaseHTTPMiddleware):
         tokens_info = response_data.get('tokens', {})
         total_tokens = tokens_info.get('token', 0)
 
-        if total_tokens == 0:
-            return
-
-        try:
+        if total_tokens != 0:
             await consume_tokens(token=token, tokens_info=tokens_info)
-        except (json.JSONDecodeError, AttributeError) as e:
-            print(f'Error processing token info: {e}')
