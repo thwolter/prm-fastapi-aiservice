@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from core.config import settings
+from .config import settings
 
 LOG_LEVEL = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
 
