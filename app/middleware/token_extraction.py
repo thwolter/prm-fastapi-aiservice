@@ -14,7 +14,7 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next) -> Response:
-        logger.info(f"Cookies received in middleware: {request.cookies}")
+        logger.debug(f"Cookies received in middleware: {request.cookies}")
         token = request.cookies.get('auth')
 
         if not token:
@@ -22,10 +22,10 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
 
         request.state.token = token  # Attach token to request state
         request.state.user_id = None
+
         if token:
             try:
                 payload = get_jwt_payload(request)
-                # todo: check for token expiration with payload.get('exp')
                 request.state.user_id = payload.get('sub')
             except Exception as e:
                 logger.error(f"Error extracting token: {e}")

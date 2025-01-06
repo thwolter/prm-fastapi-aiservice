@@ -24,6 +24,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 
 if settings.IS_PRODUCTION:
+    logger.info('Setting up Sentry')
     sentry_sdk.init(
         dsn=settings.SENTRY_DSN,
         # Set traces_sample_rate to 1.0 to capture 100%
@@ -41,14 +42,16 @@ if settings.IS_PRODUCTION:
 app = FastAPI(lifespan=lifespan)
 
 if settings.BACKEND_CORS_ORIGINS:
+
+    origins = [str(origin).strip('/') for origin in settings.BACKEND_CORS_ORIGINS]
+    logger.info(f'Allowed origins: {origins}')
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[str(origin).strip('/') for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=['*'],
         allow_headers=['*'],
     )
-
 
 @app.middleware('http')
 async def custom_middleware(request: Request, call_next):

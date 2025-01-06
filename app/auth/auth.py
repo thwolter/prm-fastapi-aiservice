@@ -17,9 +17,15 @@ def get_jwt_payload(request: Request):
         raise HTTPException(status_code=401, detail='Missing authentication token')
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], audience=AUDIENCE)
+        payload = jwt.decode(
+            token, SECRET_KEY,
+            algorithms=[ALGORITHM], audience=AUDIENCE,
+            options={'verify_exp': True}
+        )
         return payload
+
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail='Token has expired')
+
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail='Invalid token')

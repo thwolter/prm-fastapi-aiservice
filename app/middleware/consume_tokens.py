@@ -7,6 +7,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from app.auth.quota_service import consume_tokens
+from jose import jwt
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,11 @@ class PersistConsumedTokensMiddleware(BaseHTTPMiddleware):
         if not token:
             return
 
-        response_data = json.loads(response_body)
-        tokens_info = response_data.get('tokens', {})
+        try:
+            response_data = json.loads(response_body)
+            tokens_info = response_data.get('tokens', {})
+        except Exception as e:
+            return
 
-        await consume_tokens(token=token, user_id=user_id, tokens_info=tokens_info)
+        if tokens_info != {}:
+            await consume_tokens(token=token, user_id=user_id, tokens_info=tokens_info)

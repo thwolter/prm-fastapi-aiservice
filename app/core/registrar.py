@@ -1,9 +1,8 @@
 import logging
 from typing import Callable, Generic, Type, TypeVar
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request, HTTPException
 from pydantic import BaseModel, ValidationError
-from fastapi import Request
 
 from app.dependencies import get_current_user
 
@@ -72,6 +71,9 @@ class RouteRegistrar:
 
         async def route_function(request: Request, request_model: request_model) -> response_model:
             user_id = getattr(request.state, "user_id")
+
+            if not user_id:
+                raise HTTPException(status_code=401, detail='Unauthorized')
             logger.info(f'Processing request {path} for user {user_id}')
 
             return await handler.handle(request_model)

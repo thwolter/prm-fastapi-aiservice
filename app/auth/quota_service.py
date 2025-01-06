@@ -29,20 +29,19 @@ async def consume_tokens(token: str, user_id: str, tokens_info: dict | None = No
     Update the user's token consumption via the data-service.
     """
 
-    if tokens_info is not None:
-        payload = ConsumedTokensInfo(
-            token=tokens_info['token'], cost=tokens_info['cost'], query=tokens_info['query']
-        ).model_dump()
+    payload = ConsumedTokensInfo(
+        token=tokens_info['token'], cost=tokens_info['cost'], query=tokens_info['query']
+    ).model_dump()
 
-        logger.info(f'Consuming {tokens_info["token"]} tokens for {user_id}')
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f'{DATA_SERVICE_URL}/users/token/',
-                json=payload,
-                headers={'Cookie': f'auth={token}'},
-            )
+    logger.info(f'Consuming {tokens_info["token"]} tokens for {user_id}')
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f'{DATA_SERVICE_URL}/users/token/',
+            json=payload,
+            headers={'Cookie': f'auth={token}'},
+        )
 
-            if response.status_code != 201:
-                logger.error(f'Failed to consume tokens for {user_id}')
-            else:
-                logger.info(f'Tokens consumed for {user_id}')
+        if response.status_code != 201:
+            logger.error(f'Failed to consume tokens for {user_id}')
+        else:
+            logger.info(f'Tokens consumed for {user_id}')
