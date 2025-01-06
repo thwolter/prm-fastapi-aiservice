@@ -16,14 +16,13 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         token = request.cookies.get('auth')
         request.state.token = token  # Attach token to request state
+        request.state.user_id = None
         if token:
             try:
                 payload = get_jwt_payload(request)
+                # todo: check for token expiration with payload.get('exp')
                 request.state.user_id = payload.get('sub')
             except Exception:
-                logger.error('Failed to extract user_id from token')
-                request.state.user_id = None
-        else:
-            request.state.user_id = None
+                logger.error('Token expired or invalid')
 
         return await call_next(request)

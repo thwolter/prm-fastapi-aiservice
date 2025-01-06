@@ -15,7 +15,6 @@ from app.middleware.custom_error_format import custom_error_format_middleware
 from app.middleware.token_extraction import TokenExtractionMiddleware
 from app.router import router as base_router
 
-
 logger = logging.getLogger(__name__)
 
 

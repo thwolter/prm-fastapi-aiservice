@@ -3,11 +3,14 @@ from typing import Callable, Generic, Type, TypeVar
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ValidationError
+from fastapi import Request
 
 from app.dependencies import get_current_user
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
 TResponse = TypeVar('TResponse', bound=BaseModel)
+
+logger = logging.getLogger(__name__)
 
 
 def validate_model(data, model: Type[BaseModel]) -> BaseModel:
@@ -29,6 +32,7 @@ class BaseServiceHandler(Generic[TRequest, TResponse]):
         self.response_model = response_model
 
     async def handle(self, request: TRequest) -> TResponse:
+
         service = self.service_factory()
         try:
             query = self.request_model(**request.model_dump())
@@ -66,9 +70,13 @@ class RouteRegistrar:
     ):
         handler = BaseServiceHandler(service_factory, request_model, response_model)
 
-        async def route_function(request: request_model) -> response_model:
-            logging.info(f'Processing request at {path}')
-            return await handler.handle(request)
+        async def route_function(request: Request, request_model: request_model) -> response_model:
+            if not getattr(request.state, "user_id"):
+                logger.error('Unauthorized request')
+                raise HTTPException(status_code=401, detail='Unauthorized')
+
+            logger.info(f'Processing request at {path}')
+            return await handler.handle(request_model)
 
         self.router.post(path, response_model=response_model, tags=tags)(route_function)
 
