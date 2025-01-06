@@ -9,7 +9,7 @@ from app.auth.router import router as auth_router
 from app.core.config import settings
 from app.core.health_checks import router as core_router
 from app.keywords.router import router as keywords_router
-from app.middleware.consumed_tokens import PersistConsumedTokensMiddleware
+from app.middleware.consume_tokens import PersistConsumedTokensMiddleware
 from app.middleware.custom_error_format import custom_error_format_middleware
 from app.middleware.token_extraction import TokenExtractionMiddleware
 from app.router import router as base_router

@@ -36,16 +36,20 @@ class PersistConsumedTokensMiddleware(BaseHTTPMiddleware):
         """
         Process the token-related information from the response body.
         """
-        print(f'Processing token info: {response_body}')
-        try:
-            response_data = json.loads(response_body)
-            tokens_info = response_data.get('tokens', {})
-            total_tokens = tokens_info.get('token', 0)
+        token = request.state.token
+        if not token:
+            return
 
-            if total_tokens > 0:
-                token = request.state.token
-                if token:
-                    # Consume the token info
-                    await consume_tokens(token=token, tokens_info=tokens_info)
+        print(f'Processing token info: {response_body}')
+
+        response_data = json.loads(response_body)
+        tokens_info = response_data.get('tokens', {})
+        total_tokens = tokens_info.get('token', 0)
+
+        if total_tokens == 0:
+            return
+
+        try:
+            await consume_tokens(token=token, tokens_info=tokens_info)
         except (json.JSONDecodeError, AttributeError) as e:
             print(f'Error processing token info: {e}')
