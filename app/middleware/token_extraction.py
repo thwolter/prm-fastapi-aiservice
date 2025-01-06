@@ -1,8 +1,11 @@
+import logging
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from app.auth.auth import get_jwt_payload
+
+logger = logging.getLogger(__name__)
 
 
 class TokenExtractionMiddleware(BaseHTTPMiddleware):
@@ -18,7 +21,7 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
                 payload = get_jwt_payload(request)
                 request.state.user_id = payload.get('sub')
             except Exception:
-                # Ignore any token validation errors
+                logger.error('Failed to extract user_id from token')
                 request.state.user_id = None
         else:
             request.state.user_id = None

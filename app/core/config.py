@@ -54,6 +54,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     DATASERVICE_URL: AnyUrl
     SENTRY_DSN: str
+    LOG_LEVEL: str = 'ERROR'
 
     @computed_field
     @property

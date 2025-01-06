@@ -2,6 +2,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import sentry_sdk
+from app.core.logger import logging
 from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
 
@@ -13,6 +14,9 @@ from app.middleware.consume_tokens import PersistConsumedTokensMiddleware
 from app.middleware.custom_error_format import custom_error_format_middleware
 from app.middleware.token_extraction import TokenExtractionMiddleware
 from app.router import router as base_router
+
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager

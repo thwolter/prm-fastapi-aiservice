@@ -1,4 +1,5 @@
 import json
+import logging
 
 from fastapi import Request
 from starlette.concurrency import iterate_in_threadpool
@@ -7,6 +8,7 @@ from starlette.responses import Response
 
 from app.auth.quota_service import consume_tokens
 
+logger = logging.getLogger(__name__)
 
 class PersistConsumedTokensMiddleware(BaseHTTPMiddleware):
     """
@@ -37,14 +39,11 @@ class PersistConsumedTokensMiddleware(BaseHTTPMiddleware):
         Process the token-related information from the response body.
         """
         token = request.state.token
+        user_id = request.state.user_id
         if not token:
             return
 
-        print(f'Processing token info: {response_body}')
-
         response_data = json.loads(response_body)
         tokens_info = response_data.get('tokens', {})
-        total_tokens = tokens_info.get('token', 0)
 
-        if total_tokens != 0:
-            await consume_tokens(token=token, tokens_info=tokens_info)
+        await consume_tokens(token=token, user_id=user_id, tokens_info=tokens_info)
