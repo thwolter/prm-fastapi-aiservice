@@ -15,6 +15,9 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> Response:
         token = request.cookies.get('auth')
+        logger.debug(f'Extracted token: {token}')
+        logger.debug(f'Extracted cookies: {request.cookies}')
+
         request.state.token = token  # Attach token to request state
         request.state.user_id = None
         if token:
