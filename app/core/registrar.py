@@ -71,11 +71,9 @@ class RouteRegistrar:
         handler = BaseServiceHandler(service_factory, request_model, response_model)
 
         async def route_function(request: Request, request_model: request_model) -> response_model:
-            if not getattr(request.state, "user_id"):
-                logger.error('Unauthorized request')
-                raise HTTPException(status_code=401, detail='Unauthorized')
+            user_id = getattr(request.state, "user_id")
+            logger.info(f'Processing request {path} for user {user_id}')
 
-            logger.info(f'Processing request at {path}')
             return await handler.handle(request_model)
 
         self.router.post(path, response_model=response_model, tags=tags)(route_function)
