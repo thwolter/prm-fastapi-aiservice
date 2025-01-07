@@ -1,8 +1,10 @@
+import json
 import logging
 
 from app.core.config import settings
 from app.core.redis import initialize_redis
 
+logger = logging.getLogger(__name__)
 
 def redis_cache(timeout: int = settings.CACHE_TIMEOUT, redis_client=None):
     """
@@ -21,12 +23,12 @@ def redis_cache(timeout: int = settings.CACHE_TIMEOUT, redis_client=None):
             cache_key = self.generate_cache_key(query, *args, **kwargs)
             cached_result = redis_client.get(cache_key)
             if cached_result:
-                logging.info(f'Cache hit for key: {cache_key}')
-                return self.ResultModel.parse_raw(cached_result)
+                logger.debug(f'Cache hit for key: {cache_key}')
+                return json.loads(cached_result)
 
             result = await func(self, query, *args, **kwargs)
             redis_client.set(cache_key, result.json(), ex=timeout)
-            logging.info(f'Cache miss, key stored: {cache_key}')
+            logger.debug(f'Cache miss, key stored: {cache_key}')
             return result
 
         return wrapper

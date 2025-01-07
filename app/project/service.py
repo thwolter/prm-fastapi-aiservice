@@ -1,7 +1,7 @@
-from app.core.ai_service import AIService
+from app.core.ai_service import AIService, BaseLLMService
 from app.project.schemas import (BaseProjectRequest,
                                  CheckProjectContextResponse,
-                                 ProjectSummaryResponse)
+                                 ProjectSummaryResponse, Project)
 
 
 class CheckProjectContextService(AIService):
