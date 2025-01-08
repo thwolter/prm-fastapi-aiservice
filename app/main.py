@@ -13,7 +13,6 @@ from app.keywords.router import router as keywords_router
 from app.middleware.custom_error_format import custom_error_format_middleware
 from app.middleware.token_extraction import TokenExtractionMiddleware
 from app.router import router as base_router
-from app.project.router import router as project_router
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +64,6 @@ app.include_router(base_router)
 app.include_router(keywords_router)
 app.include_router(core_router)
 app.include_router(auth_router)
-app.include_router(project_router)
 
 
 @app.get('/health-check', tags=['Health Check'])

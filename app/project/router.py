@@ -11,7 +11,7 @@ router = APIRouter(
     responses={404: {'description': 'Not found'}},
 )
 
-@router.get('/summarize/', response_model=ProjectSummaryResponse)
+@router.get('/summarize/', response_model=ProjectSummaryResponse, deprecated=True)
 async def project_summary(
         service: ProjectService = Depends(get_project_service),
         current_user = Depends(get_current_user)

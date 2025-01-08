@@ -33,7 +33,7 @@ class AuthService:
         Update the user's token consumption via the data-service.
         """
         payload: dict = ConsumedTokensInfo(**result.tokens_info).model_dump()
-        result.tokens_info = None
+        # result.tokens_info = None
 
         logger.info(f'Consuming {payload["consumed_tokens"]} tokens for {self.user_id}')
         async with httpx.AsyncClient() as client:
