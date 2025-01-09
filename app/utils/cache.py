@@ -24,7 +24,7 @@ def redis_cache(timeout: int = settings.CACHE_TIMEOUT, redis_client=None):
             cached_result = redis_client.get(cache_key)
             if cached_result:
                 logger.debug(f'Cache hit for key: {cache_key}')
-                return json.loads(cached_result)
+                return self.ResultModel.parse_raw(cached_result)
 
             result = await func(self, query, *args, **kwargs)
             redis_client.set(cache_key, result.json(), ex=timeout)

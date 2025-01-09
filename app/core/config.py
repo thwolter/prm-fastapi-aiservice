@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = 'ERROR'
 
     SECRET_KEY: str
-    AUTH_TOKEN_LEEWAY: int = -30  # in seconds
+    AUTH_TOKEN_LEEWAY: int = 0  # in seconds
     AUTH_TOKEN_ALGORITHM: str = 'HS256'
     AUTH_TOKEN_AUDIENCE: str = 'fastapi-users:auth'
 

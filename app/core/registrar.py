@@ -68,19 +68,19 @@ class RouteRegistrar:
     ):
         handler = BaseServiceHandler(service_factory, request_model, response_model)
 
-        # We have to inject the current_user dependency to check if an auth_token is available
         async def route_function(
             request: Request,
             request_model: request_model,
-            current_user: get_current_user = Depends(get_current_user),
+            user_info: get_current_user = Depends(get_current_user),
         ) -> response_model:
+            user_id = user_info['user_id']
             service = AuthService(request)
-            valid = await service.check_token_quota()
+            valid = await service.check_token_quota(user_id)
             if not valid:
                 raise HTTPException(status_code=403, detail='Token quota exceeded')
 
             result = await handler.handle(request_model)
-            await service.consume_tokens(result)
+            await service.consume_tokens(result, user_id)
             return result
 
         self.router.post(path, response_model=response_model, tags=tags)(route_function)
