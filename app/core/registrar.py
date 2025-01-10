@@ -77,7 +77,7 @@ class RouteRegistrar:
             service = AuthService(request)
             valid = await service.check_token_quota(user_id)
             if not valid:
-                raise HTTPException(status_code=403, detail='Token quota exceeded')
+                raise HTTPException(status_code=402, detail='Token quota exceeded')
 
             result = await handler.handle(request_model)
             await service.consume_tokens(result, user_id)
