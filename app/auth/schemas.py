@@ -10,7 +10,9 @@ class LoginRequest(BaseModel):
 
 
 class ConsumedTokensInfo(BaseModel):
-    consumed_tokens: int
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
     total_cost: float
     prompt_name: str
     model_name: str

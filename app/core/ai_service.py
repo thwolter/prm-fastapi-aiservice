@@ -61,7 +61,9 @@ class BaseAIService(ABC):
         with get_openai_callback() as cb:
             result = chain.invoke(query.model_dump())
             result.tokens_info = {
-                'consumed_tokens': cb.total_tokens,
+                'prompt_tokens': cb.prompt_tokens,
+                'completion_tokens': cb.completion_tokens,
+                'total_tokens': cb.total_tokens,
                 'total_cost': cb.total_cost,
                 'prompt_name': self.prompt_name,
                 'model_name': self.model_name,

@@ -63,6 +63,8 @@ class Settings(BaseSettings):
     AUTH_TOKEN_ALGORITHM: str = 'HS256'
     AUTH_TOKEN_AUDIENCE: str = 'fastapi-users:auth'
 
+    OPENMETER_API_KEY: str
+
     @classmethod
     def from_env(cls):
         return cls()

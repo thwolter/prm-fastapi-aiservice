@@ -1,4 +1,5 @@
 import logging
+import uuid
 from uuid import UUID
 
 import httpx
@@ -7,10 +8,17 @@ from fastapi import HTTPException, Request
 from app.auth.schemas import ConsumedTokensInfo
 from app.core.config import settings
 
+from openmeter import Client
+from cloudevents.http import CloudEvent
+from cloudevents.conversion import to_dict
+
 logger = logging.getLogger(__name__)
 
 QUOTA_ENDPOINT = f'{settings.DATASERVICE_URL}/token/quota/'
 CONSUME_ENDPOINT = f'{settings.DATASERVICE_URL}/token/consume/'
+
+
+
 
 
 class AuthService:
@@ -18,6 +26,14 @@ class AuthService:
         self.request = request
         self.auth_token = self.request.state.token
         self.user_id = self.request.state.user_id
+
+        self.client = Client(
+            endpoint="https://openmeter.cloud",
+            headers={
+                "Accept": "application/json",
+                "Authorization": f"Bearer {settings.OPENMETER_API_KEY}",
+            },
+        )
 
     async def check_token_quota(self, user_id: UUID) -> bool:
         """
@@ -33,19 +49,21 @@ class AuthService:
         """
         Update the user's token consumption via the data-service.
         """
-        payload: dict = ConsumedTokensInfo(**result.tokens_info).model_dump()
-        payload['user_id'] = user_id
+        payload = ConsumedTokensInfo(**result.tokens_info)
 
-        consumed_tokens = payload["consumed_tokens"]
-        logger.info(f'Consuming {consumed_tokens} tokens for {self.user_id}')
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                CONSUME_ENDPOINT,
-                json=payload,
-                headers={'Cookie': f'auth={self.auth_token}'},
-            )
+        event = CloudEvent(
+            attributes={
+                "id": str(uuid.uuid4()),
+                "type": "tokens",
+                "source": "prm-ai-service",
+                "subject": str(user_id),
+            },
+            data={
+                'tokens': payload.total_tokens,
+                'model': payload.model_name,
+                'prompt': payload.prompt_name,
+            },
+        )
 
-            if response.status_code != 201:
-                logger.error(f'Failed to consume tokens for {self.user_id}')
-            else:
-                logger.info(f'{consumed_tokens} Tokens consumed for {self.user_id}')
+        self.client.ingest_events(to_dict(event))
+
