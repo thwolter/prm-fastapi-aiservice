@@ -2,7 +2,6 @@ import logging
 import uuid
 from uuid import UUID
 
-import httpx
 from fastapi import HTTPException, Request
 
 from app.auth.schemas import ConsumedTokensInfo
@@ -12,16 +11,12 @@ from openmeter import Client
 from cloudevents.http import CloudEvent
 from cloudevents.conversion import to_dict
 
+from azure.core.exceptions import ResourceNotFoundError
+
 logger = logging.getLogger(__name__)
 
-QUOTA_ENDPOINT = f'{settings.DATASERVICE_URL}/token/quota/'
-CONSUME_ENDPOINT = f'{settings.DATASERVICE_URL}/token/consume/'
 
-
-
-
-
-class AuthService:
+class TokenService:
     def __init__(self, request: Request):
         self.request = request
         self.auth_token = self.request.state.token
@@ -35,21 +30,27 @@ class AuthService:
             },
         )
 
-    async def check_token_quota(self, user_id: UUID) -> bool:
+    async def has_access(self) -> bool:
         """
         Check the user's token quota via the data-service.
         """
-        async with httpx.AsyncClient() as client:
-            response = await client.get(QUOTA_ENDPOINT, headers={'Cookie': f'auth={self.auth_token}'})
-            if response.status_code != 200:
-                raise HTTPException(status_code=response.status_code, detail=response.text)
-            return response.json()['sufficient']
+        try:
+            response = self.client.get_entitlement_value(str(self.user_id), 'ai_tokens')
+        except ResourceNotFoundError as e:
+            logger.error(f"User {self.user_id}: {e}")
+            raise HTTPException(status_code=404, detail='User not found')
+        return response['hasAccess']
 
     async def consume_tokens(self, result, user_id: UUID) -> None:
         """
         Update the user's token consumption via the data-service.
         """
-        payload = ConsumedTokensInfo(**result.tokens_info)
+        try:
+            payload = ConsumedTokensInfo(**result.tokens_info)
+            del result.tokens_info
+        except ValueError as e:
+            logger.error(f"Invalid tokens info: {e}")
+            raise HTTPException(status_code=400, detail='Invalid tokens info')
 
         event = CloudEvent(
             attributes={

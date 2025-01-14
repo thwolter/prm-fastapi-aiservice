@@ -2,7 +2,7 @@ import logging
 from typing import Callable, Generic, Type, TypeVar
 
 from app.auth.dependencies import get_current_user
-from app.auth.service import AuthService
+from app.auth.service import TokenService
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ValidationError
 
@@ -74,9 +74,9 @@ class RouteRegistrar:
             user_info: get_current_user = Depends(get_current_user),
         ) -> response_model:
             user_id = user_info['user_id']
-            service = AuthService(request)
-            valid = await service.check_token_quota(user_id)
-            if not valid:
+            service = TokenService(request)
+            has_access = await service.has_access()
+            if not has_access:
                 raise HTTPException(status_code=402, detail='Token quota exceeded')
 
             result = await handler.handle(request_model)

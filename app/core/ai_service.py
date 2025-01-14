@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from app.core.config import settings
 from app.utils.cache import redis_cache
+from auth.service import TokenService
 
 
 class BaseAIService(ABC):
