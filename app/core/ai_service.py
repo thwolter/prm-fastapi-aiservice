@@ -11,7 +11,6 @@ from pydantic import BaseModel
 
 from app.core.config import settings
 from app.utils.cache import redis_cache
-from auth.service import TokenService
 
 
 class BaseAIService(ABC):
@@ -82,22 +81,17 @@ class AIService(BaseAIService):
         return self.prompt_name
 
 
-
 class BaseLLMService(ABC):
-
     def __init__(self) -> None:
         self.model_name = settings.OPENAI_MODEL_NAME
         self.temperature = settings.OPENAI_TEMPERATURE
 
         self.llm = ChatOpenAI(
-            model=self.model_name,
-            api_key=settings.OPENAI_API_KEY,
-            temperature=self.temperature
+            model=self.model_name, api_key=settings.OPENAI_API_KEY, temperature=self.temperature
         )
 
     def model_hash(self):
         raise NotImplementedError
-
 
     def generate_cache_key(self, prompt_name, *args, **kwargs) -> str:
         """Generate a consistent cache key based on query content and service parameters."""

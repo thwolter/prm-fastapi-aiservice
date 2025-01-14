@@ -2,16 +2,14 @@ import logging
 import uuid
 from uuid import UUID
 
+from azure.core.exceptions import ResourceNotFoundError
+from cloudevents.conversion import to_dict
+from cloudevents.http import CloudEvent
 from fastapi import HTTPException, Request
+from openmeter import Client
 
 from app.auth.schemas import ConsumedTokensInfo
 from app.core.config import settings
-
-from openmeter import Client
-from cloudevents.http import CloudEvent
-from cloudevents.conversion import to_dict
-
-from azure.core.exceptions import ResourceNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +21,10 @@ class TokenService:
         self.user_id = self.request.state.user_id
 
         self.client = Client(
-            endpoint="https://openmeter.cloud",
+            endpoint='https://openmeter.cloud',
             headers={
-                "Accept": "application/json",
-                "Authorization": f"Bearer {settings.OPENMETER_API_KEY}",
+                'Accept': 'application/json',
+                'Authorization': f'Bearer {settings.OPENMETER_API_KEY}',
             },
         )
 
@@ -37,7 +35,7 @@ class TokenService:
         try:
             response = self.client.get_entitlement_value(str(self.user_id), 'ai_tokens')
         except ResourceNotFoundError as e:
-            logger.error(f"User {self.user_id}: {e}")
+            logger.error(f'User {self.user_id}: {e}')
             raise HTTPException(status_code=404, detail='User not found')
         return response['hasAccess']
 
@@ -49,15 +47,15 @@ class TokenService:
             payload = ConsumedTokensInfo(**result.tokens_info)
             del result.tokens_info
         except ValueError as e:
-            logger.error(f"Invalid tokens info: {e}")
+            logger.error(f'Invalid tokens info: {e}')
             raise HTTPException(status_code=400, detail='Invalid tokens info')
 
         event = CloudEvent(
             attributes={
-                "id": str(uuid.uuid4()),
-                "type": "tokens",
-                "source": "prm-ai-service",
-                "subject": str(user_id),
+                'id': str(uuid.uuid4()),
+                'type': 'tokens',
+                'source': 'prm-ai-service',
+                'subject': str(user_id),
             },
             data={
                 'tokens': payload.total_tokens,
@@ -67,4 +65,3 @@ class TokenService:
         )
 
         self.client.ingest_events(to_dict(event))
-

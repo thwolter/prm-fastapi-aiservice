@@ -1,10 +1,11 @@
 import logging
 from typing import Callable, Generic, Type, TypeVar
 
-from app.auth.dependencies import get_current_user
-from app.auth.service import TokenService
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ValidationError
+
+from app.auth.dependencies import get_current_user
+from app.auth.service import TokenService
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
 TResponse = TypeVar('TResponse', bound=BaseModel)

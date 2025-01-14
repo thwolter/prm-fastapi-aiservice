@@ -5,7 +5,6 @@ import sentry_sdk
 from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
 
-from app.auth.router import router as auth_router
 from app.core.config import settings
 from app.core.health_checks import router as core_router
 from app.core.logger import logging
@@ -63,7 +62,6 @@ app.add_middleware(TokenExtractionMiddleware)
 app.include_router(base_router)
 app.include_router(keywords_router)
 app.include_router(core_router)
-app.include_router(auth_router)
 
 
 @app.get('/health-check', tags=['Health Check'])

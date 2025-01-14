@@ -54,7 +54,6 @@ class Settings(BaseSettings):
     REDIS_URL: str = 'redis://localhost:6379/0'
     CACHE_TIMEOUT: int = 60 * 60 * 24
 
-    DATASERVICE_URL: AnyUrl
     SENTRY_DSN: str
     LOG_LEVEL: str = 'ERROR'
 

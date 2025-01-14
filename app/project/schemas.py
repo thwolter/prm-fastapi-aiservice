@@ -1,25 +1,10 @@
 from datetime import datetime
-from typing import Optional
-from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 from app.utils.schema import BaseResponseModel
 
 today = datetime.now().strftime('%Y-%m-%d')
-
-
-class Project(BaseModel):
-    id: UUID
-    name: str
-    context: str
-    language: Optional[str] = None
-    budget: Optional[str] = None
-    currency: Optional[str] = None
-    timeline: Optional[str] = None
-    deadline: Optional[str] = None
-    summary: Optional[str] = None
-    image_url: Optional[str] = None
 
 
 class BaseProjectRequest(BaseModel):

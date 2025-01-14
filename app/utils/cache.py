@@ -1,10 +1,10 @@
-import json
 import logging
 
 from app.core.config import settings
 from app.core.redis import initialize_redis
 
 logger = logging.getLogger(__name__)
+
 
 def redis_cache(timeout: int = settings.CACHE_TIMEOUT, redis_client=None):
     """
