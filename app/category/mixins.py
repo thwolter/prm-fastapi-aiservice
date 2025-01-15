@@ -7,6 +7,8 @@ class CategoryParserMixin:
         if hasattr(self, 'categories'):
             return '\n'.join([f'{category.name}: {category.description}' for category in self.categories])
 
+    @computed_field
+    @property
     def parsed_category(self) -> str:
         if hasattr(self, 'category'):
             return f'{self.category.name}: {self.category.description}'
