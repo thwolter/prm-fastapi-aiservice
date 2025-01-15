@@ -1,15 +1,24 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from app.utils.schema import BaseResponseModel
 
 today = datetime.now().strftime('%Y-%m-%d')
 
 
-class BaseProjectRequest(BaseModel):
+class Project(BaseModel):
     name: str = Field(..., description='The name of the project.')
     context: str = Field(..., description='The project context to be checked.')
+
+
+class BaseProjectRequest(BaseModel):
+    project: Project = Field(..., description='The project to be assessed.')
+
+    @computed_field
+    @property
+    def parsed_project(self) -> str:
+        return f'{self.project.name}: {self.project.context}'
 
 
 class CheckProjectContextResponse(BaseResponseModel):

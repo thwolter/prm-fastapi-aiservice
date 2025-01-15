@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.category.schemas import (BaseProjectRequest,
-                                  CategoriesIdentificationResponse,
+                                  AddCategoriesRequest,
                                   IdentifiedCategory)
 from app.main import app
 
@@ -25,7 +25,7 @@ def test_category_identification(mock_execute_query):
         name='Removal of a wasp nest.',
         context='Removal of a wasp nest by a service company within the next week.',
     )
-    mock_execute_query.return_value = CategoriesIdentificationResponse(
+    mock_execute_query.return_value = AddCategoriesRequest(
         risks=[
             IdentifiedCategory(
                 name='Sample',

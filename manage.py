@@ -16,7 +16,7 @@ cmd = typer.Typer(no_args_is_help=True)
 @cmd.command(name='run')
 def run():
     """run application"""
-    uvicorn.run(app='app.main:app', reload=True, port=settings.APP_PORT, host=settings.APP_HOST)
+    uvicorn.run(app='app.main:app', reload=True, port=8010)
 
 
 @cmd.command(name='migrate')

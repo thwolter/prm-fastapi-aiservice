@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from app.project.schemas import BaseProjectRequest
 from app.utils.schema import BaseResponseModel
+from category.mixins import CategoryParserMixin
+
 
 ### no longer needed? ###
 
@@ -25,8 +27,9 @@ class CreateCategoriesRequest(BaseProjectRequest):
     pass
 
 
-class AddCategoriesRequest(BaseProjectRequest):
-    existing: list[Category] = Field(
+
+class AddCategoriesRequest(BaseProjectRequest, CategoryParserMixin):
+    categories: list[Category] = Field(
         ..., description='Existing categories which must be excluded from the identification.'
     )
     type: str = Field(..., description='The type of the identification.')
