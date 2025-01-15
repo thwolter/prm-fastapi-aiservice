@@ -4,7 +4,7 @@ from app.category.schemas import Category
 from app.project.schemas import BaseProjectRequest
 from app.utils.schema import BaseResponseModel
 from app.risk.mixins import RiskParserMixin, ScoreParserMixin
-from category.mixins import CategoryParserMixin
+from app.category.mixins import CategoryParserMixin
 
 
 class Risk(BaseModel):
