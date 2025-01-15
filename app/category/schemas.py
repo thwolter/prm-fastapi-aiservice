@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, computed_field
 
 from app.project.schemas import BaseProjectRequest
 from app.utils.schema import BaseResponseModel
-from category.mixins import CategoryParserMixin
+from app.category.mixins import CategoryParserMixin
 
 
 ### no longer needed? ###
