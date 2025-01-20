@@ -17,6 +17,10 @@ class Score(BaseModel):
     description: str = Field(..., description='The description of the likelihood.')
 
 
+class Source(BaseModel):
+    title: str = Field(..., description='The citation of the source based on Harvard citation style.')
+    url: str = Field(..., description='The URL of the source.')
+
 class RiskDefinitionCheckRequest(BaseModel):
     text: str = Field(..., description='The text to be assessed.')
 
@@ -45,7 +49,7 @@ class RiskDriversRequest(BaseProjectRequest, RiskParserMixin):
 class RiskDriversResponse(BaseResponseModel):
     drivers: list[str] = Field(..., description='The drivers of the risk.')
     explanation: str = Field(..., description='Explanation of the drivers classification.')
-    sources: list[str] = Field(..., description='The sources of the drivers classification.')
+    sources: list[Source] = Field(..., description='The sources of the drivers classification.')
 
 
 class RiskLikelihoodRequest(BaseProjectRequest, RiskParserMixin, ScoreParserMixin):
@@ -56,7 +60,7 @@ class RiskLikelihoodRequest(BaseProjectRequest, RiskParserMixin, ScoreParserMixi
 class RiskLikelihoodResponse(BaseResponseModel):
     likelihood: int = Field(..., description='The likelihood score of the risk.')
     explanation: str = Field(..., description='Explanation of the likelihood classification.')
-    sources: list[str] = Field(..., description='The sources of the likelihood classification.')
+    sources: list[Source] = Field(..., description='The sources of the likelihood classification.')
 
 
 class RiskImpactRequest(BaseProjectRequest, RiskParserMixin, ScoreParserMixin):
@@ -66,9 +70,9 @@ class RiskImpactRequest(BaseProjectRequest, RiskParserMixin, ScoreParserMixin):
 
 class RiskImpactResponse(BaseResponseModel):
     impacts: list[str] = Field(..., description='The impacts of the risk.')
-    level: str = Field(..., description='The level of the impact: low, medium, high.')
+    level: int = Field(..., description='The impact score of the risk.')
     explanation: str = Field(..., description='Explanation of the impact classification.')
-    sources: list[str] = Field(..., description='The sources of the impact classification.')
+    sources: list[Source] = Field(..., description='The sources of the impact classification.')
 
 
 class RiskMitigationRequest(BaseProjectRequest, RiskParserMixin):
@@ -79,4 +83,4 @@ class RiskMitigationRequest(BaseProjectRequest, RiskParserMixin):
 class RiskMitigationResponse(BaseResponseModel):
     mitigation: str = Field(..., description='The mitigation of the risk.')
     explanation: str = Field(..., description='Explanation of the mitigation classification.')
-    sources: list[str] = Field(..., description='The sources of the mitigation classification.')
+    sources: list[Source] = Field(..., description='The sources of the mitigation classification.')

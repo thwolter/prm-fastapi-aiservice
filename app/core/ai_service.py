@@ -46,6 +46,9 @@ class BaseAIService(ABC):
         template = hub.pull(self.get_prompt_name(query)).template
         format_instructions = self.parser.get_format_instructions()
         format_instructions = format_instructions.replace('{', '{{').replace('}', '}}')
+        if hasattr(query, 'language_instructions'):
+            language_instructions = query.language_instructions
+            template += '\n\n' + language_instructions
         template += '\nPlease output the result as a JSON object that conforms to the schema above and do not include any additional text.'
 
         return ChatPromptTemplate.from_template(

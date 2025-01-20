@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field
 
@@ -10,6 +11,7 @@ today = datetime.now().strftime('%Y-%m-%d')
 class Project(BaseModel):
     name: str = Field(..., description='The name of the project.')
     context: str = Field(..., description='The project context to be checked.')
+    language: Optional[str] = Field(None, description='The language of the project context.')
 
 
 class BaseProjectRequest(BaseModel):
@@ -18,7 +20,14 @@ class BaseProjectRequest(BaseModel):
     @computed_field
     @property
     def parsed_project(self) -> str:
-        return f'{self.project.name}: {self.project.context}'
+        return f'Project title:\n{self.project.name}\n\nProject context:\n{self.project.context}'
+
+    @computed_field
+    @property
+    def language_instructions(self) -> str:
+        if self.project.language:
+            return f'Provide your answer in {self.project.language}.'
+        return ''
 
 
 class CheckProjectContextResponse(BaseResponseModel):
