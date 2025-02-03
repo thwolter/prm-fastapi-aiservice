@@ -63,6 +63,8 @@ class Settings(BaseSettings):
     AUTH_TOKEN_AUDIENCE: str = 'fastapi-users:auth'
 
     OPENMETER_API_KEY: str
+    OPENMETER_API_URL: str = 'https://openmeter.cloud'
+    OPENMETER_SOURCE: str = 'prm-ai-service'
 
     @classmethod
     def from_env(cls):

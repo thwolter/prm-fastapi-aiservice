@@ -2,7 +2,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import sentry_sdk
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from starlette.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
@@ -64,6 +64,6 @@ app.include_router(keywords_router)
 app.include_router(core_router)
 
 
-@app.get('/health-check', tags=['Health Check'])
+@app.get('/api/_health', tags=['Health Check'], status_code=status.HTTP_204_NO_CONTENT)
 async def root():
-    return {'status': 'ok'}
+    return

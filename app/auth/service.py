@@ -21,7 +21,7 @@ class TokenService:
         self.user_id = self.request.state.user_id
 
         self.client = Client(
-            endpoint='https://openmeter.cloud',
+            endpoint=settings.OPENMETER_API_URL,
             headers={
                 'Accept': 'application/json',
                 'Authorization': f'Bearer {settings.OPENMETER_API_KEY}',
@@ -54,7 +54,7 @@ class TokenService:
             attributes={
                 'id': str(uuid.uuid4()),
                 'type': 'tokens',
-                'source': 'prm-ai-service',
+                'source': settings.OPENMETER_SOURCE,
                 'subject': str(user_id),
             },
             data={
