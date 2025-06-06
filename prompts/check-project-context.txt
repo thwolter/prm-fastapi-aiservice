@@ -1,0 +1,1 @@
+# Prompt: check-project-context\n{format_instructions}
