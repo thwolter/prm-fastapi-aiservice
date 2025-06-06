@@ -3,6 +3,7 @@ import json
 from abc import ABC
 
 from langchain import hub
+from pathlib import Path
 from langchain_community.callbacks import get_openai_callback
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -41,7 +42,13 @@ class BaseAIService(ABC):
         return f'{self.__class__.__name__}:{hashlib.md5(key_str.encode()).hexdigest()}'
 
     def create_prompt(self, query: QueryModel) -> ChatPromptTemplate:
-        template = hub.pull(self.get_prompt_name(query)).template
+        prompt_name = self.get_prompt_name(query)
+        if settings.PROMPT_SOURCE == 'file':
+            prompt_path = Path(settings.PROMPT_DIR) / f'{prompt_name}.txt'
+            template = prompt_path.read_text()
+        else:
+            template = hub.pull(prompt_name).template
+
         format_instructions = self.parser.get_format_instructions()
         format_instructions = format_instructions.replace('{', '{{').replace('}', '}}')
         template += '\nPlease output the result as a JSON object that conforms to the schema above and do not include any additional text.'
