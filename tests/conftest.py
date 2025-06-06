@@ -2,7 +2,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import settings
-from app.main import app
 
 
 def pytest_addoption(parser):
@@ -38,5 +37,6 @@ def override_settings():
 
 @pytest.fixture
 def test_client():
+    from app.main import app
     with TestClient(app) as client:
         yield client
