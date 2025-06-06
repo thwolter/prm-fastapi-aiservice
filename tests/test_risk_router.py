@@ -149,7 +149,7 @@ def test_live_risk_identification_valid_input():
         examples=['Fully booked restaurants.', 'Limited seating capacity.'],
     )
     request_data = RiskIdentificationRequest(
-        name='Going our for dinner.',
+        name='Going out for dinner.',
         context='Going out for dinner with friends at a local restaurant.',
         category=category.model_dump(),
     )
@@ -171,7 +171,7 @@ def test_live_risk_identification_valid_input_existing_risks():
         description='Friends or diners canceling their reservations unexpectedly, leading to less availability for the group.',
     )
     request_data = RiskIdentificationRequest(
-        name='Going our for dinner.',
+        name='Going out for dinner.',
         context='Going out for dinner with friends at a local restaurant.',
         category=category.model_dump(),
         existing=[risk1.model_dump()],
@@ -185,7 +185,7 @@ def test_live_risk_identification_valid_input_existing_risks():
 @pytest.mark.webtest
 def test_live_risk_drivers(project_request_data):
     request_data = RiskDriversRequest(
-        name='Going our for dinner.',
+        name='Going out for dinner.',
         context='Going out for dinner with friends at a local restaurant.',
         risk=Risk(
             title='Last-Minute Cancellations',
