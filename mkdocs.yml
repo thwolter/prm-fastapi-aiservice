@@ -1,0 +1,5 @@
+site_name: AI Service Docs
+nav:
+  - Home: index.md
+  - Authentication: authentication.md
+docs_dir: docs
