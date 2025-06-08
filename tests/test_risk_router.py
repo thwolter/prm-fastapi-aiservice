@@ -3,15 +3,21 @@ from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-from risk.schemas import (RiskDriversResponse, RiskImpactResponse,
-                          RiskLikelihoodResponse, RiskMitigationResponse)
+from riskgpt.models.schemas import (
+    Risk,
+    RiskDefinitionCheckResponse,
+    RiskDriversRequest,
+    RiskDriversResponse,
+    RiskIdentificationRequest,
+    RiskIdentificationResponse,
+    RiskImpactResponse,
+    RiskLikelihoodResponse,
+    RiskMitigationResponse,
+)
 
 from app.category.schemas import Category
 from app.main import app
 from app.project.schemas import BaseProjectRequest
-from app.risk.schemas import (Risk, RiskDefinitionCheckResponse,
-                              RiskDriversRequest, RiskIdentificationRequest,
-                              RiskIdentificationResponse)
 
 client = TestClient(app)
 
