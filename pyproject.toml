@@ -29,6 +29,7 @@ riskgpt = ">=0.1.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
+pytest-dotenv = "^0.5.2"
 isort = "^5.13.2"
 ruff = "^0.6.9"
 
@@ -49,3 +50,4 @@ markers = [
     "webtest: marks tests that access external APIs (select with '-m webtest')",
     "tryfirst: marks tests that should be run first",
 ]
+dotenv_file = ".env.test"
