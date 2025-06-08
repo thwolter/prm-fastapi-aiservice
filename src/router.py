@@ -13,7 +13,7 @@ services = []
 for _, module_name, _ in pkgutil.walk_packages(
     path=importlib.import_module('src').__path__, prefix='src.'
 ):
-    if not module_name.endswith('.service'):
+    if not module_name.split('.')[-1].endswith('service'):
         continue
     module = importlib.import_module(module_name)
     services.extend(
