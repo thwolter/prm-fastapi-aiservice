@@ -1,20 +1,21 @@
+import importlib
 import pytest
-
-from src.core.config import settings
 
 
 @pytest.fixture(scope='session', autouse=True)
 def load_env():
-    settings.from_env()
-    assert settings.OPENAI_API_KEY, 'OPENAI_API_KEY is not set'
-    assert settings.LANGCHAIN_API_KEY, 'LANGCHAIN_API_KEY is not set'
+    from src.core import config
+    importlib.reload(config)
+    assert config.settings.OPENAI_API_KEY, 'OPENAI_API_KEY is not set'
+    assert config.settings.LANGCHAIN_API_KEY, 'LANGCHAIN_API_KEY is not set'
 
 
 @pytest.fixture(autouse=True)
 def override_settings(request):
     """Override settings for testing."""
+    from src.core import config
     redis_url = getattr(request, 'param', 'redis://localhost:6379')
-    original_redis_url = settings.REDIS_URL
-    settings.REDIS_URL = redis_url
+    original_redis_url = config.settings.REDIS_URL
+    config.settings.REDIS_URL = redis_url
     yield
-    settings.REDIS_URL = original_redis_url
+    config.settings.REDIS_URL = original_redis_url

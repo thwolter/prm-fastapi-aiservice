@@ -9,7 +9,8 @@
 
 ## Development
 
-Run the tests excluding webtests:
+Run the tests excluding webtests. Environment variables are loaded from
+`.env.test` using `pytest-dotenv`:
 
 ```bash
 pytest -m "not webtest"
