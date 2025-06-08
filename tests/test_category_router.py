@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient  # noqa: F401
 
-from src.category.riskgpt_service import (
+from src.services.riskgpt_service import (
     CategoryRequest,
     CategoryResponse,
     RiskGPTCategoryService,
@@ -11,7 +11,7 @@ from src.category.riskgpt_service import (
 from src.main import app
 
 
-@patch('src.category.riskgpt_service.RiskGPTCategoryService.execute_query')
+@patch('src.services.riskgpt_service.RiskGPTCategoryService.execute_query')
 def test_category_identification(mock_execute_query, test_client):
     data = CategoryRequest(
         project_id='1',

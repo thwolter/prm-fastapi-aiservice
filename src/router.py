@@ -1,26 +1,11 @@
-import inspect
-import importlib
-import pkgutil
+from src.services import discover_services
 
 from fastapi import APIRouter
 
 from src.core.registrar import RouteRegistrar
 
-# Discover all ``service`` modules within the ``src`` package so that
-# newly added wrappers are registered automatically without having to
-# modify this file.
-services = []
-for _, module_name, _ in pkgutil.walk_packages(
-    path=importlib.import_module('src').__path__, prefix='src.'
-):
-    if not module_name.split('.')[-1].endswith('service'):
-        continue
-    module = importlib.import_module(module_name)
-    services.extend(
-        member
-        for _, member in inspect.getmembers(module, inspect.isclass)
-        if getattr(member, 'route_path', None)
-    )
+# Automatically discover service classes from the ``services`` package.
+services = discover_services()
 
 router = APIRouter(
     prefix='/api',
