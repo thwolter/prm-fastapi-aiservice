@@ -6,6 +6,18 @@ from pydantic import AnyUrl, BeforeValidator, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class RiskGPTSettings(BaseSettings):
+    """Settings for RiskGPT related configuration."""
+
+    model_config = SettingsConfigDict(
+        env_file='.env', env_prefix='RISKGPT_', env_ignore_empty=True, extra='ignore'
+    )
+
+    OPENAI_API_KEY: str | None = None
+    MODEL_NAME: str | None = None
+    TEMPERATURE: float | None = None
+
+
 def find_dotenv():
     current_dir = Path(__file__).resolve().parent
     while current_dir != current_dir.root:
@@ -72,3 +84,16 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def build_riskgpt_settings(base: Settings) -> RiskGPTSettings:
+    """Create ``RiskGPTSettings`` using ``base`` values as fallbacks."""
+    env_cfg = RiskGPTSettings()
+    return RiskGPTSettings(
+        OPENAI_API_KEY=env_cfg.OPENAI_API_KEY or base.OPENAI_API_KEY,
+        MODEL_NAME=env_cfg.MODEL_NAME or base.OPENAI_MODEL_NAME,
+        TEMPERATURE=env_cfg.TEMPERATURE or base.OPENAI_TEMPERATURE,
+    )
+
+
+riskgpt_settings = build_riskgpt_settings(settings)
