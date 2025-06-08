@@ -1,55 +1,63 @@
-from src.core.ai_service import AIService
-from riskgpt.models.schemas import (
-    AssessmentRequest,
-    AssessmentResponse,
-    DefinitionCheckRequest,
-    DefinitionCheckResponse,
-    DriverRequest,
-    DriverResponse,
-    MitigationRequest,
-    MitigationResponse,
-    RiskRequest,
-    RiskResponse,
-)
+"""Services using the riskgpt library."""
+from __future__ import annotations
+
+from typing import Type
+
+from pydantic import BaseModel
+
+from riskgpt import chains
+from riskgpt.models import schemas as rg_schemas
 
 
-class RiskDefinitionService(AIService):
-    prompt_name = 'risk-definition-check'
+class RiskGPTService:
+    """Base service calling RiskGPT chains."""
+
+    chain_fn: callable
+    route_path: str
+    QueryModel: Type[BaseModel]
+    ResultModel: Type[BaseModel]
+
+    async def execute_query(self, query: BaseModel):
+        return await self.chain_fn(query)
+
+
+class RiskDefinitionCheckService(RiskGPTService):
+    chain_fn = chains.async_check_definition_chain
     route_path = '/risk/check/definition/'
-    QueryModel = DefinitionCheckRequest
-    ResultModel = DefinitionCheckResponse
+    QueryModel = rg_schemas.DefinitionCheckRequest
+    ResultModel = rg_schemas.DefinitionCheckResponse
 
 
-class RiskIdentificationService(AIService):
-    prompt_name = 'identify-risk-for-category'
+class RiskIdentificationService(RiskGPTService):
+    chain_fn = chains.async_get_risks_chain
     route_path = '/risk/identify/'
-    QueryModel = RiskRequest
-    ResultModel = RiskResponse
+    QueryModel = rg_schemas.RiskRequest
+    ResultModel = rg_schemas.RiskResponse
 
 
-class RiskDriverService(AIService):
-    prompt_name = 'risk-drivers'
+class RiskDriverService(RiskGPTService):
+    chain_fn = chains.async_get_drivers_chain
     route_path = '/risk/drivers/'
-    QueryModel = DriverRequest
-    ResultModel = DriverResponse
+    QueryModel = rg_schemas.DriverRequest
+    ResultModel = rg_schemas.DriverResponse
 
 
-class RiskLikelihoodService(AIService):
-    prompt_name = 'risk-likelihood'
+class RiskLikelihoodService(RiskGPTService):
+    chain_fn = chains.async_get_assessment_chain
     route_path = '/risk/likelihood/'
-    QueryModel = AssessmentRequest
-    ResultModel = AssessmentResponse
+    QueryModel = rg_schemas.AssessmentRequest
+    ResultModel = rg_schemas.AssessmentResponse
 
 
-class RiskImpactService(AIService):
-    prompt_name = 'risk-impact'
+class RiskAssessmentService(RiskGPTService):
+    chain_fn = chains.async_get_assessment_chain
     route_path = '/risk/impact/'
-    QueryModel = AssessmentRequest
-    ResultModel = AssessmentResponse
+    QueryModel = rg_schemas.AssessmentRequest
+    ResultModel = rg_schemas.AssessmentResponse
 
 
-class RiskMitigationService(AIService):
-    prompt_name = 'risk-mitigation'
+class RiskMitigationService(RiskGPTService):
+    chain_fn = chains.async_get_mitigations_chain
     route_path = '/risk/mitigation/'
-    QueryModel = MitigationRequest
-    ResultModel = MitigationResponse
+    QueryModel = rg_schemas.MitigationRequest
+    ResultModel = rg_schemas.MitigationResponse
