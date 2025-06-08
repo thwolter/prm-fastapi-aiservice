@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.core.config import settings
-from app.main import app
+from src.core.config import settings
+from src.main import app
 
 
 def pytest_addoption(parser):
@@ -43,15 +43,15 @@ def override_auth(monkeypatch):
     async def dummy_get_current_user(request):
         return {'token': 'test', 'user_id': '00000000-0000-0000-0000-000000000000'}
 
-    from app.auth.dependencies import get_current_user
-    app.dependency_overrides[get_current_user] = dummy_get_current_user
-    monkeypatch.setattr('app.auth.service.TokenService.has_access', lambda self: True)
+    from src.auth.dependencies import get_current_user
+    src.dependency_overrides[get_current_user] = dummy_get_current_user
+    monkeypatch.setattr('src.auth.service.TokenService.has_access', lambda self: True)
     monkeypatch.setattr(
-        'app.auth.service.TokenService.consume_tokens',
+        'src.auth.service.TokenService.consume_tokens',
         lambda self, result, user_id: None,
     )
     yield
-    app.dependency_overrides.clear()
+    src.dependency_overrides.clear()
 
 
 @pytest.fixture

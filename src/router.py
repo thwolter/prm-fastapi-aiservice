@@ -4,14 +4,14 @@ import pkgutil
 
 from fastapi import APIRouter
 
-from app.core.registrar import RouteRegistrar
+from src.core.registrar import RouteRegistrar
 
-# Discover all ``service`` modules within the ``app`` package so that
+# Discover all ``service`` modules within the ``src`` package so that
 # newly added wrappers are registered automatically without having to
 # modify this file.
 services = []
 for _, module_name, _ in pkgutil.walk_packages(
-    package=importlib.import_module('app').__path__, prefix='app.'
+    package=importlib.import_module('src').__path__, prefix='src.'
 ):
     if not module_name.endswith('.service'):
         continue

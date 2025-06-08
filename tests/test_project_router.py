@@ -4,8 +4,8 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
-from app.project.schemas import (
+from src.main import app
+from src.project.schemas import (
     BaseProjectRequest,
     CheckProjectContextResponse,
     ProjectSummaryResponse,
@@ -24,7 +24,7 @@ def project_request_data():
     ).model_dump()
 
 
-@patch('app.project.service.CheckProjectContextService.execute_query')
+@patch('src.project.service.CheckProjectContextService.execute_query')
 def test_check_project_context_valid_input(mock_execute_query, test_client):
     request_data = BaseProjectRequest(
         project=Project(
@@ -65,7 +65,7 @@ def test_live_check_project_context_valid_input(project_request_data):
         print(json.dumps(response.json(), indent=4))
 
 
-@patch('app.project.service.ProjectSummaryService.execute_query')
+@patch('src.project.service.ProjectSummaryService.execute_query')
 def test_summarize_project_valid_input(mock_execute_query, test_client, project_request_data):
     mock_execute_query.return_value = ProjectSummaryResponse(
         summary='This is a summary of Project Alpha.',

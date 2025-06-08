@@ -1,4 +1,4 @@
-from app.core.ai_service import AIService
+from src.core.ai_service import AIService
 from riskgpt.models.schemas import (
     RiskDefinitionCheckRequest,
     RiskDefinitionCheckResponse,

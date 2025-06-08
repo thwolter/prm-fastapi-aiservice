@@ -4,7 +4,7 @@ from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-from app.auth.auth import get_jwt_payload
+from src.auth.auth import get_jwt_payload
 
 logger = logging.getLogger(__name__)
 

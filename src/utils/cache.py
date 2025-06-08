@@ -1,7 +1,7 @@
 import logging
 
-from app.core.config import settings
-from app.core.redis import initialize_redis
+from src.core.config import settings
+from src.core.redis import initialize_redis
 
 logger = logging.getLogger(__name__)
 

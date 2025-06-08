@@ -1,6 +1,6 @@
-from app.category.schemas import (AddCategoriesRequest, CategoriesResponse,
+from src.category.schemas import (AddCategoriesRequest, CategoriesResponse,
                                   CreateCategoriesRequest)
-from app.core.ai_service import AIService
+from src.core.ai_service import AIService
 
 
 class CreateRiskCategoriesService(AIService):

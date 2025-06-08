@@ -8,8 +8,8 @@ from cloudevents.http import CloudEvent
 from fastapi import HTTPException, Request
 from openmeter import Client
 
-from app.auth.schemas import ConsumedTokensInfo
-from app.core.config import settings
+from src.auth.schemas import ConsumedTokensInfo
+from src.core.config import settings
 
 logger = logging.getLogger(__name__)
 

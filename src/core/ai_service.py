@@ -10,8 +10,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-from app.core.config import settings
-from app.utils.cache import redis_cache
+from src.core.config import settings
+from src.utils.cache import redis_cache
 
 logger = logging.getLogger(__name__)
 

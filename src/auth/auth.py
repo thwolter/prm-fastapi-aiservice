@@ -1,7 +1,7 @@
 import jwt
 from fastapi import HTTPException, Request
 
-from app.core.config import settings
+from src.core.config import settings
 
 
 def get_jwt_payload(request: Request):

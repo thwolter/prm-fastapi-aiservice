@@ -3,14 +3,14 @@ from unittest.mock import patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.category.schemas import (
+from src.category.schemas import (
     BaseProjectRequest,
     AddCategoriesRequest,
     IdentifiedCategory,
     CategoriesResponse,
 )
-from app.project.schemas import Project
-from app.main import app
+from src.project.schemas import Project
+from src.main import app
 
 
 @pytest.fixture(scope='function')
@@ -23,7 +23,7 @@ def project_request_data():
     ).model_dump()
 
 
-@patch('app.category.service.AddRiskCategoriesService.execute_query')
+@patch('src.category.service.AddRiskCategoriesService.execute_query')
 def test_category_identification(mock_execute_query, test_client):
     data = AddCategoriesRequest(
         project=Project(
