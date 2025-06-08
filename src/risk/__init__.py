@@ -1,32 +1,17 @@
 from .service import (
-    RiskDefinitionService,
+    RiskDefinitionCheckService,
     RiskIdentificationService,
     RiskDriverService,
     RiskLikelihoodService,
-    RiskImpactService,
+    RiskAssessmentService,
     RiskMitigationService,
 )
 
-from .riskgpt_service import (
-    RiskDefinitionCheckService as RiskGPTDefinitionCheckService,
-    RiskIdentificationService as RiskGPTRiskIdentificationService,
-    RiskDriverService as RiskGPTDriverService,
-    RiskLikelihoodService as RiskGPTLikelihoodService,
-    RiskImpactService as RiskGPTImpactService,
-    RiskMitigationService as RiskGPTMitigationService,
-)
-
 __all__ = [
-    'RiskDefinitionService',
+    'RiskDefinitionCheckService',
     'RiskIdentificationService',
     'RiskDriverService',
     'RiskLikelihoodService',
-    'RiskImpactService',
+    'RiskAssessmentService',
     'RiskMitigationService',
-    'RiskGPTDefinitionCheckService',
-    'RiskGPTRiskIdentificationService',
-    'RiskGPTDriverService',
-    'RiskGPTLikelihoodService',
-    'RiskGPTImpactService',
-    'RiskGPTMitigationService',
 ]

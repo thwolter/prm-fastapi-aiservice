@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-from src.risk.schemas import (
+from riskgpt.models.schemas import (
     RiskDriversResponse,
     RiskImpactResponse,
     RiskLikelihoodResponse,
@@ -14,9 +14,13 @@ from src.category.schemas import Category
 from src.main import app
 
 from src.project.schemas import BaseProjectRequest, Project
-from src.risk.schemas import (Risk, RiskDefinitionCheckResponse,
-                              RiskDriversRequest, RiskIdentificationRequest,
-                              RiskIdentificationResponse)
+from riskgpt.models.schemas import (
+    Risk,
+    RiskDefinitionCheckResponse,
+    RiskDriversRequest,
+    RiskIdentificationRequest,
+    RiskIdentificationResponse,
+)
 
 
 
@@ -31,7 +35,7 @@ def project_request_data():
     ).model_dump()
 
 
-@patch('src.risk.service.RiskDefinitionService.execute_query')
+@patch('src.risk.service.RiskDefinitionCheckService.execute_query')
 def test_risk_definition_check_valid_input(mock_execute_query, test_client):
     request_data = {'text': 'The project might face delays due to unforeseen circumstances.'}
     mock_execute_query.return_value = RiskDefinitionCheckResponse(
@@ -63,21 +67,21 @@ def test_Live_risk_definition_check_valid_input(test_client):
     assert isinstance(RiskDefinitionCheckResponse(**response_data), RiskDefinitionCheckResponse)
 
 
-@patch('src.services.services.RiskDefinitionService.execute_query')
+@patch('src.risk.service.RiskDefinitionCheckService.execute_query')
 def risk_definition_check_missing_text(mock_execute_query, test_client):
     request_data = {}
     response = test_client.post('/api/risk-definition/check/', json=request_data)
     assert response.status_code == 422
 
 
-@patch('src.services.services.RiskDefinitionService.execute_query')
+@patch('src.risk.service.RiskDefinitionCheckService.execute_query')
 def risk_definition_check_empty_text(mock_execute_query, test_client):
     request_data = {'text': ''}
     response = test_client.post('/api/risk-definition/check/', json=request_data)
     assert response.status_code == 422
 
 
-@patch('src.services.services.RiskDefinitionService.execute_query')
+@patch('src.risk.service.RiskDefinitionCheckService.execute_query')
 def risk_definition_check_invalid_text_type(mock_execute_query, test_client):
     request_data = {'text': 12345}
     response = test_client.post('/api/risk-definition/check/', json=request_data)
