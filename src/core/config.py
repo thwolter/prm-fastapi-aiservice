@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from pydantic import AnyUrl, BeforeValidator, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -17,18 +17,7 @@ class RiskGPTSettings(BaseSettings):
     MODEL_NAME: str | None = None
     TEMPERATURE: float | None = None
 
-
-def find_dotenv():
-    current_dir = Path(__file__).resolve().parent
-    while current_dir != current_dir.root:
-        dotenv_path = current_dir / '.env'
-        if dotenv_path.exists():
-            return str(dotenv_path)
-        current_dir = current_dir.parent
-    raise FileNotFoundError('.env file not found')
-
-
-DOTENV = find_dotenv()
+DOTENV = find_dotenv(usecwd=True)
 load_dotenv(DOTENV)
 
 

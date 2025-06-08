@@ -1,7 +1,7 @@
 import logging
 from typing import Callable, Generic, Type, TypeVar
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Body
 from pydantic import BaseModel, ValidationError
 
 from src.auth.dependencies import get_current_user
@@ -75,7 +75,7 @@ class RouteRegistrar:
 
         async def route_function(
             request: Request,
-            request_model: request_model,
+            request_model: request_model = Body(..., embed=False),
             user_info: get_current_user = Depends(get_current_user),
         ) -> response_model:
             user_id = user_info['user_id']

@@ -46,6 +46,7 @@ def test_check_project_context_valid_input(mock_execute_query, test_client):
         currency='EUR',
         timeline='Q1 2024',
         deadline='2024-03-31',
+        tokens_info={},
     )
     response = test_client.post('/api/project/check/context/', json=request_data)
     assert response.status_code == 200
