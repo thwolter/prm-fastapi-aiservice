@@ -8,11 +8,14 @@ from starlette.middleware.cors import CORSMiddleware
 from app.auth.router import router as auth_router
 from app.core.config import settings
 from app.core.health_checks import router as core_router
-from app.core.logger import logging
+import logging
+from app.core.logger import configure_logging
 from app.keywords.router import router as keywords_router
 from app.middleware.custom_error_format import custom_error_format_middleware
 from app.middleware.token_extraction import TokenExtractionMiddleware
 from app.router import router as base_router
+
+configure_logging()
 
 logger = logging.getLogger(__name__)
 
