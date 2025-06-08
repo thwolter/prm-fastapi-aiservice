@@ -1,32 +1,30 @@
+"""Generic service wrapper around RiskGPT chains."""
+
 import hashlib
 import json
 import logging
 from abc import ABC
 
 from langchain import hub
-from langchain_community.callbacks import get_openai_callback
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 from pydantic import BaseModel
 
-from src.core.config import settings
+from riskgpt.chains.base import BaseChain
+from src.core.config import riskgpt_settings
 from src.utils.cache import redis_cache
 
 logger = logging.getLogger(__name__)
 
 class BaseAIService(ABC):
-    model_name: str = settings.OPENAI_MODEL_NAME
-    temperature: float = settings.OPENAI_TEMPERATURE
+    model_name: str = riskgpt_settings.MODEL_NAME or ""
+    temperature: float = riskgpt_settings.TEMPERATURE or 0.0
 
     prompt_name: str
     QueryModel = BaseModel
     ResultModel = BaseModel
 
     def __init__(self) -> None:
-        self.model = ChatOpenAI(
-            model=self.model_name, api_key=settings.OPENAI_API_KEY, temperature=self.temperature
-        )
         self.parser = PydanticOutputParser(pydantic_object=self.ResultModel)
 
     def generate_cache_key(self, query: QueryModel, *args, **kwargs) -> str:
@@ -42,7 +40,7 @@ class BaseAIService(ABC):
         key_str = json.dumps(key_components, sort_keys=True)
         return f'{self.__class__.__name__}:{hashlib.md5(key_str.encode()).hexdigest()}'
 
-    def create_prompt(self, query: QueryModel) -> ChatPromptTemplate:
+    def create_chain(self, query: QueryModel) -> BaseChain:
         template = hub.pull(self.get_prompt_name(query)).template
         format_instructions = self.parser.get_format_instructions()
         format_instructions = format_instructions.replace('{', '{{').replace('}', '}}')
@@ -51,9 +49,16 @@ class BaseAIService(ABC):
             template += '\n\n' + language_instructions
         template += '\nPlease output the result as a JSON object that conforms to the schema above and do not include any additional text.'
 
-        return ChatPromptTemplate.from_template(
+        prompt = ChatPromptTemplate.from_template(
             template=template,
             partial_variables={'format_instructions': format_instructions},
+        )
+
+        return BaseChain(
+            prompt_template=prompt.template,
+            parser=self.parser,
+            settings=riskgpt_settings,
+            prompt_name=self.get_prompt_name(query),
         )
 
     def get_prompt_name(self, query: QueryModel) -> str:
@@ -61,17 +66,17 @@ class BaseAIService(ABC):
 
     @redis_cache()
     async def execute_query(self, query: QueryModel) -> ResultModel:
-        prompt = self.create_prompt(query)
-        chain = prompt | self.model | self.parser
-        with get_openai_callback() as cb:
-            result = chain.invoke(query.model_dump())
+        chain = self.create_chain(query)
+        result = await chain.invoke_async(query.model_dump())
+        if hasattr(result, "response_info") and result.response_info:
+            ri = result.response_info
             result.tokens_info = {
-                'prompt_tokens': cb.prompt_tokens,
-                'completion_tokens': cb.completion_tokens,
-                'total_tokens': cb.total_tokens,
-                'total_cost': cb.total_cost,
-                'prompt_name': self.prompt_name,
-                'model_name': self.model_name,
+                "prompt_tokens": ri.consumed_tokens,
+                "completion_tokens": 0,
+                "total_tokens": ri.consumed_tokens,
+                "total_cost": ri.total_cost,
+                "prompt_name": ri.prompt_name,
+                "model_name": ri.model_name,
             }
         return result
 
