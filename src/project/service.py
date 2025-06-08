@@ -1,5 +1,5 @@
-from app.core.ai_service import AIService
-from app.project.schemas import (BaseProjectRequest,
+from src.core.ai_service import AIService
+from src.project.schemas import (BaseProjectRequest,
                                  CheckProjectContextResponse,
                                  ProjectSummaryResponse)
 

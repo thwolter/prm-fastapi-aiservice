@@ -8,7 +8,7 @@ from pathlib import Path
 import typer
 import uvicorn
 
-from app.core.config import settings
+from src.core.config import settings
 
 cmd = typer.Typer(no_args_is_help=True)
 
@@ -16,7 +16,7 @@ cmd = typer.Typer(no_args_is_help=True)
 @cmd.command(name='run')
 def run():
     """run application"""
-    uvicorn.run(app='app.main:app', reload=True, port=8010)
+    uvicorn.run(app='src.main:app', reload=True, port=8010)
 
 
 @cmd.command(name='migrate')
@@ -57,10 +57,10 @@ def list_prompts():
     prompt_names = []
 
     # Discover and import all service modules
-    package_dir = Path(__file__).resolve().parent / 'app' / 'risk'
+    package_dir = Path(__file__).resolve().parent / 'src' / 'risk'
     for _, module_name, _ in pkgutil.iter_modules([str(package_dir)]):
         if module_name.endswith('service'):
-            module = importlib.import_module(f'app.risk.{module_name}')
+            module = importlib.import_module(f'src.risk.{module_name}')
             for name, obj in inspect.getmembers(module, inspect.isclass):
                 if name.endswith('Service'):
                     services.append(obj)

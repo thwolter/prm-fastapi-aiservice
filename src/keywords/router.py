@@ -2,8 +2,8 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
-from app.keywords.keywords import get_keywords
-from app.keywords.models import KeywordRequest, KeywordResponse
+from src.keywords.keywords import get_keywords
+from src.keywords.models import KeywordRequest, KeywordResponse
 
 router = APIRouter(
     prefix='/api',

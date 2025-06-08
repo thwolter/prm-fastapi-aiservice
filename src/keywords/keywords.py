@@ -1,7 +1,7 @@
 import yake
 from yake.highlight import TextHighlighter
 
-from app.keywords.models import KeywordRequest, KeywordResponse
+from src.keywords.models import KeywordRequest, KeywordResponse
 
 kw_extractor = yake.KeywordExtractor()
 th = TextHighlighter(max_ngram_size=3)

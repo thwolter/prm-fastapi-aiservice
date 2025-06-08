@@ -25,4 +25,4 @@ COPY . /app
 EXPOSE 8010
 
 # Set the default command to run the application
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8010"]
+CMD ["poetry", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8010"]

@@ -1,6 +1,6 @@
 import redis
 
-from app.core.config import settings
+from src.core.config import settings
 
 
 def initialize_redis():

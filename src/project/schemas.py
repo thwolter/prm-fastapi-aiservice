@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field
 
-from app.utils.schema import BaseResponseModel
+from src.utils.schema import BaseResponseModel
 
 today = datetime.now().strftime('%Y-%m-%d')
 

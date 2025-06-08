@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
-from app.keywords.models import KeywordRequest
-from app.main import app
+from src.keywords.models import KeywordRequest
+from src.main import app
 
 client = TestClient(app)
 

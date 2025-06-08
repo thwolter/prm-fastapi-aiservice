@@ -3,18 +3,18 @@ from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-from app.risk.schemas import (
+from src.risk.schemas import (
     RiskDriversResponse,
     RiskImpactResponse,
     RiskLikelihoodResponse,
     RiskMitigationResponse,
 )
 
-from app.category.schemas import Category
-from app.main import app
+from src.category.schemas import Category
+from src.main import app
 
-from app.project.schemas import BaseProjectRequest, Project
-from app.risk.schemas import (Risk, RiskDefinitionCheckResponse,
+from src.project.schemas import BaseProjectRequest, Project
+from src.risk.schemas import (Risk, RiskDefinitionCheckResponse,
                               RiskDriversRequest, RiskIdentificationRequest,
                               RiskIdentificationResponse)
 
@@ -31,7 +31,7 @@ def project_request_data():
     ).model_dump()
 
 
-@patch('app.risk.service.RiskDefinitionService.execute_query')
+@patch('src.risk.service.RiskDefinitionService.execute_query')
 def test_risk_definition_check_valid_input(mock_execute_query, test_client):
     request_data = {'text': 'The project might face delays due to unforeseen circumstances.'}
     mock_execute_query.return_value = RiskDefinitionCheckResponse(
@@ -63,21 +63,21 @@ def test_Live_risk_definition_check_valid_input(test_client):
     assert isinstance(RiskDefinitionCheckResponse(**response_data), RiskDefinitionCheckResponse)
 
 
-@patch('app.services.services.RiskDefinitionService.execute_query')
+@patch('src.services.services.RiskDefinitionService.execute_query')
 def risk_definition_check_missing_text(mock_execute_query, test_client):
     request_data = {}
     response = test_client.post('/api/risk-definition/check/', json=request_data)
     assert response.status_code == 422
 
 
-@patch('app.services.services.RiskDefinitionService.execute_query')
+@patch('src.services.services.RiskDefinitionService.execute_query')
 def risk_definition_check_empty_text(mock_execute_query, test_client):
     request_data = {'text': ''}
     response = test_client.post('/api/risk-definition/check/', json=request_data)
     assert response.status_code == 422
 
 
-@patch('app.services.services.RiskDefinitionService.execute_query')
+@patch('src.services.services.RiskDefinitionService.execute_query')
 def risk_definition_check_invalid_text_type(mock_execute_query, test_client):
     request_data = {'text': 12345}
     response = test_client.post('/api/risk-definition/check/', json=request_data)
@@ -103,7 +103,7 @@ def risk_identification_request_data():
     ).model_dump()
 
 
-@patch('app.risk.service.RiskIdentificationService.execute_query')
+@patch('src.risk.service.RiskIdentificationService.execute_query')
 def test_risk_identification_valid_input(mock_execute_query, test_client, risk_identification_request_data):
     mock_execute_query.return_value = RiskIdentificationResponse(
         risks=[
@@ -121,14 +121,14 @@ def test_risk_identification_valid_input(mock_execute_query, test_client, risk_i
     assert response_data['risks'][0]['title'] == 'Identified Risk 1'
 
 
-@patch('app.risk.service.RiskIdentificationService.execute_query')
+@patch('src.risk.service.RiskIdentificationService.execute_query')
 def test_risk_identification_missing_category(mock_execute_query, test_client):
     request_data = {'risks': [{'title': 'Risk 1', 'description': 'Description of Risk 1'}]}
     response = test_client.post('/api/risk/identify/', json=request_data)
     assert response.status_code == 422
 
 
-@patch('app.risk.service.RiskIdentificationService.execute_query')
+@patch('src.risk.service.RiskIdentificationService.execute_query')
 def test_risk_identification_empty_existing(mock_execute_query, test_client, risk_identification_request_data):
     mock_execute_query.return_value = RiskIdentificationResponse(
         risks=[
@@ -146,7 +146,7 @@ def test_risk_identification_empty_existing(mock_execute_query, test_client, ris
     assert isinstance(RiskIdentificationResponse(**response_data), RiskIdentificationResponse)
 
 
-@patch('app.risk.service.RiskIdentificationService.execute_query')
+@patch('src.risk.service.RiskIdentificationService.execute_query')
 def test_risk_identification_invalid_existing_type(mock_execute_query, test_client):
     request_data = {'category': 'Operational', 'risks': 'invalid_type'}
     response = test_client.post('/api/risk/identify/', json=request_data)

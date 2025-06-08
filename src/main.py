@@ -5,13 +5,13 @@ import sentry_sdk
 from fastapi import FastAPI, Request, status
 from starlette.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
-from app.core.health_checks import router as core_router
-from app.core.logger import logging
-from app.keywords.router import router as keywords_router
-from app.middleware.custom_error_format import custom_error_format_middleware
-from app.middleware.token_extraction import TokenExtractionMiddleware
-from app.router import router as base_router
+from src.core.config import settings
+from src.core.health_checks import router as core_router
+from src.core.logger import logging
+from src.keywords.router import router as keywords_router
+from src.middleware.custom_error_format import custom_error_format_middleware
+from src.middleware.token_extraction import TokenExtractionMiddleware
+from src.router import router as base_router
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ app = FastAPI(lifespan=lifespan)
 if settings.BACKEND_CORS_ORIGINS:
     origins = [str(origin).strip('/') for origin in settings.BACKEND_CORS_ORIGINS]
     logger.info(f'Allowed origins: {origins}')
-    app.add_middleware(
+    src.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
         allow_credentials=True,
@@ -51,19 +51,19 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 
-@app.middleware('http')
+@src.middleware('http')
 async def custom_middleware(request: Request, call_next):
     return await custom_error_format_middleware(request, call_next)
 
 
-app.add_middleware(TokenExtractionMiddleware)
+src.add_middleware(TokenExtractionMiddleware)
 
 
-app.include_router(base_router)
-app.include_router(keywords_router)
-app.include_router(core_router)
+src.include_router(base_router)
+src.include_router(keywords_router)
+src.include_router(core_router)
 
 
-@app.get('/api/_health', tags=['Health Check'], status_code=status.HTTP_204_NO_CONTENT)
+@src.get('/api/_health', tags=['Health Check'], status_code=status.HTTP_204_NO_CONTENT)
 async def root():
     return

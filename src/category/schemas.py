@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field, computed_field
 
-from app.project.schemas import BaseProjectRequest
-from app.utils.schema import BaseResponseModel
-from app.category.mixins import CategoryParserMixin
+from src.project.schemas import BaseProjectRequest
+from src.utils.schema import BaseResponseModel
+from src.category.mixins import CategoryParserMixin
 
 
 ### no longer needed? ###

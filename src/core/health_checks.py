@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from langchain import hub
 from langchain_openai import ChatOpenAI
 
-from app.core.config import settings
+from src.core.config import settings
 
 router = APIRouter(tags=['Health Check'])
 
