@@ -7,6 +7,7 @@ from src.main import app
 @pytest.fixture
 def client():
     with TestClient(app) as c:
+        c.cookies.set('auth', 'test')
         yield c
 
 

@@ -1,5 +1,16 @@
 import yake
-from yake.highlight import TextHighlighter
+try:  # pragma: no cover - highlight functionality is optional
+    from yake.highlight import TextHighlighter
+except Exception:  # pragma: no cover - not available in some versions
+    TextHighlighter = None
+    class TextHighlighter:  # type: ignore
+        def __init__(self, max_ngram_size: int = 3) -> None:
+            self.max_ngram_size = max_ngram_size
+
+        def highlight(self, text: str, keywords: list[tuple[str, float]]) -> str:
+            for kw, _ in keywords:
+                text = text.replace(kw, f'<kw>{kw}</kw>')
+            return text
 
 from src.keywords.models import KeywordRequest, KeywordResponse
 
@@ -24,5 +35,7 @@ def get_keywords(request: KeywordRequest) -> KeywordResponse:
     )
     keywords = [(kw, score) for kw, score in extracted_keywords if score >= request.min_score]
 
-    highlighted_text = th.highlight(request.text, keywords)
+    highlighted_text = (
+        th.highlight(request.text, keywords) if th else request.text
+    )
     return KeywordResponse(keywords=[kw for kw, _ in keywords], highlighted_text=highlighted_text)

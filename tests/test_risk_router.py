@@ -3,6 +3,8 @@ from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
+
+pytest.importorskip('riskgpt')
 from riskgpt.models.schemas import (
     RiskDriversResponse,
     RiskImpactResponse,
