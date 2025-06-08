@@ -17,3 +17,10 @@ pytest -m "not webtest"
 
 Prompts can be defined under <https://smith.langchain.com/prompts>
 
+### Category endpoint
+
+Risk categories are generated via the [RiskGPT](https://pypi.org/project/riskgpt/)
+library (Python 3.12+). Install it separately and provide a valid
+`riskgpt.toml` configuration. Send a `CategoryRequest` to
+`/api/categories/` to receive a list of categories and an optional rationale.
+
