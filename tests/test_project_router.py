@@ -5,25 +5,32 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.project.schemas import (BaseProjectRequest,
-                                 CheckProjectContextResponse,
-                                 ProjectSummaryResponse)
+from app.project.schemas import (
+    BaseProjectRequest,
+    CheckProjectContextResponse,
+    ProjectSummaryResponse,
+    Project,
+)
 
-client = TestClient(app)
 
 
 @pytest.fixture(scope='function')
 def project_request_data():
     return BaseProjectRequest(
-        name='H2 Project',
-        context='Building a H2 cavern at an existing salt cavern site in the Netherlands. The budget is 100M EUR.',
+        project=Project(
+            name='H2 Project',
+            context='Building a H2 cavern at an existing salt cavern site in the Netherlands. The budget is 100M EUR.',
+        )
     ).model_dump()
 
 
 @patch('app.project.service.CheckProjectContextService.execute_query')
-def test_check_project_context_valid_input(mock_execute_query):
+def test_check_project_context_valid_input(mock_execute_query, test_client):
     request_data = BaseProjectRequest(
-        **{'context': 'This is a valid project context.', 'name': 'Project Alpha'}
+        project=Project(
+            name='Project Alpha',
+            context='This is a valid project context.',
+        )
     ).model_dump()
     mock_execute_query.return_value = CheckProjectContextResponse(
         is_valid=True,
@@ -40,7 +47,7 @@ def test_check_project_context_valid_input(mock_execute_query):
         timeline='Q1 2024',
         deadline='2024-03-31',
     )
-    response = client.post('/api/project/check/context/', json=request_data)
+    response = test_client.post('/api/project/check/context/', json=request_data)
     assert response.status_code == 200
     mock_execute_query.assert_called_once()
     response_data = response.json()
@@ -59,14 +66,15 @@ def test_live_check_project_context_valid_input(project_request_data):
 
 
 @patch('app.project.service.ProjectSummaryService.execute_query')
-def test_summarize_project_valid_input(mock_execute_query, project_request_data):
+def test_summarize_project_valid_input(mock_execute_query, test_client, project_request_data):
     mock_execute_query.return_value = ProjectSummaryResponse(
         summary='This is a summary of Project Alpha.',
         picture_url='https://example.com/project-alpha.jpg',
         tags=['Alpha', 'Project', 'Summary'],
         image_url='https://example.com/project-alpha.jpg',
+        tokens_info={},
     )
-    response = client.post('/api/project/summarize/', json=project_request_data)
+    response = test_client.post('/api/project/summarize/', json=project_request_data)
     assert response.status_code == 200
     response_data = response.json()
     assert response_data['summary'] == 'This is a summary of Project Alpha.'

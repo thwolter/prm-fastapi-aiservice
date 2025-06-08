@@ -36,7 +36,25 @@ def override_settings():
     settings.REDIS_URL = original_redis_url
 
 
+@pytest.fixture(autouse=True)
+def override_auth(monkeypatch):
+    """Override authentication dependencies for tests."""
+
+    async def dummy_get_current_user(request):
+        return {'token': 'test', 'user_id': '00000000-0000-0000-0000-000000000000'}
+
+    from app.auth.dependencies import get_current_user
+    app.dependency_overrides[get_current_user] = dummy_get_current_user
+    monkeypatch.setattr('app.auth.service.TokenService.has_access', lambda self: True)
+    monkeypatch.setattr(
+        'app.auth.service.TokenService.consume_tokens',
+        lambda self, result, user_id: None,
+    )
+    yield
+    app.dependency_overrides.clear()
+
+
 @pytest.fixture
-def test_client():
+def test_client(override_auth):
     with TestClient(app) as client:
         yield client
