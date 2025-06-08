@@ -3,6 +3,7 @@ import sys
 
 from .config import settings
 
+
 LOG_LEVEL = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
 
 
@@ -25,8 +26,12 @@ class CustomFormatter(logging.Formatter):
 
 formatter = CustomFormatter('%(levelname)s [%(name)s] %(message)s')
 
-logging.basicConfig(level=LOG_LEVEL, handlers=[logging.StreamHandler(sys.stdout)])
+
+def configure_logging(level: int = LOG_LEVEL, stream=sys.stdout) -> None:
+    """Configure root logging with the custom formatter."""
+    logging.basicConfig(level=level, handlers=[logging.StreamHandler(stream)], force=True)
+    for handler in logging.root.handlers:
+        handler.setFormatter(formatter)
 
 
-for handler in logging.root.handlers:
-    handler.setFormatter(formatter)
+configure_logging()
