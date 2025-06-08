@@ -1,27 +1,25 @@
 import inspect
+import importlib
+import pkgutil
 
 from fastapi import APIRouter
 
-from app.category import service as category_service
 from app.core.registrar import RouteRegistrar
-from app.project import service as project_service
-from app.risk import service as risk_service
 
-# Dynamically import services from the specified module
-modules = [
-    category_service,
-    project_service,
-    risk_service,
-]
+# Discover all ``service`` modules within the ``app`` package so that
+# newly added wrappers are registered automatically without having to
+# modify this file.
 services = []
-
-# Dynamically import services from the specified modules
-for module in modules:
-    # Filter out the service classes
+for _, module_name, _ in pkgutil.walk_packages(
+    package=importlib.import_module('app').__path__, prefix='app.'
+):
+    if not module_name.endswith('.service'):
+        continue
+    module = importlib.import_module(module_name)
     services.extend(
         member
-        for name, member in inspect.getmembers(module, inspect.isclass)
-        if member.__module__ == module.__name__
+        for _, member in inspect.getmembers(module, inspect.isclass)
+        if getattr(member, 'route_path', None)
     )
 
 router = APIRouter(
@@ -42,3 +40,4 @@ for service_class in services:
         service_factory=lambda cls=service_class: cls(),  # Dynamically instantiate
         tags=tags,
     )
+

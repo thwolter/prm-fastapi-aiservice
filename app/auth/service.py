@@ -50,6 +50,16 @@ class TokenService:
             logger.error(f'Invalid tokens info: {e}')
             raise HTTPException(status_code=400, detail='Invalid tokens info')
 
+        response_info = getattr(result, 'response_info', None)
+
+        event_data = {
+            'tokens': payload.total_tokens,
+            'model': payload.model_name,
+            'prompt': payload.prompt_name,
+        }
+        if response_info is not None:
+            event_data['response_info'] = response_info
+
         event = CloudEvent(
             attributes={
                 'id': str(uuid.uuid4()),
@@ -57,11 +67,7 @@ class TokenService:
                 'source': settings.OPENMETER_SOURCE,
                 'subject': str(user_id),
             },
-            data={
-                'tokens': payload.total_tokens,
-                'model': payload.model_name,
-                'prompt': payload.prompt_name,
-            },
+            data=event_data,
         )
 
         self.client.ingest_events(to_dict(event))

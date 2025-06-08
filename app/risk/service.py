@@ -1,11 +1,18 @@
 from app.core.ai_service import AIService
-from app.risk.schemas import (RiskDefinitionCheckRequest,
-                              RiskDefinitionCheckResponse, RiskDriversRequest,
-                              RiskDriversResponse, RiskIdentificationRequest,
-                              RiskIdentificationResponse, RiskImpactRequest,
-                              RiskImpactResponse, RiskLikelihoodRequest,
-                              RiskLikelihoodResponse, RiskMitigationRequest,
-                              RiskMitigationResponse)
+from riskgpt.models.schemas import (
+    RiskDefinitionCheckRequest,
+    RiskDefinitionCheckResponse,
+    RiskDriversRequest,
+    RiskDriversResponse,
+    RiskIdentificationRequest,
+    RiskIdentificationResponse,
+    RiskImpactRequest,
+    RiskImpactResponse,
+    RiskLikelihoodRequest,
+    RiskLikelihoodResponse,
+    RiskMitigationRequest,
+    RiskMitigationResponse,
+)
 
 
 class RiskDefinitionService(AIService):
