@@ -19,6 +19,18 @@ class BaseProjectRequest(BaseModel):
 
     @computed_field
     @property
+    def name(self) -> str:
+        """Expose the project name at the top level for convenience."""
+        return self.project.name
+
+    @computed_field
+    @property
+    def context(self) -> str:
+        """Expose the project context at the top level for convenience."""
+        return self.project.context
+
+    @computed_field
+    @property
     def parsed_project(self) -> str:
         return f'Project title:\n{self.project.name}\n\nProject context:\n{self.project.context}'
 
