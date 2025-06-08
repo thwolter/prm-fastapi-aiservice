@@ -25,3 +25,9 @@ library (Python 3.12+). Install it separately and provide a valid
 `riskgpt.toml` configuration. Send a `CategoryRequest` to
 `/api/categories/` to receive a list of categories and an optional rationale.
 
+### Context quality endpoint
+
+Use `/api/context/check/` with a `ContextQualityRequest` payload to analyse the
+quality of a project context. The service returns a `ContextQualityResponse`
+containing a quality score and rationale.
+
