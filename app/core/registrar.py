@@ -36,7 +36,11 @@ class BaseServiceHandler(Generic[TRequest, TResponse]):
         try:
             query = self.request_model(**request.model_dump())
             result = await service.execute_query(query)
-            return validate_model(result, self.response_model)
+            response_info = getattr(result, 'response_info', None)
+            validated = validate_model(result, self.response_model)
+            if response_info is not None:
+                setattr(validated, 'response_info', response_info)
+            return validated
 
         except AttributeError as ae:
             logging.error(f'Attribute error in {self.service_factory.__name__}: {ae}')
