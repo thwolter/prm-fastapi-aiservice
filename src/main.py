@@ -42,7 +42,7 @@ app = FastAPI(lifespan=lifespan)
 if settings.BACKEND_CORS_ORIGINS:
     origins = [str(origin).strip('/') for origin in settings.BACKEND_CORS_ORIGINS]
     logger.info(f'Allowed origins: {origins}')
-    src.add_middleware(
+    app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
         allow_credentials=True,
@@ -51,19 +51,19 @@ if settings.BACKEND_CORS_ORIGINS:
     )
 
 
-@src.middleware('http')
+@app.middleware('http')
 async def custom_middleware(request: Request, call_next):
     return await custom_error_format_middleware(request, call_next)
 
 
-src.add_middleware(TokenExtractionMiddleware)
+app.add_middleware(TokenExtractionMiddleware)
 
 
-src.include_router(base_router)
-src.include_router(keywords_router)
-src.include_router(core_router)
+app.include_router(base_router)
+app.include_router(keywords_router)
+app.include_router(core_router)
 
 
-@src.get('/api/_health', tags=['Health Check'], status_code=status.HTTP_204_NO_CONTENT)
+@app.get('/api/_health', tags=['Health Check'], status_code=status.HTTP_204_NO_CONTENT)
 async def root():
     return

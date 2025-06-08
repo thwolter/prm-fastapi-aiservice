@@ -11,7 +11,7 @@ from src.core.registrar import RouteRegistrar
 # modify this file.
 services = []
 for _, module_name, _ in pkgutil.walk_packages(
-    package=importlib.import_module('src').__path__, prefix='src.'
+    path=importlib.import_module('src').__path__, prefix='src.'
 ):
     if not module_name.endswith('.service'):
         continue
