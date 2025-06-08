@@ -15,7 +15,7 @@ from riskgpt.models.schemas import (
 from src.category.schemas import Category
 from src.main import app
 
-from src.project.schemas import BaseProjectRequest, Project
+from src.context.schemas import BaseProjectRequest, Project
 from riskgpt.models.schemas import (
     Risk,
     RiskDefinitionCheckResponse,

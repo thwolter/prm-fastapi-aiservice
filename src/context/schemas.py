@@ -1,6 +1,26 @@
 from datetime import datetime
 from typing import Optional
 
+try:  # pragma: no cover - optional dependency
+    from riskgpt.models.schemas import (
+        ContextQualityRequest,
+        ContextQualityResponse,
+    )
+except Exception:  # pragma: no cover - fallback definitions
+    from pydantic import BaseModel
+
+    class ContextQualityRequest(BaseModel):
+        """Fallback request model if riskgpt is unavailable."""
+
+        project_name: str
+        project_context: str
+
+    class ContextQualityResponse(BaseModel):
+        """Fallback response model if riskgpt is unavailable."""
+
+        quality_score: float
+        rationale: str
+
 from pydantic import BaseModel, Field, computed_field
 
 from src.utils.schema import BaseResponseModel
