@@ -1,9 +1,10 @@
 from src.utils import logutils
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from src.keywords.keywords import get_keywords
 from src.keywords.models import KeywordRequest, KeywordResponse
+from src.utils.exceptions import InternalServerException
 
 router = APIRouter(
     prefix='/api',
@@ -19,4 +20,4 @@ def extract_keywords(request: KeywordRequest) -> KeywordResponse:
         return result
     except Exception as e:
         logutils.error(f'Error extracting keywords: {e}')
-        raise HTTPException(status_code=500, detail='Error extracting keywords')
+        raise InternalServerException(detail='Error extracting keywords')

@@ -2,10 +2,14 @@
 from src.utils import logutils
 from typing import Callable, Generic, Type, TypeVar
 
-from fastapi import HTTPException
 from pydantic import BaseModel
 
 from src.routes.validation import validate_model
+from src.utils.exceptions import (
+    BaseServiceException,
+    RequestException,
+    InternalServerException
+)
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
 TResponse = TypeVar('TResponse', bound=BaseModel)
@@ -53,7 +57,7 @@ class ServiceHandler(Generic[TRequest, TResponse]):
             The validated response.
 
         Raises:
-            HTTPException: If an error occurs during processing.
+            BaseServiceException: If an error occurs during processing.
         """
         service = self.service_factory()
         try:
@@ -77,19 +81,20 @@ class ServiceHandler(Generic[TRequest, TResponse]):
 
         except AttributeError as ae:
             logger.error(f'Attribute error in {self._get_service_name()}: {ae}')
-            raise HTTPException(status_code=400, detail=f'Invalid request structure: {ae}')
+            raise RequestException(detail=f'Invalid request structure: {ae}')
 
-        except HTTPException as he:
-            logger.warning(f'HTTPException in {self._get_service_name()}: {he.detail}')
-            raise HTTPException(status_code=he.status_code, detail=he.detail)
+        except BaseServiceException as bse:
+            logger.warning(f'Service exception in {self._get_service_name()}: {bse.detail}')
+            # Re-raise the custom exception as is
+            raise
 
         except TypeError as te:
             logger.error(f'Type error in {self._get_service_name()}: {te}')
-            raise HTTPException(status_code=400, detail=f'Invalid request structure: {te}')
+            raise RequestException(detail=f'Invalid request structure: {te}')
 
         except Exception as e:
             logger.error(f'Unexpected error in {self._get_service_name()}: {e}')
-            raise HTTPException(status_code=500, detail='Internal Server Error')
+            raise InternalServerException()
 
     def _get_service_name(self) -> str:
         """Get the name of the service for logutils purposes."""

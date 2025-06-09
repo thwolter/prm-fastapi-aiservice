@@ -1,9 +1,10 @@
 import requests
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from langchain import hub
 from langchain_openai import ChatOpenAI
 
 from src.core.config import settings
+from src.utils.exceptions import ExternalServiceException
 
 router = APIRouter(tags=['Health Check'])
 
@@ -21,9 +22,9 @@ async def check_openai_connection():
         if response:
             return {'message': 'OpenAI connection successful'}
         else:
-            raise HTTPException(status_code=500, detail='OpenAI connection failed')
+            raise ExternalServiceException(detail='OpenAI connection failed', service_name='OpenAI')
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise ExternalServiceException(detail=str(e), service_name='OpenAI')
 
 
 @router.get('/health-check/smith/check-connection')
@@ -35,6 +36,6 @@ async def check_smith_connection():
         if response:
             return {'message': 'Smith connection successful'}
         else:
-            raise HTTPException(status_code=500, detail='Smith connection failed')
+            raise ExternalServiceException(detail='Smith connection failed', service_name='Smith')
     except requests.RequestException as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise ExternalServiceException(detail=str(e), service_name='Smith')

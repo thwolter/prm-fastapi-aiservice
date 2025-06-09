@@ -2,12 +2,13 @@
 from src.utils import logutils
 from typing import Callable, List, Optional, Type, TypeVar
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Request
+from fastapi import APIRouter, Body, Depends, Request
 from pydantic import BaseModel
 
 from src.auth.dependencies import get_current_user
 from src.auth.service import TokenService
 from src.routes.service_handler import ServiceHandler
+from src.utils.exceptions import BaseServiceException, QuotaExceededException
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
 TResponse = TypeVar('TResponse', bound=BaseModel)
@@ -79,14 +80,14 @@ class RouteRegistry:
                 The response data.
 
             Raises:
-                HTTPException: If an error occurs during processing.
+                BaseServiceException: If an error occurs during processing.
             """
             # Check token quota
             user_id = user_info['user_id']
             token_service = TokenService(request)
             has_access = await token_service.has_access()
             if not has_access:
-                raise HTTPException(status_code=402, detail='Token quota exceeded')
+                raise QuotaExceededException(detail='Token quota exceeded')
 
             # Handle the request
             result = await handler.handle(request_model)

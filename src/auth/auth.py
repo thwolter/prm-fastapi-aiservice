@@ -1,7 +1,8 @@
 import jwt
-from fastapi import HTTPException, Request
+from fastapi import Request
 
 from src.core.config import settings
+from src.utils.exceptions import AuthenticationException
 
 
 def get_jwt_payload(request: Request):
@@ -10,7 +11,7 @@ def get_jwt_payload(request: Request):
     """
     token = request.cookies.get('auth')
     if not token:
-        raise HTTPException(status_code=401, detail='Missing authentication token')
+        raise AuthenticationException(detail='Missing authentication token')
 
     try:
         payload = jwt.decode(
@@ -23,7 +24,7 @@ def get_jwt_payload(request: Request):
         return payload
 
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail='Token has expired')
+        raise AuthenticationException(detail='Token has expired')
 
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail='Invalid token')
+        raise AuthenticationException(detail='Invalid token')

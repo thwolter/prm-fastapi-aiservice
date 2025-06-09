@@ -4,4 +4,5 @@ theme:
 nav:
   - Home: index.md
   - Services and Routes: services_and_routes.md
+  - Error Handling: error_handling.md
   - Improvement Tasks: tasks.md

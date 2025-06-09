@@ -5,11 +5,12 @@ from uuid import UUID
 from azure.core.exceptions import ResourceNotFoundError
 from cloudevents.conversion import to_dict
 from cloudevents.http import CloudEvent
-from fastapi import HTTPException, Request
+from fastapi import Request
 from openmeter import Client
 
 from src.auth.schemas import ConsumedTokensInfo
 from src.core.config import settings
+from src.utils.exceptions import ResourceNotFoundException, RequestException
 
 logger = logutils.get_logger(__name__)
 
@@ -36,7 +37,7 @@ class TokenService:
             response = self.client.get_entitlement_value(str(self.user_id), 'ai_tokens')
         except ResourceNotFoundError as e:
             logger.error(f'User {self.user_id}: {e}')
-            raise HTTPException(status_code=404, detail='User not found')
+            raise ResourceNotFoundException(detail='User not found')
         return response['hasAccess']
 
     async def consume_tokens(self, result, user_id: UUID) -> None:
@@ -48,7 +49,7 @@ class TokenService:
             del result.tokens_info
         except ValueError as e:
             logger.error(f'Invalid tokens info: {e}')
-            raise HTTPException(status_code=400, detail='Invalid tokens info')
+            raise RequestException(detail='Invalid tokens info')
 
         response_info = getattr(result, 'response_info', None)
 
