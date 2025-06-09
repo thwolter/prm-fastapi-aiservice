@@ -5,6 +5,7 @@ from langchain_openai import ChatOpenAI
 
 from src.core.config import settings
 from src.utils.exceptions import ExternalServiceException
+from src.utils.circuit_breaker import with_circuit_breaker
 
 router = APIRouter(tags=['Health Check'])
 
@@ -15,6 +16,7 @@ async def health_check():
 
 
 @router.get('/health-check/openai/check-connection')
+@with_circuit_breaker(service_name='OpenAI')
 async def check_openai_connection():
     llm = ChatOpenAI(model_name='gpt-3.5-turbo', api_key=settings.OPENAI_API_KEY)
     try:
@@ -28,6 +30,7 @@ async def check_openai_connection():
 
 
 @router.get('/health-check/smith/check-connection')
+@with_circuit_breaker(service_name='Smith')
 async def check_smith_connection():
     llm = ChatOpenAI(model_name='gpt-3.5-turbo', api_key=settings.OPENAI_API_KEY)
     try:
