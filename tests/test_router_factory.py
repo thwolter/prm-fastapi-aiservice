@@ -1,16 +1,16 @@
-import logging
+import logutils
 from unittest import mock
 
 import pytest
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from routes import create_router
+from src.routes import create_router
 from src.services.base_service import BaseService
 
 
-# Configure logging for tests
-logging.basicConfig(level=logging.DEBUG)
+# Configure logutils for tests
+logutils.basicConfig(level=logutils.DEBUG)
 
 
 class MockService(BaseService):

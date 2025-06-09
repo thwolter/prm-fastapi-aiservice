@@ -2,7 +2,7 @@
 DEPRECATED: This module is deprecated and will be removed in a future version.
 Use src.core.routes.validation, src.core.routes.service_handler, and src.core.routes.route_registry instead.
 """
-import logging
+from src.utils import logutils
 import warnings
 from typing import Callable, Generic, List, Optional, Type, TypeVar
 
@@ -10,13 +10,13 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 # Import the new modules
-from routes.service_handler import ServiceHandler
-from routes.route_registry import RouteRegistry
+from src.routes.service_handler import ServiceHandler
+from src.routes.route_registry import RouteRegistry
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
 TResponse = TypeVar('TResponse', bound=BaseModel)
 
-logger = logging.getLogger(__name__)
+logger = logutils.get_logger(__name__)
 
 # Show deprecation warning
 warnings.warn(

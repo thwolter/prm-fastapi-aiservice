@@ -3,7 +3,7 @@ import pytest
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from routes.validation import validate_model
+from src.routes.validation import validate_model
 
 
 class TestModel(BaseModel):

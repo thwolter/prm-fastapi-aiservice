@@ -3,7 +3,7 @@ import pytest
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from routes.service_handler import ServiceHandler
+from src.routes.service_handler import ServiceHandler
 
 
 class TestRequestModel(BaseModel):

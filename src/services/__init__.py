@@ -1,10 +1,10 @@
 import importlib
 import inspect
-import logging
+from src.utils import logutils
 import pkgutil
 from typing import Type, List, Optional
 
-logger = logging.getLogger(__name__)
+logger = logutils.get_logger(__name__)
 
 def discover_services() -> List[Type]:
     """

@@ -1,4 +1,4 @@
-import logging
+from src.utils import logutils
 import uuid
 from uuid import UUID
 
@@ -11,7 +11,7 @@ from openmeter import Client
 from src.auth.schemas import ConsumedTokensInfo
 from src.core.config import settings
 
-logger = logging.getLogger(__name__)
+logger = logutils.get_logger(__name__)
 
 
 class TokenService:

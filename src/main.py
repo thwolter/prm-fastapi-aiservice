@@ -7,13 +7,13 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
 from src.core.health_checks import router as core_router
-from src.core.logger import logging
+from src.utils import logutils
 from src.keywords.router import router as keywords_router
 from src.middleware.custom_error_format import custom_error_format_middleware
 from src.middleware.token_extraction import TokenExtractionMiddleware
 from src.router import router as base_router
 
-logger = logging.getLogger(__name__)
+logger = logutils.get_logger(__name__)
 
 
 @asynccontextmanager

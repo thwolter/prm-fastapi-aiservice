@@ -1,11 +1,11 @@
 """Validation utilities for API models."""
-import logging
+from src.utils import logutils
 from typing import Type
 
 from fastapi import HTTPException
 from pydantic import BaseModel, ValidationError
 
-logger = logging.getLogger(__name__)
+logger = logutils.get_logger(__name__)
 
 
 def validate_model(data, model: Type[BaseModel]) -> BaseModel:

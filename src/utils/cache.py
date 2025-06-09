@@ -1,9 +1,9 @@
-import logging
+from src.utils import logutils
 
 from src.core.config import settings
 from src.core.redis import initialize_redis
 
-logger = logging.getLogger(__name__)
+logger = logutils.get_logger(__name__)
 
 
 def redis_cache(timeout: int = settings.CACHE_TIMEOUT, redis_client=None):

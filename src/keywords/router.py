@@ -1,4 +1,4 @@
-import logging
+from src.utils import logutils
 
 from fastapi import APIRouter, HTTPException
 
@@ -18,5 +18,5 @@ def extract_keywords(request: KeywordRequest) -> KeywordResponse:
         result = get_keywords(request)
         return result
     except Exception as e:
-        logging.error(f'Error extracting keywords: {e}')
+        logutils.error(f'Error extracting keywords: {e}')
         raise HTTPException(status_code=500, detail='Error extracting keywords')

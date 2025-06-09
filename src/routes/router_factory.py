@@ -1,13 +1,13 @@
 """Factory for creating routers with routes for all discovered services."""
-import logging
+from src.utils import logutils
 from typing import Callable, List, Type, Optional
 
 from fastapi import APIRouter
 
-from routes.route_registry import RouteRegistry
+from src.routes.route_registry import RouteRegistry
 from src.services import discover_services
 
-logger = logging.getLogger(__name__)
+logger = logutils.get_logger(__name__)
 
 
 def create_router(

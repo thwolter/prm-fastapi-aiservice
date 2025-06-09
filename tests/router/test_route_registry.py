@@ -4,7 +4,7 @@ from unittest import mock
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
-from routes import RouteRegistry
+from src.routes import RouteRegistry
 
 
 class TestRequestModel(BaseModel):
@@ -111,7 +111,7 @@ class TestRouteRegistry:
             return {"user_id": "test_user"}
 
         # Create a mock token service
-        with mock.patch("src.core.routes.route_registry.TokenService") as MockTokenService:
+        with mock.patch("src.router.routes.route_registry.TokenService") as MockTokenService:
             # Configure the mock token service
             mock_token_service = MockTokenService.return_value
             mock_token_service.has_access.return_value = True
@@ -174,7 +174,7 @@ class TestRouteRegistry:
             return {"user_id": "test_user"}
 
         # Create a mock token service
-        with mock.patch("src.core.routes.route_registry.TokenService") as MockTokenService:
+        with mock.patch("src.router.routes.route_registry.TokenService") as MockTokenService:
             # Configure the mock token service to indicate token quota exceeded
             mock_token_service = MockTokenService.return_value
             mock_token_service.has_access.return_value = False
