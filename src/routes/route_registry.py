@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from src.auth.dependencies import get_current_user
 from src.auth.service import TokenService
+from src.core.config import settings
 from src.routes.service_handler import ServiceHandler
 from src.utils.exceptions import BaseServiceException, QuotaExceededException
 
@@ -63,39 +64,65 @@ class RouteRegistry:
         # Use the provided auth dependency or the default
         auth_dep = auth_dependency or get_current_user
 
-        async def route_function(
-            request: Request,
-            request_model: request_model = Body(..., embed=False),
-            user_info: dict = Depends(auth_dep),
-        ) -> response_model:
-            """
-            Route handler function.
+        # Define a route function that bypasses authentication and metering in local environment
+        if settings.ENVIRONMENT == 'local':
+            async def route_function(
+                request: Request,
+                request_model: request_model = Body(..., embed=False),
+            ) -> response_model:
+                """
+                Route handler function for local environment (no auth/metering).
 
-            Args:
-                request: The FastAPI request object.
-                request_model: The request data.
-                user_info: User information from authentication.
+                Args:
+                    request: The FastAPI request object.
+                    request_model: The request data.
 
-            Returns:
-                The response data.
+                Returns:
+                    The response data.
 
-            Raises:
-                BaseServiceException: If an error occurs during processing.
-            """
-            # Check token quota
-            user_id = user_info['user_id']
-            token_service = TokenService(request)
-            has_access = await token_service.has_access()
-            if not has_access:
-                raise QuotaExceededException(detail='Token quota exceeded')
+                Raises:
+                    BaseServiceException: If an error occurs during processing.
+                """
+                logger.debug("Local environment: Bypassing authentication and metering")
 
-            # Handle the request
-            result = await handler.handle(request_model)
+                # Handle the request without authentication or metering
+                result = await handler.handle(request_model)
 
-            # Consume tokens
-            await token_service.consume_tokens(result, user_id)
+                return result
+        else:
+            async def route_function(
+                request: Request,
+                request_model: request_model = Body(..., embed=False),
+                user_info: dict = Depends(auth_dep),
+            ) -> response_model:
+                """
+                Route handler function with authentication and metering.
 
-            return result
+                Args:
+                    request: The FastAPI request object.
+                    request_model: The request data.
+                    user_info: User information from authentication.
+
+                Returns:
+                    The response data.
+
+                Raises:
+                    BaseServiceException: If an error occurs during processing.
+                """
+                # Check token quota
+                user_id = user_info['user_id']
+                token_service = TokenService(request)
+                has_access = await token_service.has_access()
+                if not has_access:
+                    raise QuotaExceededException(detail='Token quota exceeded')
+
+                # Handle the request
+                result = await handler.handle(request_model)
+
+                # Consume tokens
+                await token_service.consume_tokens(result, user_id)
+
+                return result
 
         # Register the route with the FastAPI router
         self.router.post(

@@ -53,7 +53,7 @@ class RiskAssessmentService(BaseService):
     """Service for assessing risk impact."""
     
     chain_fn = chains.async_get_assessment_chain
-    route_path = '/risk/impact/'
+    route_path = '/risk/assessment/'
     QueryModel = rg_schemas.AssessmentRequest
     ResultModel = rg_schemas.AssessmentResponse
 

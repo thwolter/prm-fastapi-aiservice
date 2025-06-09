@@ -50,7 +50,7 @@ The decorator uses RiskGPT's `with_fallback` functionality to handle failures:
 ```python
 # Use with_fallback to wrap the function
 result = await with_fallback(
-    primary_function=lambda: func(*args, **kwargs),
+    function=lambda: func(*args, **kwargs),
     fallback_function=fallback_function,
     fallback_args=args,
     fallback_kwargs=kwargs

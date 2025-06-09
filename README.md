@@ -16,6 +16,20 @@ Run the tests excluding webtests. Environment variables are loaded from
 pytest -m "not webtest"
 ```
 
+### Testing APIs without Protection
+
+In the local environment (`ENVIRONMENT=local` in `.env`), API authentication and metering protections are automatically disabled. This allows you to test the APIs without needing to provide authentication tokens or worrying about token quota limitations.
+
+This feature is:
+- Only enabled in the local environment
+- Automatically disabled in staging and production environments
+- Indicated by a warning log message at application startup
+
+To use this feature:
+1. Ensure your `.env` file has `ENVIRONMENT=local` (this is the default for local development)
+2. Start the application normally
+3. Make API requests without authentication tokens
+
 Prompts can be defined under <https://smith.langchain.com/prompts>
 
 ### Category endpoint

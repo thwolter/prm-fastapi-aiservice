@@ -39,6 +39,13 @@ if settings.IS_PRODUCTION:
 
 app = FastAPI(lifespan=lifespan)
 
+if settings.ENVIRONMENT == 'local':
+    logger.warning(
+        "Running in LOCAL environment: API authentication and metering protections are DISABLED. "
+        "This is only for local development and testing. "
+        "Protections will be enforced in staging and production environments."
+    )
+
 if settings.BACKEND_CORS_ORIGINS:
     origins = [str(origin).strip('/') for origin in settings.BACKEND_CORS_ORIGINS]
     logger.info(f'Allowed origins: {origins}')

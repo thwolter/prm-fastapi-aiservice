@@ -65,7 +65,7 @@ def with_resilient_execution(service_name, create_default_response: Optional[Cal
             try:
                 # Use with_fallback to wrap the function
                 result = await with_fallback(
-                    primary_function=lambda: func(*args, **kwargs),
+                    function=lambda: func(*args, **kwargs),
                     fallback_function=fallback_function,
                     fallback_args=args,
                     fallback_kwargs=kwargs
