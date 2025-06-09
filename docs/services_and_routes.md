@@ -233,6 +233,54 @@ class MyNewService(BaseService):
     ResultModel = rg_schemas.MyNewResponse
 ```
 
+## Health Check Endpoints
+
+The AI Service provides several health check endpoints to verify connectivity to external dependencies. These endpoints are defined in `src/core/health_checks.py` and are registered in `src/main.py`.
+
+### Basic Health Check
+
+- **Endpoint**: `/health-check`
+- **Description**: A basic health check that returns a simple status message.
+- **Response**: `{"status": "ok"}`
+
+### External Dependency Health Checks
+
+The following endpoints check connectivity to specific external dependencies:
+
+#### OpenAI
+
+- **Endpoint**: `/health-check/openai/check-connection`
+- **Description**: Verifies connectivity to OpenAI by making a simple API call.
+- **Response**: `{"message": "OpenAI connection successful"}` or an error message.
+
+#### Smith (LangChain Hub)
+
+- **Endpoint**: `/health-check/smith/check-connection`
+- **Description**: Verifies connectivity to Smith (LangChain Hub) by pulling a template.
+- **Response**: `{"message": "Smith connection successful"}` or an error message.
+
+#### Redis
+
+- **Endpoint**: `/health-check/redis/check-connection`
+- **Description**: Verifies connectivity to Redis by pinging the server.
+- **Response**: `{"message": "Redis connection successful"}` or an error message.
+
+#### Sentry
+
+- **Endpoint**: `/health-check/sentry/check-connection`
+- **Description**: Verifies that Sentry is properly configured.
+- **Response**: `{"message": "Sentry connection successful"}` or an error message.
+
+#### OpenMeter
+
+- **Endpoint**: `/health-check/openmeter/check-connection`
+- **Description**: Verifies connectivity to OpenMeter by making a simple API call.
+- **Response**: `{"message": "OpenMeter connection successful"}` or an error message.
+
+### Circuit Breaker Pattern
+
+All health check endpoints use the circuit breaker pattern to handle service outages gracefully. If a service is unavailable, the circuit breaker will prevent repeated failed calls to the service, reducing the load on the service and improving the responsiveness of the application.
+
 ## Conclusion
 
 The AI Service project uses a flexible and extensible architecture for defining, discovering, and registering services and routes. This approach makes it easy to add new functionality to the API without modifying the core routing logic.
