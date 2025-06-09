@@ -5,59 +5,17 @@ from typing import Type
 
 from pydantic import BaseModel
 
-try:  # pragma: no cover - optional dependency
-    from riskgpt import chains
-    from riskgpt.models import schemas as rg_schemas
-except Exception:  # pragma: no cover - riskgpt not installed
-    chains = None
+from riskgpt import chains
+from riskgpt.models import schemas as rg_schemas
 
-    class rg_schemas:  # type: ignore
-        class DefinitionCheckRequest(BaseModel):
-            text: str
-
-        class DefinitionCheckResponse(BaseModel):
-            is_valid: bool
-
-        class RiskRequest(BaseModel):
-            pass
-
-        class RiskResponse(BaseModel):
-            risks: list[str] = []
-
-        class DriverRequest(BaseModel):
-            pass
-
-        class DriverResponse(BaseModel):
-            drivers: list[str] = []
-
-        class AssessmentRequest(BaseModel):
-            pass
-
-        class AssessmentResponse(BaseModel):
-            assessment: str | None = None
-
-        class MitigationRequest(BaseModel):
-            pass
-
-        class MitigationResponse(BaseModel):
-            mitigations: list[str] = []
+from src.services.riskgpt_base_service import RiskGPTService
 
 
-class RiskGPTService:
-    """Base service calling RiskGPT chains."""
-
-    chain_fn: callable
-    route_path: str
-    QueryModel: Type[BaseModel]
-    ResultModel: Type[BaseModel]
-
-    async def execute_query(self, query: BaseModel):
-        if not self.chain_fn:
-            raise RuntimeError('riskgpt is not installed')
-        return await self.chain_fn(query)
-
+# Risk Services
 
 class RiskDefinitionCheckService(RiskGPTService):
+    """Service for checking risk definitions."""
+    
     chain_fn = chains.async_check_definition_chain if chains else None
     route_path = '/risk/check/definition/'
     QueryModel = rg_schemas.DefinitionCheckRequest
@@ -65,6 +23,8 @@ class RiskDefinitionCheckService(RiskGPTService):
 
 
 class RiskIdentificationService(RiskGPTService):
+    """Service for identifying risks."""
+    
     chain_fn = chains.async_get_risks_chain if chains else None
     route_path = '/risk/identify/'
     QueryModel = rg_schemas.RiskRequest
@@ -72,6 +32,8 @@ class RiskIdentificationService(RiskGPTService):
 
 
 class RiskDriverService(RiskGPTService):
+    """Service for identifying risk drivers."""
+    
     chain_fn = chains.async_get_drivers_chain if chains else None
     route_path = '/risk/drivers/'
     QueryModel = rg_schemas.DriverRequest
@@ -79,6 +41,8 @@ class RiskDriverService(RiskGPTService):
 
 
 class RiskLikelihoodService(RiskGPTService):
+    """Service for assessing risk likelihood."""
+    
     chain_fn = chains.async_get_assessment_chain if chains else None
     route_path = '/risk/likelihood/'
     QueryModel = rg_schemas.AssessmentRequest
@@ -86,6 +50,8 @@ class RiskLikelihoodService(RiskGPTService):
 
 
 class RiskAssessmentService(RiskGPTService):
+    """Service for assessing risk impact."""
+    
     chain_fn = chains.async_get_assessment_chain if chains else None
     route_path = '/risk/impact/'
     QueryModel = rg_schemas.AssessmentRequest
@@ -93,7 +59,20 @@ class RiskAssessmentService(RiskGPTService):
 
 
 class RiskMitigationService(RiskGPTService):
+    """Service for identifying risk mitigations."""
+    
     chain_fn = chains.async_get_mitigations_chain if chains else None
     route_path = '/risk/mitigation/'
     QueryModel = rg_schemas.MitigationRequest
     ResultModel = rg_schemas.MitigationResponse
+
+
+# Category Services
+
+class CreateCategoriesService(RiskGPTService):
+    """Base service for category operations."""
+    
+    chain_fn = chains.async_get_categories_chain if chains else None
+    route_path = '/categories/'
+    QueryModel: Type[BaseModel] = rg_schemas.CategoryRequest
+    ResultModel: Type[BaseModel] = rg_schemas.CategoryResponse

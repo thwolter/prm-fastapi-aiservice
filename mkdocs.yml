@@ -1,3 +1,5 @@
 site_name: AI Service Documentation
+theme:
+  name: material
 nav:
   - Home: index.md
