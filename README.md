@@ -31,3 +31,17 @@ Use `/api/context/check/` with a `ContextQualityRequest` payload to analyse the
 quality of a project context. The service returns a `ContextQualityResponse`
 containing a quality score and rationale.
 
+## Documentation
+
+The project documentation is built with MkDocs and can be found in the `docs` directory. To view the documentation locally, run:
+
+```bash
+mkdocs serve
+```
+
+Then open http://127.0.0.1:8000/ in your browser.
+
+The documentation includes:
+- General information about the AI Service
+- Detailed explanation of how services and routes are defined, discovered, and registered
+- A comprehensive list of improvement tasks for the project

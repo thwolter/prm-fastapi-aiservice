@@ -3,3 +3,5 @@ theme:
   name: material
 nav:
   - Home: index.md
+  - Services and Routes: services_and_routes.md
+  - Improvement Tasks: tasks.md

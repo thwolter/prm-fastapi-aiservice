@@ -5,7 +5,7 @@ import pytest
 from riskgpt.models import schemas as rg_schemas
 
 
-@patch('src.services.riskgpt_services.RiskDefinitionCheckService.execute_query')
+@patch('src.services.services.RiskDefinitionCheckService.execute_query')
 def test_risk_definition_check_valid_input(mock_execute_query, test_client):
     request_data = {
         'project_id': 'test-project',
@@ -39,21 +39,21 @@ def test_Live_risk_definition_check_valid_input(test_client):
     assert isinstance(rg_schemas.DefinitionCheckResponse(**response_data), rg_schemas.DefinitionCheckResponse)
 
 
-@patch('src.services.riskgpt_services.RiskDefinitionCheckService.execute_query')
+@patch('src.services.services.RiskDefinitionCheckService.execute_query')
 def risk_definition_check_missing_text(mock_execute_query, test_client):
     request_data = {}
     response = test_client.post('/api/risk-definition/check/', json=request_data)
     assert response.status_code == 422
 
 
-@patch('src.services.riskgpt_services.RiskDefinitionCheckService.execute_query')
+@patch('src.services.services.RiskDefinitionCheckService.execute_query')
 def risk_definition_check_empty_text(mock_execute_query, test_client):
     request_data = {'text': ''}
     response = test_client.post('/api/risk-definition/check/', json=request_data)
     assert response.status_code == 422
 
 
-@patch('src.services.riskgpt_services.RiskDefinitionCheckService.execute_query')
+@patch('src.services.services.RiskDefinitionCheckService.execute_query')
 def risk_definition_check_invalid_text_type(mock_execute_query, test_client):
     request_data = {'text': 12345}
     response = test_client.post('/api/risk-definition/check/', json=request_data)
@@ -70,7 +70,7 @@ def risk_identification_request_data():
     ).model_dump()
 
 
-@patch('src.services.riskgpt_services.RiskIdentificationService.execute_query')
+@patch('src.services.services.RiskIdentificationService.execute_query')
 def test_risk_identification_valid_input(mock_execute_query, test_client, risk_identification_request_data):
     mock_execute_query.return_value = rg_schemas.RiskResponse(
         risks=[
@@ -89,14 +89,14 @@ def test_risk_identification_valid_input(mock_execute_query, test_client, risk_i
     assert response_data['risks'][0]['title'] == 'Identified Risk 1'
 
 
-@patch('src.services.riskgpt_services.RiskIdentificationService.execute_query')
+@patch('src.services.services.RiskIdentificationService.execute_query')
 def test_risk_identification_missing_category(mock_execute_query, test_client):
     request_data = {'risks': [{'title': 'Risk 1', 'description': 'Description of Risk 1'}]}
     response = test_client.post('/api/risk/identify/', json=request_data)
     assert response.status_code == 422
 
 
-@patch('src.services.riskgpt_services.RiskIdentificationService.execute_query')
+@patch('src.services.services.RiskIdentificationService.execute_query')
 def test_risk_identification_empty_existing(mock_execute_query, test_client, risk_identification_request_data):
     mock_execute_query.return_value = rg_schemas.RiskResponse(
         risks=[
@@ -115,7 +115,7 @@ def test_risk_identification_empty_existing(mock_execute_query, test_client, ris
     assert isinstance(rg_schemas.RiskResponse(**response_data), rg_schemas.RiskResponse)
 
 
-@patch('src.services.riskgpt_services.RiskIdentificationService.execute_query')
+@patch('src.services.services.RiskIdentificationService.execute_query')
 def test_risk_identification_invalid_existing_type(mock_execute_query, test_client):
     request_data = {'category': 'Operational', 'risks': 'invalid_type'}
     response = test_client.post('/api/risk/identify/', json=request_data)
