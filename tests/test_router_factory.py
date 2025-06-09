@@ -1,4 +1,3 @@
-import logutils
 from unittest import mock
 
 import pytest
@@ -7,10 +6,11 @@ from pydantic import BaseModel
 
 from src.routes import create_router
 from src.services.base_service import BaseService
+from src.utils import logutils
 
 
 # Configure logutils for tests
-logutils.basicConfig(level=logutils.DEBUG)
+logutils.logging.basicConfig(level=logutils.logging.DEBUG)
 
 
 class MockService(BaseService):

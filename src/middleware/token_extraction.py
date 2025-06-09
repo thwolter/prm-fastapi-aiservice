@@ -1,4 +1,4 @@
-import logging
+from src.utils import logutils
 
 from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -6,7 +6,7 @@ from starlette.responses import Response
 
 from src.auth.auth import get_jwt_payload
 
-logger = logging.getLogger(__name__)
+logger = logutils.get_logger(__name__)
 
 
 class TokenExtractionMiddleware(BaseHTTPMiddleware):

@@ -1,11 +1,11 @@
-import logutils
 import pytest
 from unittest import mock
 
 from src.services import discover_services
 from src.services.base_service import BaseService
+from src.utils import logutils
 
-logutils.basicConfig(level=logutils.DEBUG)
+logutils.logging.basicConfig(level=logutils.logging.DEBUG)
 
 
 class TestDiscoverServices:
