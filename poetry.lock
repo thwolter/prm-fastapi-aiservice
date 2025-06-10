@@ -4900,7 +4900,7 @@ wikipedia = "^1.4.0"
 type = "git"
 url = "https://github.com/thwolter/riskgpt.git"
 reference = "develop"
-resolved_reference = "4b489a1a7e2c25710138bbcd27fda1a59e2f7ece"
+resolved_reference = "7844043fbf005f368c6ed6b2e99930a93ec744f9"
 
 [[package]]
 name = "rpds-py"
