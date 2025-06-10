@@ -117,4 +117,4 @@ class BaseService:
         Returns:
             The result of the chain function.
         """
-        return await self.chain_fn(query)
+        return await self.__class__.chain_fn(query)
