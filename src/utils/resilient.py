@@ -5,6 +5,7 @@ combining circuit breaker pattern with fallback functionality.
 """
 
 import logging
+import inspect
 from functools import wraps
 from typing import Callable, TypeVar, Optional, Coroutine, Any, Union
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def with_resilient_execution(
     service_name: Union[str, Callable[..., str]],
-    create_default_response: Optional[Callable[..., Coroutine[Any, Any, T]]] = None,
+    create_default_response: Optional[Callable[..., Union[T, Coroutine[Any, Any, T]]]] = None,
 ) -> Callable[[Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]]:
     """Decorator that combines circuit breaker and fallback functionality.
 
@@ -35,7 +36,7 @@ def with_resilient_execution(
     """
 
     def decorator(
-        func: Callable[..., Coroutine[Any, Any, T]]
+        func: Callable[..., Coroutine[Any, Any, T]],
     ) -> Callable[..., Coroutine[Any, Any, T]]:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> T:
@@ -48,7 +49,10 @@ def with_resilient_execution(
             if not circuit.allow_request():
                 logger.warning(f"Circuit breaker for {svc_name} is open, failing fast")
                 if create_default_response:
-                    return await create_default_response(*args, **kwargs)
+                    result = create_default_response(*args, **kwargs)
+                    if inspect.isawaitable(result):
+                        result = await result
+                    return result
                 raise ExternalServiceException(
                     detail=f"Service {svc_name} is currently unavailable", service_name=svc_name
                 )
@@ -61,7 +65,10 @@ def with_resilient_execution(
                 circuit.record_failure()
                 logger.warning(f"Service {svc_name} failed: {error}")
                 if create_default_response:
-                    return await create_default_response(*args, **kwargs)
+                    result = create_default_response(*args, **kwargs)
+                    if inspect.isawaitable(result):
+                        result = await result
+                    return result
                 raise ExternalServiceException(
                     detail=f"Service {svc_name} failed: {str(error)}",
                     service_name=svc_name,
