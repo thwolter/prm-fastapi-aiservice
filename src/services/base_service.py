@@ -39,18 +39,67 @@ class BaseService:
         return await self._execute_with_resilience(query)
 
     def _create_default_response(self, query: BaseModel):
-        """Create a default response when the service is unavailable.
+        """Create a default ``ResultModel`` instance for fallback scenarios.
 
-        Args:
-            query: The original query.
-
-        Returns:
-            A default response of the appropriate ResultModel type.
+        The newer ``riskgpt`` response models do not provide ``success`` or
+        ``error`` fields. Instead, they expose an optional ``response_info``
+        object which itself contains an ``error`` attribute. When a service
+        fails we still need to return a valid instance of the expected
+        ``ResultModel``. This helper builds such an instance by populating all
+        required fields with sensible default values and attaching the error
+        information to ``response_info``.
         """
-        return self.ResultModel(
-            success=False,
-            error=f"Service {self.__class__.__name__} is temporarily unavailable"
-        )
+        from typing import get_args, get_origin
+        from riskgpt.models.schemas import ResponseInfo
+
+        def default_for_annotation(annotation):
+            origin = get_origin(annotation)
+            if origin is list:
+                return []
+            if origin is dict:
+                return {}
+            if origin is not None and origin is not list and origin is not dict:
+                args = [a for a in get_args(annotation) if a is not type(None)]
+                return default_for_annotation(args[0]) if args else None
+            if isinstance(annotation, type) and issubclass(annotation, BaseModel):
+                values = {
+                    name: (
+                        field.default
+                        if field.default is not None
+                        else default_for_annotation(field.annotation)
+                    )
+                    for name, field in annotation.model_fields.items()
+                }
+                return annotation(**values)
+            if annotation is str:
+                return ""
+            if annotation is bool:
+                return False
+            if annotation is int:
+                return 0
+            if annotation is float:
+                return 0.0
+            return None
+
+        values = {}
+        for name, field in self.ResultModel.model_fields.items():
+            if name == "response_info":
+                continue
+            if field.default is not None:
+                values[name] = field.default
+            else:
+                values[name] = default_for_annotation(field.annotation)
+
+        if "response_info" in self.ResultModel.model_fields:
+            values["response_info"] = ResponseInfo(
+                consumed_tokens=0,
+                total_cost=0.0,
+                prompt_name="",
+                model_name="",
+                error=f"Service {self.__class__.__name__} is temporarily unavailable",
+            )
+
+        return self.ResultModel(**values)
 
     @with_resilient_execution(
         service_name=lambda self, query: self.__class__.__name__,
