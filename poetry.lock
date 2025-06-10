@@ -4869,7 +4869,7 @@ typing-extensions = ">=4.12.2"
 
 [[package]]
 name = "riskgpt"
-version = "0.1.3"
+version = "0.1.5"
 description = "Analyze project risks and opportunities using AI"
 optional = false
 python-versions = "^3.12"
@@ -4900,7 +4900,7 @@ wikipedia = "^1.4.0"
 type = "git"
 url = "https://github.com/thwolter/riskgpt.git"
 reference = "develop"
-resolved_reference = "183d3f98cdb9d992a6fea63347c759669b29c850"
+resolved_reference = "fe3fc3980387b27f855332ab931b5bb64bba844c"
 
 [[package]]
 name = "rpds-py"
