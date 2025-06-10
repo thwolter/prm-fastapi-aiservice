@@ -31,7 +31,7 @@ async def test_base_service_execute_query_success():
     
     # Create a test service with the mock chain function
     service = TestService()
-    service.chain_fn = mock_chain_fn
+    service.__class__.chain_fn = mock_chain_fn
     
     # Execute a query
     query = TestQueryModel(query="test query")
@@ -50,7 +50,7 @@ async def test_base_service_execute_query_failure():
     
     # Create a test service with the mock chain function
     service = TestService()
-    service.chain_fn = mock_chain_fn
+    service.__class__.chain_fn = mock_chain_fn
     
     # Execute a query - should return a fallback response
     query = TestQueryModel(query="test query")
@@ -69,7 +69,7 @@ async def test_base_service_execute_query_circuit_open():
     
     # Create a test service with the mock chain function
     service = TestService()
-    service.chain_fn = mock_chain_fn
+    service.__class__.chain_fn = mock_chain_fn
     
     # Open the circuit for the service
     from src.utils.circuit_breaker import _circuit_breakers, CircuitBreaker
@@ -91,7 +91,7 @@ async def test_base_service_execute_query_no_chain_fn():
     """Test that execute_query raises RuntimeError when chain_fn is not set."""
     # Create a test service without a chain function
     service = TestService()
-    service.chain_fn = None
+    service.__class__.chain_fn = None
     
     # Execute a query - should raise RuntimeError
     query = TestQueryModel(query="test query")
