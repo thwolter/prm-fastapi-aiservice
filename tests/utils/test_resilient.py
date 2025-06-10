@@ -42,6 +42,25 @@ async def test_with_resilient_execution_failure_with_fallback():
 
 
 @pytest.mark.asyncio
+async def test_with_resilient_execution_failure_with_async_fallback():
+    """Fallback coroutine functions should also be awaited."""
+    mock_func = AsyncMock(side_effect=Exception("test error"))
+    mock_fallback = AsyncMock(return_value="fallback_async")
+
+    @with_resilient_execution(
+        service_name="test_async_fallback", create_default_response=mock_fallback
+    )
+    async def test_func():
+        return await mock_func()
+
+    result: str = await test_func()
+
+    assert result == "fallback_async"
+    mock_func.assert_called_once()
+    mock_fallback.assert_awaited_once()
+
+
+@pytest.mark.asyncio
 async def test_with_resilient_execution_dynamic_service_name():
     """Test that the decorator handles dynamic service names."""
     mock_func = AsyncMock(return_value="success")
