@@ -9,7 +9,7 @@ def test_root(client):
 
 @pytest.mark.webtest
 @pytest.mark.tryfirst
-def test_cors_headers_are_present():
+def test_cors_headers_are_present(client):
     response = client.options("/api/keywords/extract/", headers={"Origin": "http://localhost:3000"})
 
     assert response.status_code == 200
