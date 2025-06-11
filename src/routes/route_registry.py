@@ -1,12 +1,11 @@
 """Route registry for registering API routes."""
 
 from enum import Enum
-from typing import Any, Callable, List, Optional, Type, TypeVar, Union
+from typing import Callable, List, Optional, Type, TypeVar, Union
 
-from fastapi import APIRouter, Body, Depends, Request
+from fastapi import APIRouter, Body, Request
 from pydantic import BaseModel
 
-from src.auth.dependencies import get_current_user
 from src.auth.quota_service import TokenQuotaService
 from src.core.config import settings
 from src.routes.service_handler import ServiceHandler, ServiceProtocol
@@ -46,7 +45,6 @@ class RouteRegistry:
         response_model: Type[TResponse],
         service_factory: Callable[[], ServiceProtocol],
         tags: Optional[List[Union[str, Enum]]] = None,
-        auth_dependency: Optional[Callable] = None,
     ) -> None:
         """
         Register a route with the FastAPI router.
@@ -57,22 +55,17 @@ class RouteRegistry:
             response_model: The Pydantic model for the response.
             service_factory: A callable that returns a service instance.
             tags: Optional list of tags for the route.
-            auth_dependency: Optional custom authentication dependency.
-                If None, the default get_current_user dependency is used.
         """
         # Create a service handler for this route
         handler = ServiceHandler(service_factory, request_model, response_model)
-
-        # Use the provided auth dependency or the default
-        auth_dep = auth_dependency or get_current_user
 
         # Define a route function that bypasses authentication and metering in local environment
         if settings.ENVIRONMENT == "local":
 
             async def route_function(
                 request: Request,
-                request_model: request_model = Body(..., embed=False),
-            ) -> response_model:
+                request_model: request_model = Body(..., embed=False),  # type: ignore[valid-type]
+            ) -> response_model:  # type: ignore[valid-type]
                 """
                 Route handler function for local environment (no auth/metering).
 
@@ -97,9 +90,8 @@ class RouteRegistry:
 
             async def route_function(
                 request: Request,
-                request_model: TRequest = Body(..., embed=False),
-                user_info: Optional[dict[Any, Any]] = Depends(auth_dep),
-            ) -> TResponse:
+                request_model: request_model = Body(..., embed=False),  # type: ignore[valid-type]
+            ) -> response_model:  # type: ignore[valid-type]
                 """
                 Route handler function with authentication and metering.
 

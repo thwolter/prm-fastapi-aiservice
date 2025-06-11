@@ -1,7 +1,8 @@
 """Tests for the route_registry module."""
 
-import pytest
 from unittest import mock
+
+import pytest
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
@@ -182,37 +183,3 @@ class TestRouteRegistry:
                 # Check that the exception has the correct status code and detail
                 assert excinfo.value.status_code == 402
                 assert "Token quota exceeded" in excinfo.value.detail
-
-    def test_register_route_custom_auth(self):
-        """Test that register_route accepts a custom auth dependency."""
-        # Create a mock router
-        router = mock.MagicMock(spec=APIRouter)
-
-        # Create a route registry
-        registry = RouteRegistry(router)
-
-        # Create a service factory
-        def service_factory():
-            return TestService()
-
-        # Create a custom auth dependency
-        async def custom_auth(request):
-            return {"user_id": "custom_user"}
-
-        # Register a route with a custom auth dependency
-        registry.register_route(
-            path="/test",
-            request_model=TestRequestModel,
-            response_model=TestResponseModel,
-            service_factory=service_factory,
-            tags=["test"],
-            auth_dependency=custom_auth,
-        )
-
-        # Check that router.post was called with the correct arguments
-        router.post.assert_called_once_with(
-            "/test", response_model=TestResponseModel, tags=["test"]
-        )
-
-        # Check that the route function was registered
-        assert router.post.return_value.called
