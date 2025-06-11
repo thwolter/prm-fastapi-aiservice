@@ -10,7 +10,7 @@ from src.utils.exceptions import AuthenticationException
 
 def get_jwt_payload(request: Request) -> dict[str, Any]:
     """
-    Extract and verify JWT token from the cookie.
+    Extract and verify JWT token from the ``Authorization`` header.
     In local environment, authentication is bypassed.
     """
     # Skip authentication in local environment
@@ -18,9 +18,11 @@ def get_jwt_payload(request: Request) -> dict[str, Any]:
         # Return a dummy payload with a user ID
         return {"sub": "00000000-0000-0000-0000-000000000000"}
 
-    token = request.cookies.get("auth")
-    if not token:
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
         raise AuthenticationException(detail="Missing authentication token")
+
+    token = auth_header.split(" ", 1)[1]
 
     try:
         payload = jwt.decode(

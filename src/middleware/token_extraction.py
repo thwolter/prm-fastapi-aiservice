@@ -19,8 +19,6 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
-        logger.debug(f"Cookies received in middleware: {request.cookies}")
-
         # In local environment, set dummy token and user ID
         if settings.ENVIRONMENT == "local":
             logger.debug("Local environment: setting dummy token and user ID")
@@ -29,10 +27,12 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
             response: Response = await call_next(request)
             return response
 
-        token = request.cookies.get("auth")
-
-        if not token:
-            logger.debug("No 'auth' token found in cookies")
+        auth_header = request.headers.get("Authorization")
+        token = None
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ", 1)[1]
+        else:
+            logger.debug("No valid Authorization header found")
 
         if token:
             try:
@@ -42,6 +42,9 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
             except HTTPException:
                 request.state.token = None
                 request.state.user_id = None
+        else:
+            request.state.token = None
+            request.state.user_id = None
 
         final_response: Response = await call_next(request)
         return final_response
