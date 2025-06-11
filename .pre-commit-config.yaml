@@ -26,7 +26,7 @@ repos:
       - id: mypy
         language: system
         entry: poetry run mypy
-        stages: [commit, push]  # Lint bei commit UND push (alternativ nur "push")
+        stages: [pre-push]
 
   - repo: local
     hooks:
