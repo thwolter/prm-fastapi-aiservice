@@ -50,25 +50,25 @@ SERVICE_PARAMS = [
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("service_cls,chain_path", SERVICE_PARAMS)
-@pytest.mark.skip(reason="Skipping due to validation errors in response models")
 async def test_service_executes_chain(monkeypatch, service_cls, chain_path):
     """Test that services execute their chains correctly.
 
     This test verifies that when a service chain succeeds, the service returns
     the result of the chain.
     """
-    # Create a valid instance of the ResultModel using the example
+    query = service_cls.QueryModel.model_validate(EXAMPLES[service_cls.QueryModel])
     try:
         example = RESPONSE_EXAMPLES[service_cls.ResultModel]
         example_model = service_cls.ResultModel.model_validate(example)
-        # Create a mock that returns the example model
-        mock_chain = AsyncMock(return_value=example_model)
-    except Exception as e:
-        pytest.skip(f"Could not create example model for {service_cls.__name__}: {e}")
+    except Exception:
+        example_model = service_cls()._create_default_response(query)
+    # Create a mock that returns the example model
+    mock_chain = AsyncMock(return_value=example_model)
 
     svc = service_cls()
+
     monkeypatch.setattr(svc, "chain_fn", mock_chain)
-    query = service_cls.QueryModel.model_validate(EXAMPLES[service_cls.QueryModel])
+
 
     # Test that execute_query returns the result of the chain
     result = await svc.execute_query(query)
@@ -79,8 +79,10 @@ async def test_service_executes_chain(monkeypatch, service_cls, chain_path):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("use_fallback", [True, False])
 @pytest.mark.parametrize("service_cls,chain_path", SERVICE_PARAMS)
+
 @pytest.mark.skip(reason="Skipping due to validation errors in response models")
 async def test_service_fallback(monkeypatch, service_cls, chain_path, use_fallback):
+
     """Test that services handle failures appropriately.
 
     If ``use_fallback`` is ``True`` the service should return a valid ``ResultModel``
@@ -91,10 +93,12 @@ async def test_service_fallback(monkeypatch, service_cls, chain_path, use_fallba
 
     mock_chain = AsyncMock(side_effect=Exception("boom"))
     svc = service_cls()
+
     monkeypatch.setattr(svc, "chain_fn", mock_chain)
 
     if not use_fallback:
         monkeypatch.setattr(svc, "_create_default_response", AsyncMock(side_effect=Exception("fail")))
+
 
     query = service_cls.QueryModel.model_validate(EXAMPLES[service_cls.QueryModel])
 
