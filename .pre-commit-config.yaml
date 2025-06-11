@@ -21,3 +21,12 @@ repos:
         language: system
         entry: poetry run mypy
         stages: [commit, push]  # Lint bei commit UND push (alternativ nur "push")
+
+  - repo: local
+    hooks:
+      - id: pytest-on-push
+        name: pytest before push
+        entry: poetry run pytest
+        language: system
+        pass_filenames: false
+        stages: [pre-push]  # Nur auf push!
