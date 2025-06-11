@@ -9,6 +9,7 @@ client = TestClient(app)
 def test_root():
     response = client.get("/api/_health")
     assert response.status_code == 204
+    assert response.content == b""
 
 
 @pytest.mark.webtest
