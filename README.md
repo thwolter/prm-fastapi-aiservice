@@ -30,6 +30,16 @@ To use this feature:
 2. Start the application normally
 3. Make API requests without authentication tokens
 
+## Authentication
+
+In staging and production environments you must provide a valid JSON Web Token in the request headers. The API expects the following format:
+
+```http
+Authorization: Bearer <jwt>
+```
+
+The [`TokenExtractionMiddleware`](docs/authentication.md) extracts and validates this token. When `ENVIRONMENT=local`, the middleware injects dummy credentials so you can call the API without a token.
+
 ## Documentation
 
 The project documentation is built with MkDocs and can be found in the `docs` directory. To view the documentation locally, run:
