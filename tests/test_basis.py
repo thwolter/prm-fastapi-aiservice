@@ -1,19 +1,14 @@
 import pytest
-from fastapi.testclient import TestClient
-
-from src.main import app
-
-client = TestClient(app)
 
 
-def test_root():
+def test_root(client):
     response = client.get("/api/_health")
     assert response.status_code == 204
 
 
 @pytest.mark.webtest
 @pytest.mark.tryfirst
-def test_cors_headers_are_present():
+def test_cors_headers_are_present(client):
     response = client.options("api/keywords/extract/", headers={"Origin": "http://localhost:3000"})
     assert response.status_code == 200
     assert "access-control-allow-origin" in response.headers
@@ -23,7 +18,7 @@ def test_cors_headers_are_present():
 
 
 @pytest.mark.webtest
-def test_health_check_returns_ok():
+def test_health_check_returns_ok(client):
     response = client.get("/health-check")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
