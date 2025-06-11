@@ -75,21 +75,21 @@ def test_risk_definition_check_with_mock(mock_execute_query, test_client):
 @patch("src.services.services.RiskDefinitionCheckService.execute_query")
 def test_risk_definition_check_missing_text(mock_execute_query, test_client):
     request_data: dict[str, str] = {}
-    response = test_client.post("/api/risk-definition/check/", json=request_data)
+    response = test_client.post("/api/risk/check/definition/", json=request_data)
     assert response.status_code == 422
 
 
 @patch("src.services.services.RiskDefinitionCheckService.execute_query")
 def test_risk_definition_check_empty_text(mock_execute_query, test_client):
     request_data: dict[str, str] = {"text": ""}
-    response = test_client.post("/api/risk-definition/check/", json=request_data)
+    response = test_client.post("/api/risk/check/definition/", json=request_data)
     assert response.status_code == 422
 
 
 @patch("src.services.services.RiskDefinitionCheckService.execute_query")
 def test_risk_definition_check_invalid_text_type(mock_execute_query, test_client):
     request_data = {"text": 12345}
-    response = test_client.post("/api/risk-definition/check/", json=request_data)
+    response = test_client.post("/api/risk/check/definition/", json=request_data)
     assert response.status_code == 422
 
 

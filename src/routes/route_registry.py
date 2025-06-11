@@ -71,16 +71,14 @@ class RouteRegistry:
 
             async def route_function(
                 request: Request,
-                request_model: TRequest = Body(..., embed=False),
-                user_info: Optional[dict[Any, Any]] = None,
-            ) -> TResponse:
+                request_model: request_model = Body(..., embed=False),
+            ) -> response_model:
                 """
                 Route handler function for local environment (no auth/metering).
 
                 Args:
                     request: The FastAPI request object.
                     request_model: The request data.
-                    user_info: User information from authentication (not used in local).
 
                 Returns:
                     The response data.
@@ -108,7 +106,6 @@ class RouteRegistry:
                 Args:
                     request: The FastAPI request object.
                     request_model: The request data.
-                    user_info: User information from authentication.
 
                 Returns:
                     The response data.
@@ -117,9 +114,7 @@ class RouteRegistry:
                     BaseServiceException: If an error occurs during processing.
                 """
                 # Check token quota
-                if user_info is None:
-                    raise ValueError("User info is required for authentication")
-                user_id = user_info["user_id"]
+                user_id = request.state.user_id
                 token_service = TokenQuotaService(request)
                 has_access = await token_service.has_access()
                 if not has_access:
