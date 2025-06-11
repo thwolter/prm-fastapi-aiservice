@@ -25,6 +25,7 @@ sentry-sdk = {extras = ["fastapi"], version = "^2.19.2"}
 numpy = "^2.3"
 openmeter = "^1.0.0b186"
 riskgpt = {git = "https://github.com/thwolter/riskgpt.git", rev = "develop"}
+pytest-asyncio = "^1.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

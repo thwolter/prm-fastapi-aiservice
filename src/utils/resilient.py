@@ -61,14 +61,22 @@ def with_resilient_execution(
                 result = await func(*args, **kwargs)
                 circuit.record_success()
                 return result
-            except Exception as error:  # pragma: no cover - unexpected error
+            except Exception as error:
                 circuit.record_failure()
                 logger.warning(f"Service {svc_name} failed: {error}")
                 if create_default_response:
-                    result = create_default_response(*args, **kwargs)
-                    if inspect.isawaitable(result):
-                        result = await result
-                    return result
+                    try:
+                        result = create_default_response(*args, **kwargs)
+                        if inspect.isawaitable(result):
+                            result = await result
+                        return result
+                    except Exception as fallback_error:
+                        logger.error(f"Fallback for {svc_name} failed: {fallback_error}")
+                        # If the fallback fails, raise the original error
+                        raise ExternalServiceException(
+                            detail=f"Service {svc_name} failed: {str(error)}",
+                            service_name=svc_name,
+                        )
                 raise ExternalServiceException(
                     detail=f"Service {svc_name} failed: {str(error)}",
                     service_name=svc_name,
