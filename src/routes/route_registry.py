@@ -1,6 +1,7 @@
 """Route registry for registering API routes."""
+
 from src.utils import logutils
-from typing import Callable, List, Optional, Type, TypeVar
+from typing import Any, Callable, List, Optional, Type, TypeVar
 
 from fastapi import APIRouter, Body, Depends, Request
 from pydantic import BaseModel
@@ -9,10 +10,10 @@ from src.auth.dependencies import get_current_user
 from src.auth.service import TokenService
 from src.core.config import settings
 from src.routes.service_handler import ServiceHandler
-from src.utils.exceptions import BaseServiceException, QuotaExceededException
+from src.utils.exceptions import QuotaExceededException
 
-TRequest = TypeVar('TRequest', bound=BaseModel)
-TResponse = TypeVar('TResponse', bound=BaseModel)
+TRequest = TypeVar("TRequest", bound=BaseModel)
+TResponse = TypeVar("TResponse", bound=BaseModel)
 
 logger = logutils.get_logger(__name__)
 
@@ -65,7 +66,8 @@ class RouteRegistry:
         auth_dep = auth_dependency or get_current_user
 
         # Define a route function that bypasses authentication and metering in local environment
-        if settings.ENVIRONMENT == 'local':
+        if settings.ENVIRONMENT == "local":
+
             async def route_function(
                 request: Request,
                 request_model: request_model = Body(..., embed=False),
@@ -89,11 +91,13 @@ class RouteRegistry:
                 result = await handler.handle(request_model)
 
                 return result
+
         else:
+
             async def route_function(
                 request: Request,
                 request_model: request_model = Body(..., embed=False),
-                user_info: dict = Depends(auth_dep),
+                user_info: dict[str, Any] = Depends(auth_dep),
             ) -> response_model:
                 """
                 Route handler function with authentication and metering.
@@ -110,11 +114,11 @@ class RouteRegistry:
                     BaseServiceException: If an error occurs during processing.
                 """
                 # Check token quota
-                user_id = user_info['user_id']
+                user_id = user_info["user_id"]
                 token_service = TokenService(request)
                 has_access = await token_service.has_access()
                 if not has_access:
-                    raise QuotaExceededException(detail='Token quota exceeded')
+                    raise QuotaExceededException(detail="Token quota exceeded")
 
                 # Handle the request
                 result = await handler.handle(request_model)
@@ -125,10 +129,6 @@ class RouteRegistry:
                 return result
 
         # Register the route with the FastAPI router
-        self.router.post(
-            path, 
-            response_model=response_model, 
-            tags=tags
-        )(route_function)
+        self.router.post(path, response_model=response_model, tags=tags)(route_function)
 
         logger.debug(f"Registered route: {path} with tags: {tags}")
