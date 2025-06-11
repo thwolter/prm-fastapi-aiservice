@@ -1,17 +1,25 @@
 import jwt
+import typing
 from fastapi import Request
+from typing import Any
 
 from src.core.config import settings
 from src.utils.exceptions import AuthenticationException
 
 
-def get_jwt_payload(request: Request):
+def get_jwt_payload(request: Request) -> dict[str, Any]:
     """
     Extract and verify JWT token from the cookie.
+    In local environment, authentication is bypassed.
     """
-    token = request.cookies.get('auth')
+    # Skip authentication in local environment
+    if settings.ENVIRONMENT == "local":
+        # Return a dummy payload with a user ID
+        return {"sub": "00000000-0000-0000-0000-000000000000"}
+
+    token = request.cookies.get("auth")
     if not token:
-        raise AuthenticationException(detail='Missing authentication token')
+        raise AuthenticationException(detail="Missing authentication token")
 
     try:
         payload = jwt.decode(
@@ -21,10 +29,10 @@ def get_jwt_payload(request: Request):
             audience=settings.AUTH_TOKEN_AUDIENCE,
             leeway=settings.AUTH_TOKEN_LEEWAY,
         )
-        return payload
+        return typing.cast(dict[str, Any], payload)
 
     except jwt.ExpiredSignatureError:
-        raise AuthenticationException(detail='Token has expired')
+        raise AuthenticationException(detail="Token has expired")
 
     except jwt.InvalidTokenError:
-        raise AuthenticationException(detail='Invalid token')
+        raise AuthenticationException(detail="Invalid token")

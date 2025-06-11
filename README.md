@@ -30,36 +30,6 @@ To use this feature:
 2. Start the application normally
 3. Make API requests without authentication tokens
 
-Prompts can be defined under <https://smith.langchain.com/prompts>
-
-### Category endpoint
-
-Risk categories are generated via the [RiskGPT](https://pypi.org/project/riskgpt/)
-library (Python 3.12+). Install it separately and provide a valid
-`riskgpt.toml` configuration. Send a `CategoryRequest` to
-`/api/categories/` to receive a list of categories and an optional rationale.
-
-### Context quality endpoint
-
-Use `/api/context/check/` with a `ContextQualityRequest` payload to analyse the
-quality of a project context. The service returns a `ContextQualityResponse`
-containing a quality score and rationale.
-
-### External context endpoint
-
-Use `/api/context/external/` with an `ExternalContextRequest` to gather relevant
-external information. The endpoint returns an `ExternalContextResponse`.
-
-### Presentation endpoint
-
-Send a `PresentationRequest` to `/api/presentation/` to create presentation-ready
-summaries. The service responds with a `PresentationResponse`.
-
-### Risk workflow endpoint
-
-The `/api/risk/workflow/` route executes the full risk workflow. Provide a
-`RiskRequest` and receive a `RiskResponse` with references and document IDs.
-
 ## Documentation
 
 The project documentation is built with MkDocs and can be found in the `docs` directory. To view the documentation locally, run:

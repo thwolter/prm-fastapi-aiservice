@@ -5,10 +5,16 @@ from src.core.config import settings
 from src.utils.exceptions import AuthenticationException
 
 
-async def get_current_user(request: Request):
+async def get_current_user(request: Request) -> dict[str, str]:
     """
     Dependency to enforce token validation and access control.
+    In local environment, authentication is bypassed.
     """
+    # Skip authentication in local environment
+    if settings.ENVIRONMENT == "local":
+        # Return a dummy user with a dummy token and user ID
+        return {"token": "dummy_token", "user_id": "00000000-0000-0000-0000-000000000000"}
+
     token = getattr(request.state, "token", None)
     user_id = getattr(request.state, "user_id", None)
 

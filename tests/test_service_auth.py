@@ -35,3 +35,13 @@ def test_service_jwt_invalid(monkeypatch):
     with TestClient(app) as client:
         res = client.get("/protected", headers={"Authorization": f"Bearer {token}"})
         assert res.status_code == 401
+
+
+def test_service_jwt_local_environment(monkeypatch):
+    """Test that authentication is bypassed in the local environment."""
+    monkeypatch.setattr(settings, "ENVIRONMENT", "local")
+    with TestClient(app) as client:
+        # No token provided, but should still work in local environment
+        res = client.get("/protected")
+        assert res.status_code == 200
+        assert res.json() == {"ok": True}
