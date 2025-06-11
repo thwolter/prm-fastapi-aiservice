@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.testclient import TestClient
 
 from src.auth.dependencies import get_current_user
-from src.auth.service import TokenService
+from src.auth.quota_service import TokenQuotaService
 from src.core.config import settings
 
 # Test app with user authentication dependency
@@ -22,14 +22,14 @@ app_token_service = FastAPI()
 
 @app_token_service.get("/token-check")
 async def token_check(request: Request):
-    token_service = TokenService(request)
+    token_service = TokenQuotaService(request)
     has_access = await token_service.has_access()
     return {"has_access": has_access}
 
 
 @app_token_service.get("/token-consume")
 async def token_consume(request: Request):
-    token_service = TokenService(request)
+    token_service = TokenQuotaService(request)
 
     # Create a dummy result object with tokens_info
     class DummyResult:

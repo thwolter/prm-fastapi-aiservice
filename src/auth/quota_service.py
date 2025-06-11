@@ -16,11 +16,11 @@ from src.utils.exceptions import RequestException, ResourceNotFoundException
 logger = logutils.get_logger(__name__)
 
 
-class TokenService:
+class TokenQuotaService:
     def __init__(self, request: Request):
         self.request = request
 
-        # In local environment, use dummy values if token or user_id are not set
+        # In a local environment, use dummy values if token or user_id are not set
         if settings.ENVIRONMENT == "local":
             self.auth_token = getattr(self.request.state, "token", "dummy_token")
             self.user_id = getattr(
@@ -41,7 +41,7 @@ class TokenService:
     async def has_access(self) -> bool:
         """
         Check the user's token quota via the data-service.
-        In local environment, token quota checking is bypassed.
+        In the local environment, token quota checking is bypassed.
         """
         # Skip token quota checking in local environment
         if settings.ENVIRONMENT == "local":
@@ -58,7 +58,7 @@ class TokenService:
     async def consume_tokens(self, result: Any, user_id: UUID) -> None:
         """
         Update the user's token consumption via the data-service.
-        In local environment, token consumption is bypassed.
+        In a local environment, token consumption is bypassed.
         """
         # Skip token consumption in local environment
         if settings.ENVIRONMENT == "local":

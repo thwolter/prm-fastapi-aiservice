@@ -1,18 +1,20 @@
 """Route registry for registering API routes."""
-from src.utils import logutils
-from typing import Callable, List, Optional, Type, TypeVar
+
+from enum import Enum
+from typing import Any, Callable, List, Optional, Type, TypeVar, Union
 
 from fastapi import APIRouter, Body, Depends, Request
 from pydantic import BaseModel
 
 from src.auth.dependencies import get_current_user
-from src.auth.service import TokenService
+from src.auth.quota_service import TokenQuotaService
 from src.core.config import settings
-from src.routes.service_handler import ServiceHandler
-from src.utils.exceptions import BaseServiceException, QuotaExceededException
+from src.routes.service_handler import ServiceHandler, ServiceProtocol
+from src.utils import logutils
+from src.utils.exceptions import QuotaExceededException
 
-TRequest = TypeVar('TRequest', bound=BaseModel)
-TResponse = TypeVar('TResponse', bound=BaseModel)
+TRequest = TypeVar("TRequest", bound=BaseModel)
+TResponse = TypeVar("TResponse", bound=BaseModel)
 
 logger = logutils.get_logger(__name__)
 
@@ -42,10 +44,10 @@ class RouteRegistry:
         path: str,
         request_model: Type[TRequest],
         response_model: Type[TResponse],
-        service_factory: Callable[[], object],
-        tags: Optional[List[str]] = None,
+        service_factory: Callable[[], ServiceProtocol],
+        tags: Optional[List[Union[str, Enum]]] = None,
         auth_dependency: Optional[Callable] = None,
-    ):
+    ) -> None:
         """
         Register a route with the FastAPI router.
 
@@ -65,17 +67,20 @@ class RouteRegistry:
         auth_dep = auth_dependency or get_current_user
 
         # Define a route function that bypasses authentication and metering in local environment
-        if settings.ENVIRONMENT == 'local':
+        if settings.ENVIRONMENT == "local":
+
             async def route_function(
                 request: Request,
-                request_model: request_model = Body(..., embed=False),
-            ) -> response_model:
+                request_model: TRequest = Body(..., embed=False),
+                user_info: Optional[dict[Any, Any]] = None,
+            ) -> TResponse:
                 """
                 Route handler function for local environment (no auth/metering).
 
                 Args:
                     request: The FastAPI request object.
                     request_model: The request data.
+                    user_info: User information from authentication (not used in local).
 
                 Returns:
                     The response data.
@@ -89,12 +94,14 @@ class RouteRegistry:
                 result = await handler.handle(request_model)
 
                 return result
+
         else:
+
             async def route_function(
                 request: Request,
-                request_model: request_model = Body(..., embed=False),
-                user_info: dict = Depends(auth_dep),
-            ) -> response_model:
+                request_model: TRequest = Body(..., embed=False),
+                user_info: Optional[dict[Any, Any]] = Depends(auth_dep),
+            ) -> TResponse:
                 """
                 Route handler function with authentication and metering.
 
@@ -110,11 +117,13 @@ class RouteRegistry:
                     BaseServiceException: If an error occurs during processing.
                 """
                 # Check token quota
-                user_id = user_info['user_id']
-                token_service = TokenService(request)
+                if user_info is None:
+                    raise ValueError("User info is required for authentication")
+                user_id = user_info["user_id"]
+                token_service = TokenQuotaService(request)
                 has_access = await token_service.has_access()
                 if not has_access:
-                    raise QuotaExceededException(detail='Token quota exceeded')
+                    raise QuotaExceededException(detail="Token quota exceeded")
 
                 # Handle the request
                 result = await handler.handle(request_model)
@@ -125,10 +134,6 @@ class RouteRegistry:
                 return result
 
         # Register the route with the FastAPI router
-        self.router.post(
-            path, 
-            response_model=response_model, 
-            tags=tags
-        )(route_function)
+        self.router.post(path, response_model=response_model, tags=tags)(route_function)
 
         logger.debug(f"Registered route: {path} with tags: {tags}")
