@@ -79,11 +79,10 @@ async def test_with_resilient_execution_dynamic_service_name():
 async def test_with_resilient_execution_circuit_open():
     """Test that the decorator fails fast when the circuit is open."""
     # Create a circuit breaker and open it
-    from src.utils.circuit_breaker import _circuit_breakers, CircuitBreaker
+    from src.utils.circuit_breaker import get_circuit_breaker
 
-    cb = CircuitBreaker(name="test_open", failure_threshold=1)
-    _circuit_breakers["test_open"] = cb
-    cb.record_failure()  # Open the circuit
+    cb = get_circuit_breaker("test_open")
+    cb.open()
 
     mock_func = AsyncMock(return_value="success")
 
@@ -104,11 +103,10 @@ async def test_with_resilient_execution_circuit_open():
 async def test_with_resilient_execution_circuit_open_with_fallback():
     """Test that the decorator returns the fallback when the circuit is open."""
     # Create a circuit breaker and open it
-    from src.utils.circuit_breaker import _circuit_breakers, CircuitBreaker
+    from src.utils.circuit_breaker import get_circuit_breaker
 
-    cb = CircuitBreaker(name="test_open_fallback", failure_threshold=1)
-    _circuit_breakers["test_open_fallback"] = cb
-    cb.record_failure()  # Open the circuit
+    cb = get_circuit_breaker("test_open_fallback")
+    cb.open()
 
     mock_func = AsyncMock(return_value="success")
     mock_fallback = MagicMock(return_value="fallback")

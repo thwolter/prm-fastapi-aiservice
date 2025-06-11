@@ -73,10 +73,10 @@ The circuit breaker pattern works like an electrical circuit breaker:
 
 ### Implementation
 
-The circuit breaker is implemented in `src/utils/circuit_breaker.py` and provides:
-
-1. A `CircuitBreaker` class that manages the state transitions based on success/failure of calls.
-2. A `with_circuit_breaker` decorator to easily apply the circuit breaker pattern to functions.
+The circuit breaker is implemented using the `pybreaker` library (through
+`aiobreaker` for async support). The helper module
+`src/utils/circuit_breaker.py` exposes a registry of circuit breakers via
+`get_circuit_breaker` and a `with_circuit_breaker` decorator for convenience.
 
 ### Usage
 
@@ -102,12 +102,10 @@ The circuit breaker will:
 
 ### Configuration
 
-The circuit breaker can be configured with the following parameters:
+The circuit breaker exposes several configuration options when created:
 
-- `failure_threshold`: Number of consecutive failures before opening the circuit (default: 5)
-- `recovery_timeout`: Time in seconds to wait before trying to recover (default: 30)
-- `timeout_factor`: Factor to multiply recovery_timeout by on consecutive failures (default: 2.0)
-- `max_timeout`: Maximum recovery timeout in seconds (default: 120)
+- `fail_max`: Number of consecutive failures before opening the circuit (default: 5)
+- `timeout_duration`: How long the circuit stays open before allowing a test call (default: 60s)
 
 ### Benefits
 

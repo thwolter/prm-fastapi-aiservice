@@ -13,7 +13,10 @@ This combined approach ensures that the application remains responsive even when
 
 ## Implementation
 
-The resilient execution functionality is implemented in the `src/utils/resilient.py` module, which provides the `with_resilient_execution` decorator.
+The resilient execution functionality is implemented in the
+`src/utils/resilient.py` module, which relies on the `pybreaker`/`aiobreaker`
+libraries to provide circuit breaker semantics. The
+`with_resilient_execution` decorator exposes this functionality.
 
 ### The `with_resilient_execution` Decorator
 

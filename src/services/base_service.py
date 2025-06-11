@@ -101,9 +101,10 @@ class BaseService:
                 values[name] = default_for_annotation(field.annotation)
 
         from src.utils.circuit_breaker import get_circuit_breaker
+        from aiobreaker.state import CircuitBreakerState
 
         circuit = get_circuit_breaker(self.__class__.__name__)
-        if not circuit.allow_request():
+        if circuit.state.state == CircuitBreakerState.OPEN:
             error_msg = f"Service {self.__class__.__name__} is currently unavailable"
         else:
             error_msg = f"Service {self.__class__.__name__} is temporarily unavailable"

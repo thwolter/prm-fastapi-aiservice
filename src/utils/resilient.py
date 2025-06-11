@@ -1,21 +1,18 @@
-"""Resilient execution utilities for handling service failures gracefully.
+"""Utilities for resilient service execution using a circuit breaker."""
+from __future__ import annotations
 
-This module provides utilities for making service calls more resilient,
-combining circuit breaker pattern with fallback functionality.
-"""
-
-import logging
 import inspect
+import logging
 from functools import wraps
-from typing import Callable, TypeVar, Optional, Coroutine, Any, Union
+from typing import Any, Callable, Coroutine, Optional, TypeVar, Union
+
+from aiobreaker import CircuitBreakerError
 
 from src.utils.circuit_breaker import get_circuit_breaker
 from src.utils.exceptions import ExternalServiceException
 
-# Type variable for generic function return type
 T = TypeVar("T")
 
-# Configure logger
 logger = logging.getLogger(__name__)
 
 
@@ -23,31 +20,18 @@ def with_resilient_execution(
     service_name: Union[str, Callable[..., str]],
     create_default_response: Optional[Callable[..., Union[T, Coroutine[Any, Any, T]]]] = None,
 ) -> Callable[[Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]]:
-    """Decorator that combines circuit breaker and fallback functionality.
+    """Decorate an async function with circuit breaker and fallback handling."""
 
-    Args:
-        service_name: Name of the service being called. Can be a string or a callable
-            that returns a string when called with the same arguments as the decorated function.
-        create_default_response: Optional function to create a default response
-            when the circuit is open or the service fails
-
-    Returns:
-        Decorated function with circuit breaker and fallback protection
-    """
-
-    def decorator(
-        func: Callable[..., Coroutine[Any, Any, T]],
-    ) -> Callable[..., Coroutine[Any, Any, T]]:
+    def decorator(func: Callable[..., Coroutine[Any, Any, T]]) -> Callable[..., Coroutine[Any, Any, T]]:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> T:
-            # Get the service name - either directly or by calling the function
             svc_name = service_name(*args, **kwargs) if callable(service_name) else service_name
+            breaker = get_circuit_breaker(svc_name)
 
-            circuit = get_circuit_breaker(svc_name)
-
-            # If circuit is open, fail fast
-            if not circuit.allow_request():
-                logger.warning(f"Circuit breaker for {svc_name} is open, failing fast")
+            try:
+                return await breaker.call_async(func, *args, **kwargs)
+            except CircuitBreakerError:
+                logger.warning("Circuit breaker for %s is open, failing fast", svc_name)
                 if create_default_response:
                     result = create_default_response(*args, **kwargs)
                     if inspect.isawaitable(result):
@@ -56,22 +40,15 @@ def with_resilient_execution(
                 raise ExternalServiceException(
                     detail=f"Service {svc_name} is currently unavailable", service_name=svc_name
                 )
-
-            try:
-                result = await func(*args, **kwargs)
-                circuit.record_success()
-                return result
             except Exception as error:  # pragma: no cover - unexpected error
-                circuit.record_failure()
-                logger.warning(f"Service {svc_name} failed: {error}")
+                logger.warning("Service %s failed: %s", svc_name, error)
                 if create_default_response:
                     result = create_default_response(*args, **kwargs)
                     if inspect.isawaitable(result):
                         result = await result
                     return result
                 raise ExternalServiceException(
-                    detail=f"Service {svc_name} failed: {str(error)}",
-                    service_name=svc_name,
+                    detail=f"Service {svc_name} failed: {error}", service_name=svc_name
                 )
 
         return wrapper
