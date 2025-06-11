@@ -2,32 +2,22 @@
 
 repos:
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 25.1.0
     hooks:
       - id: black
         language_version: python3.12
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.4.2
+    rev: v0.11.13
     hooks:
       - id: ruff
         args: [--fix]
         language_version: python3.12
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.9.0
+    rev: v1.16.0
     hooks:
       - id: mypy
         language: system
         entry: poetry run mypy
         stages: [commit, push]  # Lint bei commit UND push (alternativ nur "push")
-
-  # Beispiel für einen eigenen pre-push-Testlauf (z.B. Tests vor dem Push)
-  - repo: local
-    hooks:
-      - id: pytest-on-push
-        name: pytest before push
-        entry: poetry run pytest
-        language: system
-        pass_filenames: false
-        stages: [pre-push]  # Nur auf push!
