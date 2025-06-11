@@ -67,7 +67,7 @@ async def test_service_executes_chain(monkeypatch, service_cls, chain_path):
         pytest.skip(f"Could not create example model for {service_cls.__name__}: {e}")
 
     svc = service_cls()
-    monkeypatch.setattr(svc, "chain_fn", mock_chain)
+    monkeypatch.setattr(service_cls, "chain_fn", mock_chain)
     query = service_cls.QueryModel.model_validate(EXAMPLES[service_cls.QueryModel])
 
     # Test that execute_query returns the result of the chain
@@ -92,7 +92,7 @@ async def test_service_fallback(monkeypatch, service_cls, chain_path):
     # Create a mock that raises an exception
     mock_chain = AsyncMock(side_effect=Exception("boom"))
     svc = service_cls()
-    monkeypatch.setattr(svc, "chain_fn", mock_chain)
+    monkeypatch.setattr(service_cls, "chain_fn", mock_chain)
     query = service_cls.QueryModel.model_validate(EXAMPLES[service_cls.QueryModel])
 
     # Test that execute_query handles the failure appropriately
