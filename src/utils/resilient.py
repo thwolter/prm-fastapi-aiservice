@@ -40,13 +40,23 @@ def with_resilient_execution(
                 raise ExternalServiceException(
                     detail=f"Service {svc_name} is currently unavailable", service_name=svc_name
                 )
+
             except Exception as error:  # pragma: no cover - unexpected error
                 logger.warning("Service %s failed: %s", svc_name, error)
+
                 if create_default_response:
-                    result = create_default_response(*args, **kwargs)
-                    if inspect.isawaitable(result):
-                        result = await result
-                    return result
+                    try:
+                        result = create_default_response(*args, **kwargs)
+                        if inspect.isawaitable(result):
+                            result = await result
+                        return result
+                    except Exception as fallback_error:
+                        logger.error(f"Fallback for {svc_name} failed: {fallback_error}")
+                        # If the fallback fails, raise the original error
+                        raise ExternalServiceException(
+                            detail=f"Service {svc_name} failed: {str(error)}",
+                            service_name=svc_name,
+                        )
                 raise ExternalServiceException(
                     detail=f"Service {svc_name} failed: {error}", service_name=svc_name
                 )

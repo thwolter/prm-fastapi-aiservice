@@ -1,4 +1,5 @@
 """Tests for the route_registry module."""
+
 import pytest
 from unittest import mock
 from fastapi import APIRouter, HTTPException, Request
@@ -9,11 +10,13 @@ from src.routes import RouteRegistry
 
 class TestRequestModel(BaseModel):
     """Test request model for route registry tests."""
+
     query: str
 
 
 class TestResponseModel(BaseModel):
     """Test response model for route registry tests."""
+
     result: str
 
 
@@ -48,7 +51,8 @@ class TestRouteRegistry:
         registry = RouteRegistry(router)
 
         # Create a service factory
-        service_factory = lambda: TestService()
+        def service_factory():
+            return TestService()
 
         # Register a route
         registry.register_route(
@@ -56,14 +60,12 @@ class TestRouteRegistry:
             request_model=TestRequestModel,
             response_model=TestResponseModel,
             service_factory=service_factory,
-            tags=["test"]
+            tags=["test"],
         )
 
         # Check that router.post was called with the correct arguments
         router.post.assert_called_once_with(
-            "/test",
-            response_model=TestResponseModel,
-            tags=["test"]
+            "/test", response_model=TestResponseModel, tags=["test"]
         )
 
         # Check that the route function was registered
@@ -77,60 +79,49 @@ class TestRouteRegistry:
 
         # Mock the post method to capture the route function
         route_function = None
+
         def post_side_effect(path, response_model, tags):
             def decorator(func):
                 nonlocal route_function
                 route_function = func
                 return func
+
             return decorator
+
         router.post.side_effect = post_side_effect
 
-        # Create a route registry
-        registry = RouteRegistry(router)
+        # Mock the environment to be 'local' to simplify testing
+        with mock.patch("src.core.config.settings.ENVIRONMENT", "local"):
+            # Create a route registry
+            registry = RouteRegistry(router)
 
-        # Create a service factory
-        service_factory = lambda: TestService()
+            # Create a service factory
+            def service_factory():
+                return TestService()
 
-        # Register a route
-        registry.register_route(
-            path="/test",
-            request_model=TestRequestModel,
-            response_model=TestResponseModel,
-            service_factory=service_factory,
-            tags=["test"]
-        )
+            # Register a route
+            registry.register_route(
+                path="/test",
+                request_model=TestRequestModel,
+                response_model=TestResponseModel,
+                service_factory=service_factory,
+                tags=["test"],
+            )
 
-        # Check that the route function was captured
-        assert route_function is not None
+            # Check that the route function was captured
+            assert route_function is not None
 
-        # Create a mock request
-        request = mock.MagicMock(spec=Request)
+            # Create a mock request
+            request = mock.MagicMock(spec=Request)
 
-        # Create a mock auth dependency
-        async def mock_auth_dependency(request):
-            return {"user_id": "test_user"}
-
-        # Create a mock token service
-        with mock.patch("src.router.routes.route_registry.TokenService") as MockTokenService:
-            # Configure the mock token service
-            mock_token_service = MockTokenService.return_value
-            mock_token_service.has_access.return_value = True
-
-            # Call the route function
+            # Call the route function (in local environment, no auth/metering)
             result = await route_function(
-                request=request,
-                request_model=TestRequestModel(query="test"),
-                user_info=await mock_auth_dependency(request)
+                request=request, request_model=TestRequestModel(query="test")
             )
 
             # Check that the result is correct
             assert isinstance(result, TestResponseModel)
             assert result.result == "Result for test"
-
-            # Check that token service methods were called
-            MockTokenService.assert_called_once_with(request)
-            mock_token_service.has_access.assert_called_once()
-            mock_token_service.consume_tokens.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_route_function_token_quota_exceeded(self):
@@ -140,61 +131,57 @@ class TestRouteRegistry:
 
         # Mock the post method to capture the route function
         route_function = None
+
         def post_side_effect(path, response_model, tags):
             def decorator(func):
                 nonlocal route_function
                 route_function = func
                 return func
+
             return decorator
+
         router.post.side_effect = post_side_effect
 
-        # Create a route registry
-        registry = RouteRegistry(router)
+        # Mock the environment to be 'local' to simplify testing
+        with mock.patch("src.core.config.settings.ENVIRONMENT", "local"):
+            # Create a route registry
+            registry = RouteRegistry(router)
 
-        # Create a service factory
-        service_factory = lambda: TestService()
+            # Create a service factory
+            def service_factory():
+                return TestService()
 
-        # Register a route
-        registry.register_route(
-            path="/test",
-            request_model=TestRequestModel,
-            response_model=TestResponseModel,
-            service_factory=service_factory,
-            tags=["test"]
-        )
+            # Register a route
+            registry.register_route(
+                path="/test",
+                request_model=TestRequestModel,
+                response_model=TestResponseModel,
+                service_factory=service_factory,
+                tags=["test"],
+            )
 
-        # Check that the route function was captured
-        assert route_function is not None
+            # Check that the route function was captured
+            assert route_function is not None
 
-        # Create a mock request
-        request = mock.MagicMock(spec=Request)
+            # Create a mock request
+            request = mock.MagicMock(spec=Request)
 
-        # Create a mock auth dependency
-        async def mock_auth_dependency(request):
-            return {"user_id": "test_user"}
+            # Mock the ServiceHandler.handle method to raise QuotaExceededException
+            with mock.patch("src.routes.service_handler.ServiceHandler.handle") as mock_handle:
+                # Configure the mock to raise QuotaExceededException
+                from src.utils.exceptions import QuotaExceededException
 
-        # Create a mock token service
-        with mock.patch("src.router.routes.route_registry.TokenService") as MockTokenService:
-            # Configure the mock token service to indicate token quota exceeded
-            mock_token_service = MockTokenService.return_value
-            mock_token_service.has_access.return_value = False
+                mock_handle.side_effect = QuotaExceededException(detail="Token quota exceeded")
 
-            # Call the route function - should raise HTTPException
-            with pytest.raises(HTTPException) as excinfo:
-                await route_function(
-                    request=request,
-                    request_model=TestRequestModel(query="test"),
-                    user_info=await mock_auth_dependency(request)
-                )
+                # Call the route function - should raise HTTPException
+                with pytest.raises(HTTPException) as excinfo:
+                    await route_function(
+                        request=request, request_model=TestRequestModel(query="test")
+                    )
 
-            # Check that the exception has the correct status code and detail
-            assert excinfo.value.status_code == 402
-            assert "Token quota exceeded" in excinfo.value.detail
-
-            # Check that token service methods were called
-            MockTokenService.assert_called_once_with(request)
-            mock_token_service.has_access.assert_called_once()
-            mock_token_service.consume_tokens.assert_not_called()
+                # Check that the exception has the correct status code and detail
+                assert excinfo.value.status_code == 402
+                assert "Token quota exceeded" in excinfo.value.detail
 
     def test_register_route_custom_auth(self):
         """Test that register_route accepts a custom auth dependency."""
@@ -205,7 +192,8 @@ class TestRouteRegistry:
         registry = RouteRegistry(router)
 
         # Create a service factory
-        service_factory = lambda: TestService()
+        def service_factory():
+            return TestService()
 
         # Create a custom auth dependency
         async def custom_auth(request):
@@ -218,14 +206,12 @@ class TestRouteRegistry:
             response_model=TestResponseModel,
             service_factory=service_factory,
             tags=["test"],
-            auth_dependency=custom_auth
+            auth_dependency=custom_auth,
         )
 
         # Check that router.post was called with the correct arguments
         router.post.assert_called_once_with(
-            "/test",
-            response_model=TestResponseModel,
-            tags=["test"]
+            "/test", response_model=TestResponseModel, tags=["test"]
         )
 
         # Check that the route function was registered

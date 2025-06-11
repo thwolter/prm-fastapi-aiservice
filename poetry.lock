@@ -4329,6 +4329,25 @@ pluggy = ">=1.5,<2"
 dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
+name = "pytest-asyncio"
+version = "1.0.0"
+description = "Pytest support for asyncio"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "pytest_asyncio-1.0.0-py3-none-any.whl", hash = "sha256:4f024da9f1ef945e680dc68610b52550e36590a67fd31bb3b4943979a1f90ef3"},
+    {file = "pytest_asyncio-1.0.0.tar.gz", hash = "sha256:d15463d13f4456e1ead2594520216b225a16f781e144f8fdf6c5bb4667c48b3f"},
+]
+
+[package.dependencies]
+pytest = ">=8.2,<9"
+
+[package.extras]
+docs = ["sphinx (>=5.3)", "sphinx-rtd-theme (>=1)"]
+testing = ["coverage (>=6.2)", "hypothesis (>=5.7.1)"]
+
+[[package]]
 name = "pytest-dotenv"
 version = "0.5.2"
 description = "A py.test plugin that parses environment files before running tests"
@@ -4900,7 +4919,7 @@ wikipedia = "^1.4.0"
 type = "git"
 url = "https://github.com/thwolter/riskgpt.git"
 reference = "develop"
-resolved_reference = "4b489a1a7e2c25710138bbcd27fda1a59e2f7ece"
+resolved_reference = "e22e3dab6560a0aef144780bf46d62a99ea75428"
 
 [[package]]
 name = "rpds-py"
@@ -6418,4 +6437,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "c97e685281ef8691d284ebb24e24a57fbf66d8962f06343b9ab102d9a3859623"
+content-hash = "fadde6afca4b877b39b1cb8fa9799d5cecddc3b3443fb27fb19de30ca2b21497"
