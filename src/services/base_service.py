@@ -7,7 +7,6 @@ import typing
 from typing import Type, Any
 
 from pydantic import BaseModel
-
 from src.utils.resilient import with_resilient_execution
 
 # Configure logger
@@ -116,14 +115,25 @@ class BaseService:
                 else:
                     values[name] = default_for_annotation(field.annotation)
 
+        from src.utils.circuit_breaker import get_circuit_breaker
+
+        circuit = get_circuit_breaker(self.__class__.__name__)
+        if not circuit.allow_request():
+            error_msg = f"Service {self.__class__.__name__} is currently unavailable"
+        else:
+            error_msg = f"Service {self.__class__.__name__} is temporarily unavailable"
+
         if "response_info" in self.ResultModel.model_fields:
             values["response_info"] = ResponseInfo(
                 consumed_tokens=0,
                 total_cost=0.0,
                 prompt_name="",
                 model_name="",
-                error=f"Service {self.__class__.__name__} is temporarily unavailable",
+                error=error_msg,
             )
+
+        if "error" in self.ResultModel.model_fields:
+            values["error"] = error_msg
 
         # Try to create the model with the values we have
         try:
