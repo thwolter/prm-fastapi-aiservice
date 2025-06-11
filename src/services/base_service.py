@@ -53,7 +53,20 @@ class BaseService:
         information to ``response_info``.
         """
         from typing import get_args, get_origin
-        from riskgpt.models.schemas import ResponseInfo
+        from pydantic.fields import PydanticUndefined
+
+        try:  # riskgpt is optional in the test environment
+            from riskgpt.models.schemas import ResponseInfo
+        except Exception:  # pragma: no cover - optional dependency
+
+            class ResponseInfo(BaseModel):
+                """Fallback ResponseInfo model when riskgpt is unavailable."""
+
+                consumed_tokens: int = 0
+                total_cost: float = 0.0
+                prompt_name: str = ""
+                model_name: str = ""
+                error: str = ""
 
         def default_for_annotation(annotation: type | None) -> Any:
             if annotation is None:
@@ -97,7 +110,11 @@ class BaseService:
 
             # If the field is required, ensure it has a non-None value
             if name in required_fields:
-                if field.default is not None and field.default is not ...:
+                if (
+                    field.default is not None
+                    and field.default is not ...
+                    and field.default is not PydanticUndefined
+                ):
                     values[name] = field.default
                 elif field.annotation is str or getattr(field, "annotation_type", None) is str:
                     values[name] = ""
@@ -110,7 +127,11 @@ class BaseService:
                 else:
                     values[name] = default_for_annotation(field.annotation)
             else:
-                if field.default is not None and field.default is not ...:
+                if (
+                    field.default is not None
+                    and field.default is not ...
+                    and field.default is not PydanticUndefined
+                ):
                     values[name] = field.default
                 else:
                     values[name] = default_for_annotation(field.annotation)
