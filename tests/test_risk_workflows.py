@@ -1,10 +1,12 @@
 from unittest.mock import patch
-from fastapi.testclient import TestClient
 
+from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+
 from src.main import app
 
 client = TestClient(app)
+client.headers.update({"Authorization": "Bearer test"})
 
 
 @patch("src.services.services.ContextQualityService.execute_query")
@@ -33,7 +35,7 @@ def test_external_context_endpoint(mock_execute):
         response_info=None,
     )
     payload = {"business_context": {"project_id": "p"}}
-    response = client.post("/api/context/external/", json=payload)
+    response = client.post("/api/workflow/context/external/", json=payload)
     assert response.status_code == 200
     data = response.json()
     assert data["sector_summary"] == "sum"
@@ -48,7 +50,7 @@ def test_presentation_workflow_endpoint(mock_execute):
         "business_context": {"project_id": "p"},
         "audience": "executive",
     }
-    response = client.post("/api/presentation/", json=payload)
+    response = client.post("/api/workflow/presentation/", json=payload)
     assert response.status_code == 200
     data = response.json()
     assert data["executive_summary"] == "exec"
@@ -62,8 +64,7 @@ def test_risk_workflow_endpoint(mock_execute):
         response_info=None,
     )
     payload = {"business_context": {"project_id": "p"}, "category": "c"}
-    response = client.post("/api/risk/workflow/", json=payload)
+    response = client.post("/api/workflow/risk/", json=payload)
     assert response.status_code == 200
     data = response.json()
     assert len(data["risks"]) == 1
-
