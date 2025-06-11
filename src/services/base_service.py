@@ -5,6 +5,17 @@ import logging
 from typing import Type
 
 from pydantic import BaseModel
+from pydantic.fields import PydanticUndefined
+
+try:  # pragma: no cover - riskgpt optional dependency
+    from riskgpt.models.schemas import ResponseInfo
+except Exception:  # pragma: no cover - fallback for tests without riskgpt
+    class ResponseInfo(BaseModel):
+        consumed_tokens: int
+        total_cost: float
+        prompt_name: str
+        model_name: str
+        error: str | None = None
 
 from src.utils.resilient import with_resilient_execution
 
@@ -50,7 +61,6 @@ class BaseService:
         information to ``response_info``.
         """
         from typing import get_args, get_origin
-        from riskgpt.models.schemas import ResponseInfo
 
         def default_for_annotation(annotation):
             origin = get_origin(annotation)
@@ -85,10 +95,18 @@ class BaseService:
         for name, field in self.ResultModel.model_fields.items():
             if name == "response_info":
                 continue
-            if field.default is not None:
+            if field.default is not PydanticUndefined:
                 values[name] = field.default
             else:
                 values[name] = default_for_annotation(field.annotation)
+
+        from src.utils.circuit_breaker import get_circuit_breaker
+
+        circuit = get_circuit_breaker(self.__class__.__name__)
+        if not circuit.allow_request():
+            error_msg = f"Service {self.__class__.__name__} is currently unavailable"
+        else:
+            error_msg = f"Service {self.__class__.__name__} is temporarily unavailable"
 
         if "response_info" in self.ResultModel.model_fields:
             values["response_info"] = ResponseInfo(
@@ -96,8 +114,11 @@ class BaseService:
                 total_cost=0.0,
                 prompt_name="",
                 model_name="",
-                error=f"Service {self.__class__.__name__} is temporarily unavailable",
+                error=error_msg,
             )
+
+        if "error" in self.ResultModel.model_fields:
+            values["error"] = error_msg
 
         return self.ResultModel(**values)
 
