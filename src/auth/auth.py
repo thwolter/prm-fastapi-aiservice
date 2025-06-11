@@ -1,7 +1,8 @@
-import jwt
 import typing
-from fastapi import Request
 from typing import Any
+
+import jwt
+from fastapi import Request
 
 from src.core.config import settings
 from src.utils.exceptions import AuthenticationException

@@ -1,6 +1,4 @@
-from typing import Callable, Awaitable
-
-from src.utils import logutils
+from typing import Awaitable, Callable
 
 from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -8,6 +6,7 @@ from starlette.responses import Response
 
 from src.auth.auth import get_jwt_payload
 from src.core.config import settings
+from src.utils import logutils
 
 logger = logutils.get_logger(__name__)
 

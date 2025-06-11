@@ -1,5 +1,5 @@
-from fastapi import Header, Request
 import jwt
+from fastapi import Header, Request
 
 from src.core.config import settings
 from src.utils.exceptions import AuthenticationException

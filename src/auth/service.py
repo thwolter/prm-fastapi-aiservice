@@ -1,4 +1,3 @@
-from src.utils import logutils
 import uuid
 from typing import Any
 from uuid import UUID
@@ -11,7 +10,8 @@ from openmeter import Client
 
 from src.auth.schemas import ConsumedTokensInfo
 from src.core.config import settings
-from src.utils.exceptions import ResourceNotFoundException, RequestException
+from src.utils import logutils
+from src.utils.exceptions import RequestException, ResourceNotFoundException
 
 logger = logutils.get_logger(__name__)
 

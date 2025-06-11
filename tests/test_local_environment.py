@@ -1,11 +1,11 @@
 from uuid import UUID
-from fastapi import FastAPI, Depends, Request
+
+from fastapi import Depends, FastAPI, Request
 from fastapi.testclient import TestClient
 
 from src.auth.dependencies import get_current_user
 from src.auth.service import TokenService
 from src.core.config import settings
-
 
 # Test app with user authentication dependency
 app_user_auth = FastAPI()

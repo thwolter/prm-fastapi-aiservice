@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import typing
-from typing import Type, Tuple, Callable, Optional
+from typing import Callable, Optional, Tuple, Type
 
 from pydantic import BaseModel
-
 from riskgpt import chains
 from riskgpt.models import schemas as rg_schemas
+
 from src.services.base_service import BaseService
 
 
@@ -16,12 +16,10 @@ def _load_workflows() -> (
     Tuple[Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable]]
 ):
     try:
-        from riskgpt.workflows import (
-            async_risk_workflow as _async_risk_workflow,
-            external_context_enrichment as _external_context_enrichment,
-            prepare_presentation_output as _prepare_presentation_output,
-            check_context_quality as _check_context_quality,
-        )
+        from riskgpt.workflows import async_risk_workflow as _async_risk_workflow
+        from riskgpt.workflows import check_context_quality as _check_context_quality
+        from riskgpt.workflows import external_context_enrichment as _external_context_enrichment
+        from riskgpt.workflows import prepare_presentation_output as _prepare_presentation_output
 
         return (
             _async_risk_workflow,

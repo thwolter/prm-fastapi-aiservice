@@ -1,6 +1,7 @@
-import jwt
 from datetime import datetime, timedelta
-from fastapi import FastAPI, Depends
+
+import jwt
+from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 
 from src.auth.dependencies import verify_service_jwt
