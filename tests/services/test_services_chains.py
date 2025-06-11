@@ -66,7 +66,9 @@ async def test_service_executes_chain(monkeypatch, service_cls, chain_path):
     mock_chain = AsyncMock(return_value=example_model)
 
     svc = service_cls()
+
     monkeypatch.setattr(svc, "chain_fn", mock_chain)
+
 
     # Test that execute_query returns the result of the chain
     result = await svc.execute_query(query)
@@ -89,7 +91,7 @@ async def test_service_fallback(monkeypatch, service_cls, chain_path):
     # Create a mock that raises an exception
     mock_chain = AsyncMock(side_effect=Exception("boom"))
     svc = service_cls()
-    monkeypatch.setattr(svc, "chain_fn", mock_chain)
+    monkeypatch.setattr(service_cls, "chain_fn", mock_chain)
     query = service_cls.QueryModel.model_validate(EXAMPLES[service_cls.QueryModel])
 
     # Test that execute_query handles the failure appropriately
