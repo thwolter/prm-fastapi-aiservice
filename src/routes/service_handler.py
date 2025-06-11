@@ -1,18 +1,26 @@
 """Service handler for executing service queries."""
-from src.utils import logutils
-from typing import Callable, Generic, Type, TypeVar
 
+from src.utils import logutils
+from typing import Callable, Generic, Type, TypeVar, Protocol, runtime_checkable, cast
+
+from fastapi import HTTPException
 from pydantic import BaseModel
 
 from src.routes.validation import validate_model
-from src.utils.exceptions import (
-    BaseServiceException,
-    RequestException,
-    InternalServerException
-)
+from src.utils.exceptions import BaseServiceException, RequestException, InternalServerException
 
-TRequest = TypeVar('TRequest', bound=BaseModel)
-TResponse = TypeVar('TResponse', bound=BaseModel)
+TRequest = TypeVar("TRequest", bound=BaseModel)
+TResponse = TypeVar("TResponse", bound=BaseModel)
+
+
+@runtime_checkable
+class ServiceProtocol(Protocol):
+    """Protocol for services that can execute queries."""
+
+    async def execute_query(self, query: BaseModel) -> BaseModel:
+        """Execute a query and return a result."""
+        ...
+
 
 logger = logutils.get_logger(__name__)
 
@@ -30,7 +38,7 @@ class ServiceHandler(Generic[TRequest, TResponse]):
 
     def __init__(
         self,
-        service_factory: Callable[[], object],
+        service_factory: Callable[[], ServiceProtocol],
         request_model: Type[TRequest],
         response_model: Type[TResponse],
     ):
@@ -68,32 +76,37 @@ class ServiceHandler(Generic[TRequest, TResponse]):
             result = await service.execute_query(query)
 
             # Preserve response_info if present
-            response_info = getattr(result, 'response_info', None)
+            response_info = getattr(result, "response_info", None)
 
             # Validate the response
             validated = validate_model(result, self.response_model)
 
             # Restore response_info if it was present
             if response_info is not None:
-                setattr(validated, 'response_info', response_info)
+                setattr(validated, "response_info", response_info)
 
-            return validated
+            return cast(TResponse, validated)
 
         except AttributeError as ae:
-            logger.error(f'Attribute error in {self._get_service_name()}: {ae}')
-            raise RequestException(detail=f'Invalid request structure: {ae}')
+            logger.error(f"Attribute error in {self._get_service_name()}: {ae}")
+            raise RequestException(detail=f"Invalid request structure: {ae}")
 
         except BaseServiceException as bse:
-            logger.warning(f'Service exception in {self._get_service_name()}: {bse.detail}')
+            logger.warning(f"Service exception in {self._get_service_name()}: {bse.detail}")
             # Re-raise the custom exception as is
             raise
 
+        except HTTPException as he:
+            logger.warning(f"HTTP exception in {self._get_service_name()}: {he.detail}")
+            # Re-raise the HTTP exception as is
+            raise
+
         except TypeError as te:
-            logger.error(f'Type error in {self._get_service_name()}: {te}')
-            raise RequestException(detail=f'Invalid request structure: {te}')
+            logger.error(f"Type error in {self._get_service_name()}: {te}")
+            raise RequestException(detail=f"Invalid request structure: {te}")
 
         except Exception as e:
-            logger.error(f'Unexpected error in {self._get_service_name()}: {e}')
+            logger.error(f"Unexpected error in {self._get_service_name()}: {e}")
             raise InternalServerException()
 
     def _get_service_name(self) -> str:
