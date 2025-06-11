@@ -45,6 +45,21 @@ Use `/api/context/check/` with a `ContextQualityRequest` payload to analyse the
 quality of a project context. The service returns a `ContextQualityResponse`
 containing a quality score and rationale.
 
+### External context endpoint
+
+Use `/api/context/external/` with an `ExternalContextRequest` to gather relevant
+external information. The endpoint returns an `ExternalContextResponse`.
+
+### Presentation endpoint
+
+Send a `PresentationRequest` to `/api/presentation/` to create presentation-ready
+summaries. The service responds with a `PresentationResponse`.
+
+### Risk workflow endpoint
+
+The `/api/risk/workflow/` route executes the full risk workflow. Provide a
+`RiskRequest` and receive a `RiskResponse` with references and document IDs.
+
 ## Documentation
 
 The project documentation is built with MkDocs and can be found in the `docs` directory. To view the documentation locally, run:

@@ -9,6 +9,59 @@ from pydantic import BaseModel
 from riskgpt import chains
 from riskgpt.models import schemas as rg_schemas
 
+
+def _load_workflows():
+    try:
+        from riskgpt.workflows import (
+            async_risk_workflow as _async_risk_workflow,
+            external_context_enrichment as _external_context_enrichment,
+            prepare_presentation_output as _prepare_presentation_output,
+            check_context_quality as _check_context_quality,
+        )
+        return (
+            _async_risk_workflow,
+            _external_context_enrichment,
+            _prepare_presentation_output,
+            _check_context_quality,
+        )
+    except Exception:  # pragma: no cover - optional dependency
+        return (None, None, None, None)
+
+
+(
+    async_risk_workflow,
+    _external_context_enrichment,
+    _prepare_presentation_output,
+    _check_context_quality,
+) = _load_workflows()
+
+
+async def async_external_context_enrichment_fn(
+    request: rg_schemas.ExternalContextRequest,
+) -> rg_schemas.ExternalContextResponse:
+    """Async wrapper around :func:`external_context_enrichment`."""
+    if _external_context_enrichment is None:
+        raise RuntimeError("riskgpt is not installed")
+    return _external_context_enrichment(request)
+
+
+async def async_prepare_presentation_output_fn(
+    request: rg_schemas.PresentationRequest,
+) -> rg_schemas.PresentationResponse:
+    """Async wrapper around :func:`prepare_presentation_output`."""
+    if _prepare_presentation_output is None:
+        raise RuntimeError("riskgpt is not installed")
+    return _prepare_presentation_output(request)
+
+
+async def async_check_context_quality_fn(
+    request: rg_schemas.ContextQualityRequest,
+) -> rg_schemas.ContextQualityResponse:
+    """Async wrapper around :func:`check_context_quality`."""
+    if _check_context_quality is None:
+        raise RuntimeError("riskgpt is not installed")
+    return _check_context_quality(request)
+
 from src.services.base_service import BaseService
 
 
@@ -133,3 +186,39 @@ class CreateCategoriesService(BaseService):
     route_path = "/categories/"
     QueryModel: Type[BaseModel] = rg_schemas.CategoryRequest
     ResultModel: Type[BaseModel] = rg_schemas.CategoryResponse
+
+
+class ContextQualityService(BaseService):
+    """Service for evaluating context knowledge quality."""
+
+    chain_fn = async_check_context_quality_fn
+    route_path = "/context/check/"
+    QueryModel = rg_schemas.ContextQualityRequest
+    ResultModel = rg_schemas.ContextQualityResponse
+
+
+class ExternalContextService(BaseService):
+    """Service for enriching context with external information."""
+
+    chain_fn = async_external_context_enrichment_fn
+    route_path = "/context/external/"
+    QueryModel = rg_schemas.ExternalContextRequest
+    ResultModel = rg_schemas.ExternalContextResponse
+
+
+class PresentationWorkflowService(BaseService):
+    """Service for preparing presentation-ready summaries."""
+
+    chain_fn = async_prepare_presentation_output_fn
+    route_path = "/presentation/"
+    QueryModel = rg_schemas.PresentationRequest
+    ResultModel = rg_schemas.PresentationResponse
+
+
+class RiskWorkflowService(BaseService):
+    """Service orchestrating the full risk workflow."""
+
+    chain_fn = async_risk_workflow
+    route_path = "/risk/workflow/"
+    QueryModel = rg_schemas.RiskRequest
+    ResultModel = rg_schemas.RiskResponse
