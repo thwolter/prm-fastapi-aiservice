@@ -72,10 +72,10 @@ async def test_base_service_execute_query_circuit_open():
     service.__class__.chain_fn = mock_chain_fn
     
     # Open the circuit for the service
-    from src.utils.circuit_breaker import _circuit_breakers, CircuitBreaker
-    cb = CircuitBreaker(name="TestService", failure_threshold=1)
-    _circuit_breakers["TestService"] = cb
-    cb.record_failure()  # Open the circuit
+    from src.utils.circuit_breaker import get_circuit_breaker
+
+    cb = get_circuit_breaker("TestService")
+    cb.open()
     
     # Execute a query - should return a fallback response without calling the chain function
     query = TestQueryModel(query="test query")
