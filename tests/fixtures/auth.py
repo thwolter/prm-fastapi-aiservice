@@ -19,11 +19,18 @@ def override_auth(monkeypatch):
     async def _allow(self):
         return True
 
-    monkeypatch.setattr("src.auth.quota_service.TokenQuotaService.has_access", _allow)
+    monkeypatch.setattr(
+        "src.auth.quota_service.TokenQuotaService.get_token_entitlement_status", _allow
+    )
 
-    async def _consume(self, result, user_id):
+    async def _reserve(self, tokens):
+        return True
+
+    monkeypatch.setattr("src.auth.quota_service.TokenQuotaService.reserve_token_quota", _reserve)
+
+    async def _adjust(self, result, user_id):
         return None
 
-    monkeypatch.setattr("src.auth.quota_service.TokenQuotaService.consume_tokens", _consume)
+    monkeypatch.setattr("src.auth.quota_service.TokenQuotaService.adjust_consumed_tokens", _adjust)
     yield
     app.dependency_overrides.clear()

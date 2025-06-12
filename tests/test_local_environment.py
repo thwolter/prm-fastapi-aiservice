@@ -23,7 +23,7 @@ app_token_service = FastAPI()
 @app_token_service.get("/token-check")
 async def token_check(request: Request):
     token_service = TokenQuotaService(request)
-    has_access = await token_service.has_access()
+    has_access = await token_service.get_token_entitlement_status()
     return {"has_access": has_access}
 
 
@@ -41,7 +41,10 @@ async def token_consume(request: Request):
             }
 
     result = DummyResult()
-    await token_service.consume_tokens(result, UUID("00000000-0000-0000-0000-000000000000"))
+    # First reserve tokens
+    await token_service.reserve_token_quota(50)
+    # Then adjust consumed tokens
+    await token_service.adjust_consumed_tokens(result, UUID("00000000-0000-0000-0000-000000000000"))
     return {"consumed": True}
 
 
@@ -55,8 +58,8 @@ def test_user_auth_local_environment(monkeypatch):
         assert "user" in res.json()
 
 
-def test_token_service_has_access_local_environment(monkeypatch):
-    """Test that token quota checking is bypassed in the local environment."""
+def test_token_service_entitlement_status_local_environment(monkeypatch):
+    """Test that token entitlement checking is bypassed in the local environment."""
     monkeypatch.setattr(settings, "ENVIRONMENT", "local")
     with TestClient(app_token_service) as client:
         # No token provided, but should still have access in local environment
@@ -65,11 +68,11 @@ def test_token_service_has_access_local_environment(monkeypatch):
         assert res.json() == {"has_access": True}
 
 
-def test_token_service_consume_tokens_local_environment(monkeypatch):
-    """Test that token consumption is bypassed in the local environment."""
+def test_token_service_reserve_and_adjust_local_environment(monkeypatch):
+    """Test that token reservation and adjustment are bypassed in the local environment."""
     monkeypatch.setattr(settings, "ENVIRONMENT", "local")
     with TestClient(app_token_service) as client:
-        # No token provided, but should still be able to consume tokens in local environment
+        # No token provided, but should still be able to reserve and adjust tokens in local environment
         res = client.get("/token-consume")
         assert res.status_code == 200
         assert res.json() == {"consumed": True}
