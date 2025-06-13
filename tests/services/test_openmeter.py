@@ -1,3 +1,5 @@
+"""Integration test of the OpenMeter sandbox."""
+
 import uuid
 
 import pytest
@@ -6,6 +8,18 @@ from openmeter import Client
 
 from src.auth.quota_service import TokenQuotaService
 from src.core.config import settings
+
+"""
+Prerequisites
+-------------
+- Valid sandbox API key and URL in the environment (`OPENMETER_API_KEY` and
+  `OPENMETER_API_URL`).
+- Active internet connection to reach the sandbox service.
+
+The `create_entitlement` call issues an initial allowance of ``1000`` tokens for
+the temporary test subject. Both the entitlement and the subject are deleted in
+the fixture teardowns so the sandbox remains clean after the test run.
+"""
 
 
 # Fixtures for sandbox client and test subject
@@ -33,7 +47,7 @@ async def entitlement_setup(sandbox_client, test_subject):
         featureKey="ai_tokens",
         type="metered",
         usagePeriod={"interval": "MONTH"},
-        issueAfterReset=1000,
+        issueAfterReset=1000,  # initial grant of 1000 tokens for the test user
         isSoftLimit=False,
     )
     yield ent
