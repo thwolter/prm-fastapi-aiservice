@@ -20,6 +20,13 @@ environment variable.
 pytest -m "not webtest"
 ```
 
+To execute the webtests (which interact with OpenMeter's sandbox), set
+`OPENMETER_SANDBOX_API_KEY` and run pytest with the `--webtest` flag:
+
+```bash
+OPENMETER_SANDBOX_API_KEY=<your_key> pytest --webtest
+```
+
 ### Testing APIs without Protection
 
 In the local environment (`ENVIRONMENT=local` in `.env`), API authentication and metering protections are automatically disabled. This allows you to test the APIs without needing to provide authentication tokens or worrying about token quota limitations.
