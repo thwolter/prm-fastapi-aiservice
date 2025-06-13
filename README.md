@@ -41,6 +41,17 @@ To use this feature:
 2. Start the application normally
 3. Make API requests without authentication tokens
 
+### OpenMeter Sandbox Test
+
+The `tests/services/test_openmeter.py` integration test exercises the
+OpenMeter sandbox. It creates a temporary subject and issues an initial
+entitlement of 1000 tokens for that user. The subject and entitlement are
+deleted when the test completes.
+
+To run this test you must provide valid sandbox credentials via
+`OPENMETER_API_URL` and `OPENMETER_API_KEY` and have an active internet
+connection.
+
 ## Authentication
 
 In staging and production environments you must provide a valid JSON Web Token in the request headers. The API expects the following format:

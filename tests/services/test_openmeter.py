@@ -1,3 +1,5 @@
+"""Integration test of the OpenMeter sandbox."""
+
 import uuid
 
 import pytest
@@ -40,6 +42,18 @@ if not settings.OPENMETER_API_KEY or settings.OPENMETER_API_KEY in {
         allow_module_level=True,
     )
 
+"""
+Prerequisites
+-------------
+- Valid sandbox API key and URL in the environment (`OPENMETER_API_KEY` and
+  `OPENMETER_API_URL`).
+- Active internet connection to reach the sandbox service.
+
+The `create_entitlement` call issues an initial allowance of ``1000`` tokens for
+the temporary test subject. Both the entitlement and the subject are deleted in
+the fixture teardowns so the sandbox remains clean after the test run.
+"""
+
 
 # Fixtures for sandbox client and test subject
 @pytest.fixture(scope="module")
@@ -66,7 +80,7 @@ async def entitlement_setup(sandbox_client, test_subject):
         featureKey="ai_tokens",
         type="metered",
         usagePeriod={"interval": "MONTH"},
-        issueAfterReset=1000,
+        issueAfterReset=1000,  # initial grant of 1000 tokens for the test user
         isSoftLimit=False,
     )
     yield ent
