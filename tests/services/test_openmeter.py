@@ -42,6 +42,7 @@ async def entitlement_setup(sandbox_client, test_subject):
 
 
 @pytest.mark.asyncio
+@pytest.mark.webtest
 async def test_reserve_and_adjust_tokens(
     entitlement_setup, sandbox_client, test_subject, monkeypatch
 ):
