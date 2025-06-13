@@ -5,6 +5,10 @@ import pytest
 
 @pytest.fixture(scope="session", autouse=True)
 def load_env():
+    """
+    Ensure that the application's config is reloaded and required environment variables are set before any tests run.
+    This is useful when environment variables may change between test runs or when using tools like pytest-dotenv.
+    """
     from src.core import config
 
     old_settings = config.settings
@@ -18,7 +22,11 @@ def load_env():
 
 @pytest.fixture(autouse=True)
 def override_settings(request):
-    """Override settings for testing."""
+    """
+    Temporarily override config settings (e.g., REDIS_URL and ENVIRONMENT) for each test.
+    This allows tests to run with different settings without affecting the global config or other tests.
+    Useful for isolating test environments and simulating different configurations.
+    """
     from src.core import config
 
     redis_url = getattr(request, "param", "redis://localhost:6379")

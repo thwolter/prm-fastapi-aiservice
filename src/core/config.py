@@ -1,7 +1,7 @@
-from typing import Annotated, Any, Literal
 import json
+from typing import Annotated, Any, Literal
 
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
 from pydantic import AnyUrl, BeforeValidator, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -88,6 +88,7 @@ class Settings(BaseSettings):
     OPENMETER_API_KEY: str
     OPENMETER_API_URL: str = "https://openmeter.cloud"
     OPENMETER_SOURCE: str = "prm-ai-service"
+    OPENMETER_TIMEOUT: float = 1.0
 
     @classmethod
     def from_env(cls):

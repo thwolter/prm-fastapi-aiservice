@@ -1,12 +1,18 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
 
 class LoginRequest(BaseModel):
-    grant_type: Optional[str] = 'password'
+    grant_type: Optional[str] = "password"
     username: str
     password: str
+
+
+class EntitlementCreate(BaseModel):
+    feature: str
+    max_limit: int
+    period: Literal["DAY", "WEEK", "MONTH", "YEAR"]
 
 
 class ConsumedTokensInfo(BaseModel):

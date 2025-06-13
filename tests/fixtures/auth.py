@@ -4,7 +4,7 @@ from src.main import app
 
 
 @pytest.fixture(autouse=True)
-def override_auth(monkeypatch):
+def override_auth(monkeypatch, request):
     """Override authentication dependencies for tests."""
 
     from fastapi import Request
@@ -16,21 +16,28 @@ def override_auth(monkeypatch):
 
     app.dependency_overrides[get_current_user] = dummy_get_current_user
 
-    async def _allow(self):
-        return True
+    if request.node.get_closest_marker("no_quota_patch") is not None:
 
-    monkeypatch.setattr(
-        "src.auth.quota_service.TokenQuotaService.get_token_entitlement_status", _allow
-    )
+        async def _allow(self):
+            return True
 
-    async def _reserve(self, tokens):
-        return True
+        async def _reserve(self, tokens):
+            return True
 
-    monkeypatch.setattr("src.auth.quota_service.TokenQuotaService.reserve_token_quota", _reserve)
+        async def _adjust(self, result, user_id):
+            return None
 
-    async def _adjust(self, result, user_id):
-        return None
+        monkeypatch.setattr(
+            "src.auth.quota_service.TokenQuotaService.get_token_entitlement_status", _allow
+        )
 
-    monkeypatch.setattr("src.auth.quota_service.TokenQuotaService.adjust_consumed_tokens", _adjust)
+        monkeypatch.setattr(
+            "src.auth.quota_service.TokenQuotaService.reserve_token_quota", _reserve
+        )
+
+        monkeypatch.setattr(
+            "src.auth.quota_service.TokenQuotaService.adjust_consumed_tokens", _adjust
+        )
+
     yield
     app.dependency_overrides.clear()

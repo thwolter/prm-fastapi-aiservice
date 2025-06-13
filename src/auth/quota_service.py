@@ -23,165 +23,125 @@ openmeter.subjects.createEntitlement('user-id', {
 # See OpenMeter documentation for detailed configuration.
 """
 
-import asyncio
-import uuid
 from typing import Any
 from uuid import UUID
 
-from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
-from azure.core.rest import HttpRequest
-from cloudevents.conversion import to_dict
-from cloudevents.http import CloudEvent
 from fastapi import Request
-from openmeter import Client
-from openmeter.aio import Client as AsyncClient
 
-from src.auth.schemas import ConsumedTokensInfo
-from src.core.config import settings
+from src.auth.schemas import EntitlementCreate
+from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.utils import logutils
-from src.utils.exceptions import RequestException, ResourceNotFoundException
-from src.utils.resilient import with_resilient_execution
 
 logger = logutils.get_logger(__name__)
 
 
 class TokenQuotaService:
+    """
+    Legacy service that delegates to specialized services.
+    This class is maintained for backward compatibility.
+
+    For new code, use the specialized services directly:
+    - CustomerService: For customer management
+    - EntitlementService: For entitlement management
+    - TokenConsumptionService: For token consumption
+    """
+
     def __init__(self, request: Request):
         self.request = request
 
-        if self.is_local_env:
-            self.auth_token = getattr(self.request.state, "token", "dummy_token")
-            self.user_id = getattr(
-                self.request.state, "user_id", "00000000-0000-0000-0000-000000000000"
-            )
-        else:
-            self.auth_token = self.request.state.token
-            self.user_id = self.request.state.user_id
+        self.auth_token = self.request.state.token
+        self.user_id = self.request.state.user_id
+        self.user_email = getattr(self.request.state, "user_email", None)
 
-        self.client = Client(
-            endpoint=settings.OPENMETER_API_URL,
-            headers={
-                "Accept": "application/json",
-                "Authorization": f"Bearer {settings.OPENMETER_API_KEY}",
-            },
-        )
-
-        self._reserved_tokens: int = 0
+        # Create specialized services
+        self.customer_service = TokenQuotaServiceProvider.get_customer_service(request)
+        self.entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(request)
+        self.token_service = TokenQuotaServiceProvider.get_token_consumption_service(request)
 
     @property
     def is_local_env(self) -> bool:
-        return settings.ENVIRONMENT == "local"
+        return self.customer_service.is_local_env
+
+    async def create_customer(self, user_id: UUID = None):
+        """
+        Create or update a customer in OpenMeter.
+        Delegates to CustomerService.
+
+        Args:
+            user_id: Optional user ID. If not provided, uses the ID from the request.
+        """
+        await self.customer_service.create_customer(user_id)
+
+    async def delete_customer(self):
+        """
+        Deletes the user from OpenMeter.
+        This is typically used during user deletion or cleanup.
+        Delegates to CustomerService.
+        """
+        await self.customer_service.delete_customer()
+
+    async def set_entitlement(self, limit: EntitlementCreate, user_id: UUID = None):
+        """
+        Set an entitlement for a user.
+        Delegates to EntitlementService.
+
+        Args:
+            limit: The entitlement details.
+            user_id: Optional user ID. If not provided, uses the ID from the request.
+        """
+        await self.entitlement_service.set_entitlement(limit, user_id)
 
     async def get_token_entitlement_status(self) -> bool:
         """
         Returns True if the user has a positive token entitlement.
         In local environment, always returns True (bypassed for dev/testing).
+        Delegates to EntitlementService.
         """
-        if self.is_local_env:
-            logger.debug("Bypassing token entitlement check in local environment")
-            return True
+        return await self.entitlement_service.get_token_entitlement_status()
 
-        try:
-            response = self.client.get_entitlement_value(str(self.user_id), "ai_tokens")
-        except ResourceNotFoundError as e:
-            logger.error(f"User {self.user_id}: {e}")
-            raise ResourceNotFoundException(detail="User not found")
-        return bool(response["hasAccess"])
+    async def has_access(self) -> bool:
+        """
+        Alias for get_token_entitlement_status.
+        """
+        return await self.get_token_entitlement_status()
 
-    @with_resilient_execution(service_name="OpenMeter")
     async def decrement_entitlement(self, tokens: int) -> bool:
         """
         Atomically checks the user's entitlement and decrements by 'tokens' if possible.
         Returns True if successful, False otherwise.
+        Delegates to TokenConsumptionService.
         """
-        if self.is_local_env:
-            logger.debug("Bypassing decrement_entitlement in local environment")
-            return True
+        return await self.token_service.decrement_entitlement(tokens)
 
-        async_client = AsyncClient(
-            endpoint=settings.OPENMETER_API_URL,
-            headers={
-                "Accept": "application/json",
-                "Authorization": f"Bearer {settings.OPENMETER_API_KEY}",
-            },
-        )
-
-        request = HttpRequest(
-            method="POST",
-            url=f"/api/v1/subjects/{self.user_id}/entitlements/ai_tokens/check-and-decrement",
-            json={"amount": tokens},
-        )
-
-        try:
-            response = await asyncio.wait_for(async_client.send_request(request), timeout=1.0)
-            if response.status_code == 200:
-                return True
-            if response.status_code in (402, 403, 409):
-                return False
-            response.raise_for_status()
-        except (HttpResponseError, ResourceNotFoundError) as e:
-            logger.error(f"OpenMeter decrement_entitlement failed: {e}")
-            if isinstance(e, ResourceNotFoundError):
-                raise ResourceNotFoundException(detail="User not found")
-            raise
-        finally:
-            await async_client.close()
-
-        return False
-
-    async def reserve_token_quota(self, tokens: int) -> bool:
+    async def reserve_token_quota(self, tokens: int, user_id: UUID = None) -> bool:
         """
         Reserve (pre-consume) an estimated number of tokens for the user.
         Returns True if reservation is successful.
-        """
-        success = await self.decrement_entitlement(tokens)
-        if success:
-            self._reserved_tokens = tokens
-        return success
+        Delegates to TokenConsumptionService.
 
-    @with_resilient_execution(service_name="OpenMeter")
+        Args:
+            tokens: The number of tokens to reserve.
+            user_id: Optional user ID. If not provided, uses the ID from the request.
+        """
+        return await self.token_service.reserve_token_quota(tokens, user_id)
+
     async def adjust_consumed_tokens(self, result: Any, user_id: UUID) -> None:
         """
         Adjust the reserved tokens based on actual usage by sending a CloudEvent.
         The adjustment is the difference between actual and reserved tokens.
+        Delegates to TokenConsumptionService.
         """
-        if self.is_local_env:
-            logger.debug("Bypassing adjust_consumed_tokens in local environment")
-            if hasattr(result, "tokens_info"):
-                del result.tokens_info
-            self._reserved_tokens = 0
-            return
+        await self.token_service.adjust_consumed_tokens(result, user_id)
 
-        try:
-            payload = ConsumedTokensInfo(**result.tokens_info)
-            del result.tokens_info
-        except ValueError as e:
-            logger.error(f"Invalid tokens info: {e}")
-            raise RequestException(detail="Invalid tokens info")
+    async def consume_tokens(self, result: Any, user_id: UUID) -> None:
+        """
+        Alias for adjust_consumed_tokens.
+        """
+        await self.adjust_consumed_tokens(result, user_id)
 
-        diff = payload.total_tokens - self._reserved_tokens
-        if diff == 0:
-            self._reserved_tokens = 0
-            return
-
-        event_data = {
-            "tokens": diff,
-            "model": payload.model_name,
-            "prompt": payload.prompt_name,
-        }
-        response_info = getattr(result, "response_info", None)
-        if response_info is not None:
-            event_data["response_info"] = response_info
-
-        event = CloudEvent(
-            attributes={
-                "id": str(uuid.uuid4()),
-                "type": "tokens",
-                "source": settings.OPENMETER_SOURCE,
-                "subject": str(user_id),
-            },
-            data=event_data,
-        )
-
-        self.client.ingest_events(to_dict(event))
-        self._reserved_tokens = 0
+    async def get_entitlement_value(self, user_id: UUID, feature_key: str = "ai_tokens") -> dict:
+        """
+        Get the entitlement value for a user.
+        Delegates to EntitlementService.
+        """
+        return await self.entitlement_service.get_entitlement_value(user_id, feature_key)

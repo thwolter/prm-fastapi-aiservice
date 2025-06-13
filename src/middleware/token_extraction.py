@@ -24,6 +24,7 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
             logger.debug("Local environment: setting dummy token and user ID")
             request.state.token = "dummy_token"
             request.state.user_id = "00000000-0000-0000-0000-000000000000"
+            request.state.user_email = "dummy@example.com"
             response: Response = await call_next(request)
             return response
 
@@ -39,12 +40,15 @@ class TokenExtractionMiddleware(BaseHTTPMiddleware):
                 payload = get_jwt_payload(request)
                 request.state.token = token
                 request.state.user_id = payload.get("sub")
+                request.state.user_email = payload.get("email")
             except HTTPException:
                 request.state.token = None
                 request.state.user_id = None
+                request.state.user_email = None
         else:
             request.state.token = None
             request.state.user_id = None
+            request.state.user_email = None
 
         final_response: Response = await call_next(request)
         return final_response
