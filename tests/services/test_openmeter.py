@@ -4,8 +4,29 @@ import pytest
 from fastapi import Request
 from openmeter import Client
 
+from src.auth.dependencies import get_current_user
 from src.auth.quota_service import TokenQuotaService
 from src.core.config import settings
+from src.main import app
+
+
+@pytest.fixture(autouse=True)
+def override_auth():
+    """Override authentication without patching quota service."""
+
+    async def dummy_get_current_user(request: Request):
+        return {
+            "token": getattr(request.state, "token", "test"),
+            "user_id": getattr(
+                request.state,
+                "user_id",
+                "00000000-0000-0000-0000-000000000000",
+            ),
+        }
+
+    app.dependency_overrides[get_current_user] = dummy_get_current_user
+    yield
+    app.dependency_overrides.pop(get_current_user, None)
 
 
 # Fixtures for sandbox client and test subject
