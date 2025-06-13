@@ -6,7 +6,7 @@ from typing import Callable, List, Optional, Type, TypeVar, Union
 from fastapi import APIRouter, Body, Request
 from pydantic import BaseModel
 
-from src.auth.quota_service import TokenQuotaService
+from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.core.config import settings
 from src.routes.service_handler import ServiceHandler, ServiceProtocol
 from src.utils import logutils
@@ -107,8 +107,10 @@ class RouteRegistry:
                 """
                 # Check token quota
                 user_id = request.state.user_id
-                token_service = TokenQuotaService(request)
-                has_access = await token_service.has_access()
+                entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(request)
+                token_service = TokenQuotaServiceProvider.get_token_consumption_service(request)
+
+                has_access = await entitlement_service.has_access()
                 if not has_access:
                     raise QuotaExceededException(detail="Token quota exceeded")
 

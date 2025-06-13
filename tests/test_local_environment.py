@@ -4,8 +4,9 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.testclient import TestClient
 
 from src.auth.dependencies import get_current_user
-from src.auth.quota_service import TokenQuotaService
+from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.core.config import settings
+from src.middleware.token_extraction import TokenExtractionMiddleware
 
 # Test app with user authentication dependency
 app_user_auth = FastAPI()
@@ -18,18 +19,19 @@ async def user_protected(user=Depends(get_current_user)):
 
 # Test app with token service
 app_token_service = FastAPI()
+app_token_service.add_middleware(TokenExtractionMiddleware)
 
 
 @app_token_service.get("/token-check")
 async def token_check(request: Request):
-    token_service = TokenQuotaService(request)
-    has_access = await token_service.get_token_entitlement_status()
+    entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(request)
+    has_access = await entitlement_service.get_token_entitlement_status()
     return {"has_access": has_access}
 
 
 @app_token_service.get("/token-consume")
 async def token_consume(request: Request):
-    token_service = TokenQuotaService(request)
+    token_service = TokenQuotaServiceProvider.get_token_consumption_service(request)
 
     # Create a dummy result object with tokens_info
     class DummyResult:
