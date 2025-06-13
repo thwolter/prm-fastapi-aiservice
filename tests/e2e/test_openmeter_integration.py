@@ -1,14 +1,20 @@
-import os
 import pytest
 from openmeter import Client
 
+from core.config import settings
+
+
 @pytest.mark.integration
-@pytest.mark.webtest
 def test_openmeter_healthcheck():
-    api_key = os.getenv("OPENMETER_API_KEY")
+    api_key = settings.OPENMETER_API_KEY
     if not api_key:
         pytest.skip("OPENMETER_API_KEY not provided")
-    client = Client(endpoint="https://api.openmeter.de/v1/sandbox/endpoint", headers={"Authorization": f"Bearer {api_key}"})
+
+    headers = {
+        "Accept": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    client = Client(endpoint=settings.OPENMETER_API_URL, headers=headers)
     try:
         client.list_meters()
     except Exception as exc:

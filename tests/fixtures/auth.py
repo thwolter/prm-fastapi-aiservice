@@ -1,7 +1,4 @@
 import pytest
-from dotenv import load_dotenv
-
-load_dotenv('.env.test')
 
 from src.main import app
 

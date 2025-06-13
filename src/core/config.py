@@ -1,7 +1,6 @@
 import json
 from typing import Annotated, Any, Literal
 
-from dotenv import find_dotenv, load_dotenv
 from pydantic import AnyUrl, BeforeValidator, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -16,10 +15,6 @@ class RiskGPTSettings(BaseSettings):
     OPENAI_API_KEY: str | None = None
     MODEL_NAME: str | None = None
     TEMPERATURE: float | None = None
-
-
-DOTENV = find_dotenv(usecwd=True)
-load_dotenv(DOTENV)
 
 
 def parse_cors(v: Any) -> list[str] | str:
@@ -51,7 +46,7 @@ def parse_cors(v: Any) -> list[str] | str:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_ignore_empty=True, extra="ignore")
+    model_config = SettingsConfigDict(env_file="../.env", env_ignore_empty=True, extra="ignore")
     DOMAIN: str = "localhost"
     ENVIRONMENT: Literal["local", "staging", "production"] = "production"
 
