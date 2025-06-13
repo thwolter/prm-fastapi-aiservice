@@ -12,6 +12,10 @@
 Run the tests excluding webtests. Environment variables are loaded from
 `.env.test` using `pytest-dotenv`:
 
+The `.env.test` file does not include an OpenMeter API key. When running the
+quota service tests you must provide `OPENMETER_API_KEY` via an external
+environment variable.
+
 ```bash
 pytest -m "not webtest"
 ```

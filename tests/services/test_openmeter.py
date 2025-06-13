@@ -7,6 +7,18 @@ from openmeter import Client
 from src.auth.quota_service import TokenQuotaService
 from src.core.config import settings
 
+# Skip tests when the OpenMeter API key is not provided or still set to a
+# placeholder value. The key must be supplied via an external environment
+# variable when running the tests.
+if not settings.OPENMETER_API_KEY or settings.OPENMETER_API_KEY in {
+    "openmeter-key",
+    "<your_sandbox_key>",
+}:
+    pytest.skip(
+        "OPENMETER_API_KEY not configured for integration tests",
+        allow_module_level=True,
+    )
+
 
 # Fixtures for sandbox client and test subject
 @pytest.fixture(scope="module")
