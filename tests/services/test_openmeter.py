@@ -46,25 +46,21 @@ async def test_reserve_and_adjust_tokens(
     entitlement_setup, sandbox_client, test_subject, monkeypatch
 ):
     monkeypatch.setattr(settings, "ENVIRONMENT", "testing123")
+    async def receive() -> dict:
+        return {"type": "http.request", "body": b""}
+
     req: Request = Request(
         scope={
             "type": "http",
             "method": "POST",
             "path": "/test",
-            "body": {
-                "model_name": "gpt-test",
-                "prompt_name": "unit-test",
-                "tokens": 200,
-            },
+            "headers": [(b"accept", b"application/json")],
             "state": {
                 "token": "test_token",
                 "user_id": str(test_subject),
             },
-            "headers": [
-                (b"authorization", f"Bearer {settings.OPENMETER_API_KEY}".encode()),
-                (b"accept", b"application/json"),
-            ],
-        }
+        },
+        receive=receive,
     )
     # Ensure we are in test environment
     service = TokenQuotaService(request=req)
