@@ -1,4 +1,7 @@
 import pytest
+from dotenv import load_dotenv
+
+load_dotenv('.env.test')
 
 from src.main import app
 
@@ -28,15 +31,18 @@ def override_auth(monkeypatch, request):
             return None
 
         monkeypatch.setattr(
-            "src.auth.quota_service.TokenQuotaService.get_token_entitlement_status", _allow
+            "src.auth.entitlement_service.EntitlementService.get_token_entitlement_status",
+            _allow,
         )
 
         monkeypatch.setattr(
-            "src.auth.quota_service.TokenQuotaService.reserve_token_quota", _reserve
+            "src.auth.token_consumption_service.TokenConsumptionService.reserve_token_quota",
+            _reserve,
         )
 
         monkeypatch.setattr(
-            "src.auth.quota_service.TokenQuotaService.adjust_consumed_tokens", _adjust
+            "src.auth.token_consumption_service.TokenConsumptionService.adjust_consumed_tokens",
+            _adjust,
         )
 
     yield

@@ -82,6 +82,7 @@ markers = [
     "webtest: marks tests that access external APIs (select with '-m webtest')",
     "tryfirst: marks tests that should be run first",
     "no_quota_patch: do not patch quota service in this test",
+    "integration: marks end-to-end tests that hit external services",
 ]
 dotenv_file = ".env.test"
 asyncio_mode = "strict"

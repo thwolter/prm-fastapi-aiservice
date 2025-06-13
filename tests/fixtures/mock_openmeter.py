@@ -5,6 +5,7 @@ Mock OpenMeter client for testing.
 from functools import wraps
 from typing import Any, Dict, List
 from unittest.mock import MagicMock
+import json
 
 import pytest
 from azure.core.exceptions import ResourceNotFoundError
@@ -82,7 +83,7 @@ class MockOpenMeterClient(MagicMock):
         # Adjust the balance based on the event
         subject_id = event["subject"]
         if subject_id in self.entitlements and "ai_tokens" in self.entitlements[subject_id]:
-            self.entitlements[subject_id]["ai_tokens"]["balance"] += event["data"]["tokens"]
+            self.entitlements[subject_id]["ai_tokens"]["balance"] -= event["data"]["tokens"]
 
             # Update hasAccess based on balance
             self.entitlements[subject_id]["ai_tokens"]["hasAccess"] = (
@@ -107,11 +108,18 @@ class MockOpenMeterClient(MagicMock):
             )
 
         # Extract amount from request body
-        amount = request.json()["amount"]
+        body = request.content
+        if isinstance(body, (bytes, bytearray)):
+            body = body.decode()
+        amount = json.loads(body)["amount"]
 
         # Check if there's enough balance
         if self.entitlements[subject_id][feature_key]["balance"] < amount:
-            return HttpResponse(request, 403)
+            class SimpleResponse:
+                def __init__(self, status_code):
+                    self.status_code = status_code
+
+            return SimpleResponse(403)
 
         # Decrement the balance
         self.entitlements[subject_id][feature_key]["balance"] -= amount
@@ -121,7 +129,11 @@ class MockOpenMeterClient(MagicMock):
             self.entitlements[subject_id][feature_key]["balance"] > 0
         )
 
-        return HttpResponse(request, 200)
+        class SimpleResponse:
+            def __init__(self, status_code):
+                self.status_code = status_code
+
+        return SimpleResponse(200)
 
 
 class MockAsyncOpenMeterClient(MockOpenMeterClient):
@@ -140,6 +152,9 @@ def mock_openmeter_clients(monkeypatch):
     """
     sync_client = MockOpenMeterClient()
     async_client = MockAsyncOpenMeterClient()
+    async_client.subjects = sync_client.subjects
+    async_client.entitlements = sync_client.entitlements
+    async_client.events = sync_client.events
 
     # Patch the create_clients method to return our mock clients
     def mock_create_clients(*args, **kwargs):
