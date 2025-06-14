@@ -25,7 +25,7 @@ def test_service_jwt_valid(monkeypatch):
     monkeypatch.setattr(settings, "ENVIRONMENT", "production")
     token = _make_token()
     with TestClient(app) as client:
-        res = client.get("/protected", headers={"Authorization": f"Bearer {token}"})
+        res = client.get("/protected", headers={"X-Service-Authorization": f"Bearer {token}"})
         assert res.status_code == 200
         assert res.json() == {"ok": True}
 
@@ -34,7 +34,7 @@ def test_service_jwt_invalid(monkeypatch):
     monkeypatch.setattr(settings, "ENVIRONMENT", "production")
     token = _make_token(iss="other")
     with TestClient(app) as client:
-        res = client.get("/protected", headers={"Authorization": f"Bearer {token}"})
+        res = client.get("/protected", headers={"X-Service-Authorization": f"Bearer {token}"})
         assert res.status_code == 401
 
 
