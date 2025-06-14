@@ -3,68 +3,13 @@
 from __future__ import annotations
 
 import typing
-from typing import Callable, Optional, Tuple, Type
+from typing import Type
 
 from pydantic import BaseModel
-from riskgpt import chains
+from riskgpt import chains, workflows
 from riskgpt.models import schemas as rg_schemas
 
 from src.services.base_service import BaseService
-
-
-def _load_workflows() -> (
-    Tuple[Optional[Callable], Optional[Callable], Optional[Callable], Optional[Callable]]
-):
-    try:
-        from riskgpt.workflows import async_risk_workflow as _async_risk_workflow
-        from riskgpt.workflows import check_context_quality as _check_context_quality
-        from riskgpt.workflows import external_context_enrichment as _external_context_enrichment
-        from riskgpt.workflows import prepare_presentation_output as _prepare_presentation_output
-
-        return (
-            _async_risk_workflow,
-            _external_context_enrichment,
-            _prepare_presentation_output,
-            _check_context_quality,
-        )
-    except Exception:  # pragma: no cover - optional dependency
-        return (None, None, None, None)
-
-
-(
-    async_risk_workflow,
-    _external_context_enrichment,
-    _prepare_presentation_output,
-    _check_context_quality,
-) = _load_workflows()
-
-
-async def async_external_context_enrichment_fn(
-    request: rg_schemas.ExternalContextRequest,
-) -> rg_schemas.ExternalContextResponse:
-    """Async wrapper around :func:`external_context_enrichment`."""
-    if _external_context_enrichment is None:
-        raise RuntimeError("riskgpt is not installed")
-    return _external_context_enrichment(request)
-
-
-async def async_prepare_presentation_output_fn(
-    request: rg_schemas.PresentationRequest,
-) -> rg_schemas.PresentationResponse:
-    """Async wrapper around :func:`prepare_presentation_output`."""
-    if _prepare_presentation_output is None:
-        raise RuntimeError("riskgpt is not installed")
-    return _prepare_presentation_output(request)
-
-
-async def async_check_context_quality_fn(
-    request: rg_schemas.ContextQualityRequest,
-) -> rg_schemas.ContextQualityResponse:
-    """Async wrapper around :func:`check_context_quality`."""
-    if _check_context_quality is None:
-        raise RuntimeError("riskgpt is not installed")
-    return _check_context_quality(request)
-
 
 # Risk Services
 
@@ -194,7 +139,7 @@ class ContextQualityService(BaseService):
 
     @staticmethod
     async def _chain_fn_wrapper(query: BaseModel) -> BaseModel:
-        result = await async_check_context_quality_fn(
+        result = await workflows.async_check_context_quality(
             typing.cast(rg_schemas.ContextQualityRequest, query)
         )
         return typing.cast(BaseModel, result)
@@ -210,7 +155,7 @@ class ExternalContextService(BaseService):
 
     @staticmethod
     async def _chain_fn_wrapper(query: BaseModel) -> BaseModel:
-        result = await async_external_context_enrichment_fn(
+        result = await workflows.async_external_context_enrichment(
             typing.cast(rg_schemas.ExternalContextRequest, query)
         )
         return typing.cast(BaseModel, result)
@@ -226,7 +171,7 @@ class PresentationWorkflowService(BaseService):
 
     @staticmethod
     async def _chain_fn_wrapper(query: BaseModel) -> BaseModel:
-        result = await async_prepare_presentation_output_fn(
+        result = await workflows.async_prepare_presentation_output(
             typing.cast(rg_schemas.PresentationRequest, query)
         )
         return typing.cast(BaseModel, result)
@@ -240,14 +185,7 @@ class PresentationWorkflowService(BaseService):
 class RiskWorkflowService(BaseService):
     """Service orchestrating the full risk workflow."""
 
-    @staticmethod
-    async def _chain_fn_wrapper(query: BaseModel) -> BaseModel:
-        if async_risk_workflow is None:
-            raise RuntimeError("riskgpt is not installed")
-        result = await async_risk_workflow(typing.cast(rg_schemas.RiskRequest, query))
-        return typing.cast(BaseModel, result)
-
-    chain_fn = _chain_fn_wrapper
+    chain_fn = workflows.async_risk_workflow
     route_path = "/workflow/risk/"
     QueryModel = rg_schemas.RiskRequest
     ResultModel = rg_schemas.RiskResponse
