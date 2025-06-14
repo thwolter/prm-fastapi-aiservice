@@ -3,10 +3,10 @@ from fastapi.testclient import TestClient
 
 from src.auth.dependencies import get_current_user
 from src.core.config import settings
-from src.middleware.token_extraction import TokenExtractionMiddleware
+from src.middleware.user_token_extraction import UserTokenExtractionMiddleware
 
 app = FastAPI()
-app.add_middleware(TokenExtractionMiddleware)
+app.add_middleware(UserTokenExtractionMiddleware)
 
 
 @app.get("/protected")

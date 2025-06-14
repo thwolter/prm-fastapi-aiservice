@@ -11,7 +11,7 @@ from src.utils import logutils
 logger = logutils.get_logger(__name__)
 
 
-class TokenExtractionMiddleware(BaseHTTPMiddleware):
+class UserTokenExtractionMiddleware(BaseHTTPMiddleware):
     """
     Middleware to extract the token from the request and attach it to the request's state.
     """

@@ -4,17 +4,17 @@ from contextlib import asynccontextmanager
 import sentry_sdk
 from fastapi import Depends, FastAPI, Request, status
 from starlette.middleware.base import RequestResponseEndpoint
-from starlette.responses import Response
 from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import Response
 
+from src.auth.dependencies import verify_service_jwt
 from src.core.config import settings
 from src.core.health_checks import router as core_router
-from src.utils import logutils
 from src.keywords.router import router as keywords_router
 from src.middleware.custom_error_format import custom_error_format_middleware
-from src.middleware.token_extraction import TokenExtractionMiddleware
-from src.auth.dependencies import verify_service_jwt
+from src.middleware.user_token_extraction import UserTokenExtractionMiddleware
 from src.router import router as base_router
+from src.utils import logutils
 
 logger = logutils.get_logger(__name__)
 
@@ -66,7 +66,7 @@ async def custom_middleware(request: Request, call_next: RequestResponseEndpoint
     return await custom_error_format_middleware(request, call_next)
 
 
-app.add_middleware(TokenExtractionMiddleware)
+app.add_middleware(UserTokenExtractionMiddleware)
 
 
 app.include_router(base_router)
