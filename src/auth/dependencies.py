@@ -25,15 +25,18 @@ async def get_current_user(request: Request) -> dict[str, str]:
     return {"token": token, "user_id": user_id}
 
 
-async def verify_service_jwt(request: Request, authorization: str | None = Header(None)) -> None:
-    """Validate service JWT from Authorization header."""
+async def verify_service_jwt(
+    request: Request,
+    service_authorization: str | None = Header(None, alias="X-Service-Authorization"),
+) -> None:
+    """Validate service JWT from ``X-Service-Authorization`` header."""
     if settings.ENVIRONMENT == "local":  # skip auth locally
         return
 
-    if not authorization or not authorization.startswith("Bearer "):
+    if not service_authorization or not service_authorization.startswith("Bearer "):
         raise AuthenticationException(detail="Missing service token")
 
-    token = authorization.split(" ", 1)[1]
+    token = service_authorization.split(" ", 1)[1]
     try:
         jwt.decode(
             token,
