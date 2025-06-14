@@ -2,6 +2,9 @@
 TokenQuotaServiceProvider: Factory for creating token quota services.
 """
 
+from typing import Optional
+from uuid import UUID
+
 from fastapi import Request
 from openmeter import Client
 from openmeter.aio import Client as AsyncClient
@@ -16,6 +19,8 @@ class TokenQuotaServiceProvider:
     """
     Provider for token quota services.
     """
+
+    _test_request: Optional[Request] = None
 
     @staticmethod
     def create_clients(request: Request = None):
@@ -57,7 +62,9 @@ class TokenQuotaServiceProvider:
             A CustomerService instance.
         """
         sync_client, async_client = TokenQuotaServiceProvider.create_clients()
-        return SubjectService(sync_client, async_client, request)
+        return SubjectService(
+            sync_client, async_client, request or TokenQuotaServiceProvider._test_request
+        )
 
     @staticmethod
     def get_entitlement_service(request: Request = None):
@@ -71,7 +78,9 @@ class TokenQuotaServiceProvider:
             An EntitlementService instance.
         """
         sync_client, async_client = TokenQuotaServiceProvider.create_clients()
-        return EntitlementService(sync_client, async_client, request)
+        return EntitlementService(
+            sync_client, async_client, request or TokenQuotaServiceProvider._test_request
+        )
 
     @staticmethod
     def get_token_consumption_service(request: Request = None):
@@ -85,4 +94,28 @@ class TokenQuotaServiceProvider:
             A TokenConsumptionService instance.
         """
         sync_client, async_client = TokenQuotaServiceProvider.create_clients()
-        return TokenConsumptionService(sync_client, async_client, request)
+        return TokenConsumptionService(
+            sync_client, async_client, request or TokenQuotaServiceProvider._test_request
+        )
+
+    @classmethod
+    def setup_for_testing(cls, test_user_id: UUID):
+        """
+        Set up the provider for testing with a test user ID.
+
+        Args:
+            test_user_id: The test user ID to use.
+        """
+        # Create a mock request with the test user ID
+        cls._test_request = Request(
+            scope={
+                "type": "http",
+                "method": "POST",
+                "path": "/test",
+                "headers": [(b"accept", b"application/json")],
+                "state": {
+                    "token": "test_token",
+                    "user_id": test_user_id,
+                },
+            }
+        )

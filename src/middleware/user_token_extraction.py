@@ -28,24 +28,20 @@ class UserTokenExtractionMiddleware(BaseHTTPMiddleware):
             response: Response = await call_next(request)
             return response
 
-        auth_header = request.headers.get("Authorization")
-        token = None
-        if auth_header and auth_header.startswith("Bearer "):
-            token = auth_header.split(" ", 1)[1]
-        else:
-            logger.debug("No valid Authorization header found")
+        token = getattr(request.state, "raw_token", None)
+        if not token:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ", 1)[1]
+            else:
+                logger.debug("No valid Authorization header found")
 
-        if token:
-            try:
-                payload = get_jwt_payload(request)
-                request.state.token = token
-                request.state.user_id = payload.get("sub")
-                request.state.user_email = payload.get("email")
-            except HTTPException:
-                request.state.token = None
-                request.state.user_id = None
-                request.state.user_email = None
-        else:
+        try:
+            payload = get_jwt_payload(request)
+            request.state.token = token
+            request.state.user_id = payload.get("sub")
+            request.state.user_email = payload.get("email")
+        except HTTPException:
             request.state.token = None
             request.state.user_id = None
             request.state.user_email = None

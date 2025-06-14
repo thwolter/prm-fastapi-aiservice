@@ -58,10 +58,15 @@ class TokenConsumptionService:
 
     async def consume_tokens(
         self,
-        response_info: ResponseInfo,
+        response_info: ResponseInfo = None,
         token: Optional[int | None] = None,
         user_id: Optional[UUID] = None,
     ) -> bool:
+
+        if not self.request and not user_id:
+            logger.warning("No request or user_id provided for token consumption.")
+            return False
+
         event_data = {
             "tokens": token if token is not None else response_info.consumed_tokens,
             "model": getattr(response_info, "model_name", ""),

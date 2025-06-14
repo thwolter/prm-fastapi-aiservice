@@ -5,6 +5,7 @@ from src.core.config import settings
 from src.utils.exceptions import AuthenticationException
 
 
+# todo: seem only be used in tests, consider removing
 async def get_current_user(request: Request) -> dict[str, str]:
     """
     Dependency to enforce token validation and access control.
@@ -24,7 +25,7 @@ async def get_current_user(request: Request) -> dict[str, str]:
     return {"token": token, "user_id": user_id}
 
 
-async def verify_service_jwt(authorization: str | None = Header(None)) -> None:
+async def verify_service_jwt(request: Request, authorization: str | None = Header(None)) -> None:
     """Validate service JWT from Authorization header."""
     if settings.ENVIRONMENT == "local":  # skip auth locally
         return
@@ -41,6 +42,7 @@ async def verify_service_jwt(authorization: str | None = Header(None)) -> None:
             options={"require": ["exp", "iss"]},
             issuer="projectrm-backend",
         )
+        request.state.raw_token = token
     except jwt.ExpiredSignatureError as exc:
         raise AuthenticationException(detail="Token has expired") from exc
     except jwt.InvalidTokenError as exc:  # includes incorrect issuer

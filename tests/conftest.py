@@ -5,6 +5,7 @@ pytest_plugins = [
     "tests.fixtures.auth",
     "tests.fixtures.client",
     "tests.fixtures.quota",
+    "tests.fixtures.meter",
 ]
 
 

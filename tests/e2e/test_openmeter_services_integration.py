@@ -9,128 +9,12 @@ import uuid
 
 import pytest
 from fastapi import Request
-from openmeter import Client
-from openmeter.aio import Client as AsyncClient
 from riskgpt.models.schemas import ResponseInfo
 
-from src.auth.entitlement_service import EntitlementService
 from src.auth.schemas import EntitlementCreate
 from src.auth.subject_service import SubjectService
-from src.auth.token_consumption_service import TokenConsumptionService
 from src.core.config import settings
 from src.utils.exceptions import ExternalServiceException
-
-
-@pytest.fixture
-def openmeter_clients():
-    """
-    Fixture that provides real OpenMeter clients for e2e testing.
-    """
-    api_key = settings.OPENMETER_API_KEY
-    if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
-
-    headers = {
-        "Accept": "application/json",
-        "Authorization": f"Bearer {api_key}",
-    }
-    sync_client = Client(endpoint=settings.OPENMETER_API_URL, headers=headers)
-    async_client = AsyncClient(endpoint=settings.OPENMETER_API_URL, headers=headers)
-
-    return sync_client, async_client
-
-
-@pytest.fixture
-def test_user_id():
-    """
-    Fixture that provides a unique user ID for testing.
-    """
-    return uuid.uuid4()
-
-
-@pytest.fixture
-async def subject_service(openmeter_clients, test_user_id):
-    """
-    Fixture that provides a CustomerService instance with a test user.
-    """
-    sync_client, async_client = openmeter_clients
-
-    # Create a request with the test user
-    req = Request(
-        scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": test_user_id,
-                "user_email": f"test-{test_user_id}@example.com",
-            },
-        }
-    )
-
-    service = SubjectService(sync_client, async_client, req)
-
-    # Create the customer for testing
-    await service.create_subject()
-
-    yield service
-
-    # Clean up after the test
-    try:
-        await service.delete_subject()
-    except Exception as e:
-        # Log but don't fail if cleanup fails
-        print(f"Cleanup failed: {e}")
-
-
-@pytest.fixture
-async def entitlement_service(openmeter_clients, test_user_id, subject_service):
-    """
-    Fixture that provides an EntitlementService instance with a test user.
-    """
-    sync_client, async_client = openmeter_clients
-
-    # Create a request with the test user
-    req = Request(
-        scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": test_user_id,
-            },
-        }
-    )
-
-    yield EntitlementService(sync_client, async_client, req)
-
-
-@pytest.fixture
-async def token_consumption_service(openmeter_clients, test_user_id, subject_service):
-    """
-    Fixture that provides a TokenConsumptionService instance with a test user.
-    """
-    sync_client, async_client = openmeter_clients
-
-    # Create a request with the test user
-    req = Request(
-        scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": test_user_id,
-            },
-        }
-    )
-
-    yield TokenConsumptionService(sync_client, async_client, req)
 
 
 @pytest.mark.integration
@@ -180,24 +64,23 @@ async def test_entitlement_service_set_get(subject_service, entitlement_service,
     Test that EntitlementService can set and get entitlements in OpenMeter.
     """
     # Await the async generator fixture to get the service instance
-    service = await anext(entitlement_service)
     feature = settings.OPENMETER_FEATURE_KEY
 
     # Set an entitlement
     limit = EntitlementCreate(feature="ai_tokens", max_limit=1000, period="MONTH")
-    await service.set_entitlement(test_user_id, limit)
+    await entitlement_service.set_entitlement(test_user_id, limit)
 
     # Get the entitlement status
-    status = await service.get_token_entitlement_status(test_user_id, feature)
+    status = await entitlement_service.get_token_entitlement_status(test_user_id, feature)
     assert status is True, "User should have access after setting entitlement"
 
     # Get the entitlement value
-    value = await service.get_entitlement_value(test_user_id, feature)
+    value = await entitlement_service.get_entitlement_value(test_user_id, feature)
     assert value["hasAccess"] is True, "User should have access"
     assert value["balance"] == 1000, "Balance should be 1000"
 
     # Test has_access alias
-    has_access = await service.has_access(test_user_id, feature)
+    has_access = await entitlement_service.has_access(test_user_id, feature)
     assert has_access is True, "has_access should return True"
 
 
@@ -212,10 +95,6 @@ async def test_token_consumption_consume_tokens(
     """
 
     feature = settings.OPENMETER_FEATURE_KEY
-
-    # Await the async generator fixture to get the service instance
-    entitlement_service = await anext(entitlement_service)
-    token_consumption_service = await anext(token_consumption_service)
 
     # Set an entitlement
     limit = EntitlementCreate(feature=feature, max_limit=1000, period="MONTH")

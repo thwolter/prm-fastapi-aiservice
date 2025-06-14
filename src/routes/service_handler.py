@@ -1,13 +1,13 @@
 """Service handler for executing service queries."""
 
-from src.utils import logutils
-from typing import Callable, Generic, Type, TypeVar, Protocol, runtime_checkable, cast
+from typing import Callable, Generic, Protocol, Type, TypeVar, cast, runtime_checkable
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from pydantic import BaseModel
 
 from src.routes.validation import validate_model
-from src.utils.exceptions import BaseServiceException, RequestException, InternalServerException
+from src.utils import logutils
+from src.utils.exceptions import BaseServiceException, InternalServerException, RequestException
 
 TRequest = TypeVar("TRequest", bound=BaseModel)
 TResponse = TypeVar("TResponse", bound=BaseModel)
@@ -53,6 +53,11 @@ class ServiceHandler(Generic[TRequest, TResponse]):
         self.service_factory = service_factory
         self.request_model = request_model
         self.response_model = response_model
+        self.request = None
+
+    def set_request(self, request: Request):
+        """Set the request for this handler."""
+        self.request = request
 
     async def handle(self, request: TRequest) -> TResponse:
         """

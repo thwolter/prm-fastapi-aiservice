@@ -9,7 +9,7 @@ class RiskGPTSettings(BaseSettings):
     """Settings for RiskGPT related configuration."""
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_prefix="RISKGPT_", env_ignore_empty=True, extra="ignore"
+        env_file=[".env", "../.env"], env_prefix="RISKGPT_", env_ignore_empty=True, extra="ignore"
     )
 
     OPENAI_API_KEY: str | None = None
@@ -46,9 +46,11 @@ def parse_cors(v: Any) -> list[str] | str:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file="../.env", env_ignore_empty=True, extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=[".env", "../.env"], env_ignore_empty=True, extra="ignore"
+    )
     DOMAIN: str = "localhost"
-    ENVIRONMENT: Literal["local", "staging", "production"] = "production"
+    ENVIRONMENT: Literal["local", "debug", "staging", "production"] = "production"
 
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 

@@ -8,7 +8,6 @@ from typing import Any, Type
 
 from pydantic import BaseModel
 
-from auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.utils.resilient import with_resilient_execution
 
 # Configure logger
@@ -41,10 +40,6 @@ class BaseService:
 
         # Use the resilient execution decorator to handle fallbacks and circuit breaking
         result = await self._execute_with_resilience(query)
-
-        token_service = TokenQuotaServiceProvider.get_token_consumption_service()
-        token_service.consume_tokens(result.response_info)
-
         return typing.cast(BaseModel, result)
 
     def _create_default_response(self, query: BaseModel) -> BaseModel:

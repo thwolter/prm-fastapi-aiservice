@@ -1,9 +1,10 @@
 """Route registry for registering API routes."""
 
 from enum import Enum
-from typing import Callable, List, Optional, Type, TypeVar, Union
+from typing import Annotated, Callable, List, Optional, Type, TypeVar, Union
 
-from fastapi import APIRouter, Body, Request
+from fastapi import APIRouter, Body, Depends, Request
+from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 
 from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
@@ -16,6 +17,8 @@ TRequest = TypeVar("TRequest", bound=BaseModel)
 TResponse = TypeVar("TResponse", bound=BaseModel)
 
 logger = logutils.get_logger(__name__)
+
+bearer_scheme = HTTPBearer(auto_error=True)
 
 
 class RouteRegistry:
@@ -64,6 +67,7 @@ class RouteRegistry:
 
             async def route_function(
                 request: Request,
+                token: Annotated[str, Depends(bearer_scheme)],
                 request_model: request_model = Body(..., embed=False),  # type: ignore[valid-type]
             ) -> response_model:  # type: ignore[valid-type]
                 """
@@ -90,6 +94,7 @@ class RouteRegistry:
 
             async def route_function(
                 request: Request,
+                token: Annotated[str, Depends(bearer_scheme)],
                 request_model: request_model = Body(..., embed=False),  # type: ignore[valid-type]
             ) -> response_model:  # type: ignore[valid-type]
                 """
@@ -105,6 +110,7 @@ class RouteRegistry:
                 Raises:
                     BaseServiceException: If an error occurs during processing.
                 """
+
                 # Check token quota
                 user_id = request.state.user_id
                 entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(request)
@@ -115,6 +121,7 @@ class RouteRegistry:
                     raise QuotaExceededException(detail="Token quota exceeded")
 
                 # Handle the request
+                handler.set_request(request)
                 result = await handler.handle(request_model)
 
                 # Consume tokens
@@ -123,6 +130,10 @@ class RouteRegistry:
                 return result
 
         # Register the route with the FastAPI router
-        self.router.post(path, response_model=response_model, tags=tags)(route_function)
+        self.router.post(
+            path,
+            response_model=response_model,
+            tags=tags,
+        )(route_function)
 
         logger.debug(f"Registered route: {path} with tags: {tags}")
