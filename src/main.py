@@ -2,12 +2,11 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 import sentry_sdk
-from fastapi import Depends, FastAPI, Request, status
+from fastapi import FastAPI, Request, status
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
-from src.auth.dependencies import verify_service_jwt
 from src.core.config import settings
 from src.core.health_checks import router as core_router
 from src.keywords.router import router as keywords_router
@@ -40,7 +39,7 @@ if settings.IS_PRODUCTION:
     )
 
 
-app = FastAPI(lifespan=lifespan, dependencies=[Depends(verify_service_jwt)])
+app = FastAPI(lifespan=lifespan)
 
 if settings.ENVIRONMENT == "local":
     logger.warning(

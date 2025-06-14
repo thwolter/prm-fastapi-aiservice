@@ -111,6 +111,7 @@ class RouteRegistry:
                     BaseServiceException: If an error occurs during processing.
                 """
 
+                print(f"Received request for {request.url.path} with token: {token}")
                 # Check token quota
                 user_id = request.state.user_id
                 entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(request)
