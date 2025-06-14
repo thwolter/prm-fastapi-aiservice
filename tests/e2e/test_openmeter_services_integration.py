@@ -4,6 +4,7 @@ These tests verify that the CustomerService, TokenConsumptionService, and Entitl
 can interact with the actual OpenMeter API.
 """
 
+import asyncio
 import uuid
 
 import pytest
@@ -231,6 +232,13 @@ async def test_token_consumption_consume_tokens(
 
     await token_consumption_service.consume_tokens(result_info)
 
-    # Check balance after consumption
+    # Wait for OpenMeter to update the balance (polling with timeout)
+    expected_balance = 1000 - tokens
     value = await entitlement_service.get_entitlement_value(test_user_id)
-    assert value["balance"] == 1000 - tokens, f"Balance should be {1000 - tokens}"
+    for _ in range(10):  # Try for up to ~5 seconds
+        if value["balance"] == expected_balance:
+            break
+        await asyncio.sleep(0.5)
+        value = await entitlement_service.get_entitlement_value(test_user_id)
+    else:
+        assert value["balance"] == expected_balance, f"Balance should be {expected_balance}"

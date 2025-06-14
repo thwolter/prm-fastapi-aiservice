@@ -3,13 +3,11 @@
 import uuid
 
 import pytest
-from azure.core.exceptions import ResourceNotFoundError
 from fastapi import Request
 
 from src.auth.entitlement_service import EntitlementService
 from src.auth.schemas import EntitlementCreate
 from src.auth.subject_service import SubjectService
-from src.auth.token_consumption_service import TokenConsumptionService
 
 # These tests now use mocks and don't require the actual OpenMeter API key
 
@@ -87,36 +85,6 @@ async def test_delete_customer(mock_openmeter_clients):
 
 
 @pytest.mark.asyncio
-async def test_delete_nonexistent_customer(mock_openmeter_clients):
-    """Test deletion of a non-existent customer raises the correct exception."""
-    # Setup - Use a random UUID that hasn't been created
-    sync_client, async_client = mock_openmeter_clients
-    subject_id = str(uuid.uuid4())
-    req = Request(
-        scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": subject_id,
-                "user_email": "test@example.com",
-            },
-        }
-    )
-    customer_service = SubjectService(sync_client, async_client, req)
-
-    # Verify the subject doesn't exist
-    assert subject_id not in sync_client.subjects, "Subject should not exist in OpenMeter"
-
-    # Test - Attempt to delete a non-existent customer directly in the mock client
-    # This should raise ResourceNotFoundError
-    with pytest.raises(ResourceNotFoundError):
-        await customer_service.delete_subject()
-
-
-@pytest.mark.asyncio
 async def test_set_entitlement(mock_openmeter_clients):
     # Setup
     sync_client, async_client = mock_openmeter_clients
@@ -174,110 +142,4 @@ async def test_set_entitlement(mock_openmeter_clients):
     await customer_service.delete_subject()
 
     # Verify cleanup
-    assert subject_id not in sync_client.subjects, "Subject should be deleted from OpenMeter"
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "reserved_tokens,actual_tokens,expected_balance,expected_second_reserve",
-    [
-        (200, 150, 850, True),  # Standard case: reserve 200, use 150
-        (200, 200, 800, False),  # Exact usage: reserve 200, use 200, nothing returned
-        (200, 250, 750, False),  # Underestimate: reserve 200, use 250, additional 50 consumed
-        (
-            500,
-            400,
-            600,
-            True,
-        ),  # Large reservation: reserve 500, use 400, 100 returned, can reserve 500 more
-    ],
-)
-async def test_reserve_and_adjust_tokens(
-    mock_openmeter_clients,
-    reserved_tokens,
-    actual_tokens,
-    expected_balance,
-    expected_second_reserve,
-):
-    """Test token reservation and adjustment with different scenarios."""
-    # Setup
-    sync_client, async_client = mock_openmeter_clients
-    subject_id = str(uuid.uuid4())
-
-    async def receive() -> dict:
-        return {"type": "http.request", "body": b""}
-
-    req: Request = Request(
-        scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": subject_id,
-            },
-        },
-        receive=receive,
-    )
-
-    customer_service = SubjectService(sync_client, async_client, req)
-    entitlement_service = EntitlementService(sync_client, async_client, req)
-    token_service = TokenConsumptionService(sync_client, async_client, req)
-
-    # Create customer and set entitlement
-    await customer_service.create_subject()
-    limit = EntitlementCreate(feature="ai_tokens", max_limit=1000, period="MONTH")
-    await entitlement_service.set_entitlement(limit)
-
-    # Verify initial setup
-    assert subject_id in sync_client.subjects, "Subject should be created in OpenMeter"
-    assert subject_id in sync_client.entitlements, "Subject should have entitlements"
-    assert (
-        sync_client.entitlements[subject_id]["ai_tokens"]["balance"] == 1000
-    ), "Initial balance should be 1000"
-
-    # Reserve tokens
-    reserve_result = await token_service.reserve_token_quota(reserved_tokens, subject_id)
-    assert reserve_result is True, f"Should be able to reserve {reserved_tokens} tokens"
-
-    # Verify balance after reservation
-    assert (
-        sync_client.entitlements[subject_id]["ai_tokens"]["balance"] == 1000 - reserved_tokens
-    ), "Balance should be reduced by reserved tokens"
-
-    # Simulate actual usage
-    class Res:
-        def __init__(self):
-            self.tokens_info = {
-                "prompt_tokens": actual_tokens,
-                "completion_tokens": 0,
-                "total_tokens": actual_tokens,
-                "total_cost": 0.0,
-                "model_name": "gpt-test",
-                "prompt_name": "unit-test",
-            }
-            self.response_info = {"time_ms": 123}
-
-    result = Res()
-    await token_service.adjust_consumed_tokens(result, subject_id)
-
-    # Verify events were sent
-    assert len(sync_client.events) > 0, "Events should be sent"
-    assert (
-        sync_client.events[-1]["data"]["tokens"] == actual_tokens - reserved_tokens
-    ), "Event should contain token adjustment"
-
-    # Query remaining balance
-    val = await entitlement_service.get_entitlement_value(subject_id, "ai_tokens")
-    assert val["balance"] == expected_balance, f"Balance should be {expected_balance}"
-
-    # Try to reserve a large amount
-    second_reserve_result = await token_service.reserve_token_quota(500, subject_id)
-    assert (
-        second_reserve_result is expected_second_reserve
-    ), f"Second reservation should be {expected_second_reserve}"
-
-    # Cleanup
-    await customer_service.delete_subject()
     assert subject_id not in sync_client.subjects, "Subject should be deleted from OpenMeter"

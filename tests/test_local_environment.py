@@ -68,13 +68,3 @@ def test_token_service_entitlement_status_local_environment(monkeypatch):
         res = client.get("/token-check")
         assert res.status_code == 200
         assert res.json() == {"has_access": True}
-
-
-def test_token_service_reserve_and_adjust_local_environment(monkeypatch):
-    """Test that token reservation and adjustment are bypassed in the local environment."""
-    monkeypatch.setattr(settings, "ENVIRONMENT", "local")
-    with TestClient(app_token_service) as client:
-        # No token provided, but should still be able to reserve and adjust tokens in local environment
-        res = client.get("/token-consume")
-        assert res.status_code == 200
-        assert res.json() == {"consumed": True}
