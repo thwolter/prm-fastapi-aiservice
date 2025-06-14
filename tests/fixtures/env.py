@@ -37,3 +37,14 @@ def override_settings(request):
     yield
     config.settings.REDIS_URL = original_redis_url
     config.settings.ENVIRONMENT = original_environment
+
+
+@pytest.fixture
+def e2e_environment():
+    """Set environment specifically for e2e tests."""
+    from src.core import config
+
+    original_environment = config.settings.ENVIRONMENT
+    config.settings.ENVIRONMENT = "testing"  # or "staging"
+    yield
+    config.settings.ENVIRONMENT = original_environment

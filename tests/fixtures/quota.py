@@ -3,8 +3,8 @@ import uuid
 import pytest
 from fastapi import Request
 
-from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.auth.schemas import EntitlementCreate
+from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 
 
 @pytest.mark.asyncio
@@ -31,7 +31,7 @@ async def test_subject(mock_openmeter_clients):
     )
     customer_service = TokenQuotaServiceProvider.get_customer_service(req)
     entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(req)
-    await customer_service.create_customer()
+    await customer_service.create_subject()
 
     # Verify customer was created
     assert subject_id in sync_client.subjects, "Subject should be created in OpenMeter"
@@ -52,7 +52,7 @@ async def test_subject(mock_openmeter_clients):
     yield subject_id  # Return the subject_id for use in tests
 
     # Clean up by deleting the customer
-    await customer_service.delete_customer()
+    await customer_service.delete_subject()
 
     # Verify cleanup
     assert subject_id not in sync_client.subjects, "Subject should be deleted from OpenMeter"

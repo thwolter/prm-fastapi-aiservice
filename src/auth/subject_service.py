@@ -18,7 +18,7 @@ from src.utils.resilient import with_resilient_execution
 logger = logutils.get_logger(__name__)
 
 
-class CustomerService:
+class SubjectService:
     """
     Service for managing customers in OpenMeter.
     """
@@ -56,7 +56,7 @@ class CustomerService:
         return settings.ENVIRONMENT == "local"
 
     @with_resilient_execution(service_name="OpenMeter")
-    async def create_customer(
+    async def create_subject(
         self, user_id: Optional[UUID] = None, user_email: Optional[str] = None
     ) -> None:
         """
@@ -77,17 +77,11 @@ class CustomerService:
             logger.error("Cannot create customer: No user ID provided")
             return
 
-        self.client.upsert_subject(
-            [
-                {
-                    "key": user_id,
-                    "displayName": user_email,
-                }
-            ]
-        )
+        subj = {"key": user_id, "displayName": user_email}
+        self.client.upsert_subject([subj])
 
     @with_resilient_execution(service_name="OpenMeter")
-    async def delete_customer(self, user_id: Optional[UUID] = None) -> None:
+    async def delete_subject(self, user_id: Optional[UUID] = None) -> None:
         """
         Delete a customer from OpenMeter.
 

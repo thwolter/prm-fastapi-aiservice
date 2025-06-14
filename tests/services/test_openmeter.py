@@ -6,11 +6,10 @@ import pytest
 from azure.core.exceptions import ResourceNotFoundError
 from fastapi import Request
 
-from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
-from src.auth.customer_service import CustomerService
 from src.auth.entitlement_service import EntitlementService
-from src.auth.token_consumption_service import TokenConsumptionService
 from src.auth.schemas import EntitlementCreate
+from src.auth.subject_service import SubjectService
+from src.auth.token_consumption_service import TokenConsumptionService
 
 # These tests now use mocks and don't require the actual OpenMeter API key
 
@@ -33,10 +32,10 @@ async def test_create_customer(mock_openmeter_clients):
             },
         }
     )
-    customer_service = CustomerService(sync_client, async_client, req)
+    customer_service = SubjectService(sync_client, async_client, req)
 
     # Test
-    await customer_service.create_customer()
+    await customer_service.create_subject()
 
     # Verify the customer was created
     assert subject_id in sync_client.subjects, "Subject should be created in OpenMeter"
@@ -65,10 +64,10 @@ async def test_delete_customer(mock_openmeter_clients):
             },
         }
     )
-    customer_service = CustomerService(sync_client, async_client, req)
+    customer_service = SubjectService(sync_client, async_client, req)
 
     # Create the customer
-    await customer_service.create_customer()
+    await customer_service.create_subject()
 
     # Verify customer was created
     assert subject_id in sync_client.subjects, "Subject should be created in OpenMeter"
@@ -106,7 +105,7 @@ async def test_delete_nonexistent_customer(mock_openmeter_clients):
             },
         }
     )
-    customer_service = CustomerService(sync_client, async_client, req)
+    customer_service = SubjectService(sync_client, async_client, req)
 
     # Verify the subject doesn't exist
     assert subject_id not in sync_client.subjects, "Subject should not exist in OpenMeter"
@@ -114,7 +113,7 @@ async def test_delete_nonexistent_customer(mock_openmeter_clients):
     # Test - Attempt to delete a non-existent customer directly in the mock client
     # This should raise ResourceNotFoundError
     with pytest.raises(ResourceNotFoundError):
-        await customer_service.delete_customer()
+        await customer_service.delete_subject()
 
 
 @pytest.mark.asyncio
@@ -135,9 +134,9 @@ async def test_set_entitlement(mock_openmeter_clients):
             },
         }
     )
-    customer_service = CustomerService(sync_client, async_client, req)
+    customer_service = SubjectService(sync_client, async_client, req)
     entitlement_service = EntitlementService(sync_client, async_client, req)
-    await customer_service.create_customer()
+    await customer_service.create_subject()
 
     # Verify customer was created
     assert subject_id in sync_client.subjects, "Subject should be created in OpenMeter"
@@ -172,7 +171,7 @@ async def test_set_entitlement(mock_openmeter_clients):
     assert entitlement_status is True, "User should have access"
 
     # Cleanup
-    await customer_service.delete_customer()
+    await customer_service.delete_subject()
 
     # Verify cleanup
     assert subject_id not in sync_client.subjects, "Subject should be deleted from OpenMeter"
@@ -222,12 +221,12 @@ async def test_reserve_and_adjust_tokens(
         receive=receive,
     )
 
-    customer_service = CustomerService(sync_client, async_client, req)
+    customer_service = SubjectService(sync_client, async_client, req)
     entitlement_service = EntitlementService(sync_client, async_client, req)
     token_service = TokenConsumptionService(sync_client, async_client, req)
 
     # Create customer and set entitlement
-    await customer_service.create_customer()
+    await customer_service.create_subject()
     limit = EntitlementCreate(feature="ai_tokens", max_limit=1000, period="MONTH")
     await entitlement_service.set_entitlement(limit)
 
@@ -280,5 +279,5 @@ async def test_reserve_and_adjust_tokens(
     ), f"Second reservation should be {expected_second_reserve}"
 
     # Cleanup
-    await customer_service.delete_customer()
+    await customer_service.delete_subject()
     assert subject_id not in sync_client.subjects, "Subject should be deleted from OpenMeter"

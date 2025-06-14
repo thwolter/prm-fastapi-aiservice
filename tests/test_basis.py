@@ -7,7 +7,7 @@ def test_root(client):
     assert response.content == b""
 
 
-@pytest.mark.webtest
+@pytest.mark.integration
 @pytest.mark.tryfirst
 def test_cors_headers_are_present(client):
     response = client.options("/api/keywords/extract/", headers={"Origin": "http://localhost:3000"})
@@ -20,7 +20,7 @@ def test_cors_headers_are_present(client):
     assert "POST" in response.headers["access-control-allow-methods"]
 
 
-@pytest.mark.webtest
+@pytest.mark.integration
 def test_health_check_returns_ok(client):
     response = client.get("/health-check")
     assert response.status_code == 200

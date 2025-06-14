@@ -6,8 +6,8 @@ from fastapi import Request
 from openmeter import Client
 from openmeter.aio import Client as AsyncClient
 
-from src.auth.customer_service import CustomerService
 from src.auth.entitlement_service import EntitlementService
+from src.auth.subject_service import SubjectService
 from src.auth.token_consumption_service import TokenConsumptionService
 from src.core.config import settings
 
@@ -57,7 +57,7 @@ class TokenQuotaServiceProvider:
             A CustomerService instance.
         """
         sync_client, async_client = TokenQuotaServiceProvider.create_clients()
-        return CustomerService(sync_client, async_client, request)
+        return SubjectService(sync_client, async_client, request)
 
     @staticmethod
     def get_entitlement_service(request: Request = None):

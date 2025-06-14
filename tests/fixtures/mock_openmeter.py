@@ -2,14 +2,13 @@
 Mock OpenMeter client for testing.
 """
 
+import json
 from functools import wraps
 from typing import Any, Dict, List
 from unittest.mock import MagicMock
-import json
 
 import pytest
 from azure.core.exceptions import ResourceNotFoundError
-from azure.core.rest import HttpResponse
 
 from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 
@@ -115,6 +114,7 @@ class MockOpenMeterClient(MagicMock):
 
         # Check if there's enough balance
         if self.entitlements[subject_id][feature_key]["balance"] < amount:
+
             class SimpleResponse:
                 def __init__(self, status_code):
                     self.status_code = status_code
@@ -163,11 +163,11 @@ def mock_openmeter_clients(monkeypatch):
     monkeypatch.setattr(TokenQuotaServiceProvider, "create_clients", mock_create_clients)
 
     # Patch the is_local_env property in all services to return False
-    from src.auth.customer_service import CustomerService
     from src.auth.entitlement_service import EntitlementService
+    from src.auth.subject_service import SubjectService
     from src.auth.token_consumption_service import TokenConsumptionService
 
-    monkeypatch.setattr(CustomerService, "is_local_env", property(lambda self: False))
+    monkeypatch.setattr(SubjectService, "is_local_env", property(lambda self: False))
     monkeypatch.setattr(EntitlementService, "is_local_env", property(lambda self: False))
     monkeypatch.setattr(TokenConsumptionService, "is_local_env", property(lambda self: False))
 
