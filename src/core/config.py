@@ -84,6 +84,7 @@ class Settings(BaseSettings):
     OPENMETER_API_URL: str = "https://openmeter.cloud"
     OPENMETER_SOURCE: str = "prm-ai-service"
     OPENMETER_TIMEOUT: float = 1.0
+    OPENMETER_FEATURE_KEY: str = "ai_tokens"
 
     @classmethod
     def from_env(cls):

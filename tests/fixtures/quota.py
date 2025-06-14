@@ -38,7 +38,7 @@ async def test_subject(mock_openmeter_clients):
 
     # Add entitlement setup
     limit = EntitlementCreate(feature="ai_tokens", max_limit=1000, period="MONTH")
-    await entitlement_service.set_entitlement(limit)
+    await entitlement_service.set_entitlement(subject_id, limit)
 
     # Verify entitlement was set
     assert subject_id in sync_client.entitlements, "Subject should have entitlements"

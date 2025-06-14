@@ -25,7 +25,9 @@ app_token_service.add_middleware(TokenExtractionMiddleware)
 @app_token_service.get("/token-check")
 async def token_check(request: Request):
     entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(request)
-    has_access = await entitlement_service.get_token_entitlement_status()
+    has_access = await entitlement_service.get_token_entitlement_status(
+        None, settings.OPENMETER_FEATURE_KEY
+    )
     return {"has_access": has_access}
 
 

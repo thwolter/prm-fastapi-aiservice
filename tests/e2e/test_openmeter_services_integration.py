@@ -181,22 +181,23 @@ async def test_entitlement_service_set_get(subject_service, entitlement_service,
     """
     # Await the async generator fixture to get the service instance
     service = await anext(entitlement_service)
+    feature = settings.OPENMETER_FEATURE_KEY
 
     # Set an entitlement
     limit = EntitlementCreate(feature="ai_tokens", max_limit=1000, period="MONTH")
-    await service.set_entitlement(limit)
+    await service.set_entitlement(test_user_id, limit)
 
     # Get the entitlement status
-    status = await service.get_token_entitlement_status()
+    status = await service.get_token_entitlement_status(test_user_id, feature)
     assert status is True, "User should have access after setting entitlement"
 
     # Get the entitlement value
-    value = await service.get_entitlement_value(test_user_id)
+    value = await service.get_entitlement_value(test_user_id, feature)
     assert value["hasAccess"] is True, "User should have access"
     assert value["balance"] == 1000, "Balance should be 1000"
 
     # Test has_access alias
-    has_access = await service.has_access()
+    has_access = await service.has_access(test_user_id, feature)
     assert has_access is True, "has_access should return True"
 
 
@@ -210,7 +211,7 @@ async def test_token_consumption_consume_tokens(
     Test that TokenConsumptionService can consume tokens directly in OpenMeter.
     """
 
-    feature = "ai_tokens"
+    feature = settings.OPENMETER_FEATURE_KEY
 
     # Await the async generator fixture to get the service instance
     entitlement_service = await anext(entitlement_service)
@@ -218,7 +219,7 @@ async def test_token_consumption_consume_tokens(
 
     # Set an entitlement
     limit = EntitlementCreate(feature=feature, max_limit=1000, period="MONTH")
-    await entitlement_service.set_entitlement(limit)
+    await entitlement_service.set_entitlement(test_user_id, limit)
 
     # Consume tokens directly
     tokens = 300
@@ -234,11 +235,11 @@ async def test_token_consumption_consume_tokens(
 
     # Wait for OpenMeter to update the balance (polling with timeout)
     expected_balance = 1000 - tokens
-    value = await entitlement_service.get_entitlement_value(test_user_id)
+    value = await entitlement_service.get_entitlement_value(test_user_id, feature)
     for _ in range(10):  # Try for up to ~5 seconds
         if value["balance"] == expected_balance:
             break
         await asyncio.sleep(0.5)
-        value = await entitlement_service.get_entitlement_value(test_user_id)
+        value = await entitlement_service.get_entitlement_value(test_user_id, feature)
     else:
         assert value["balance"] == expected_balance, f"Balance should be {expected_balance}"

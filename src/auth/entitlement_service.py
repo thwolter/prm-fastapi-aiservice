@@ -56,7 +56,9 @@ class EntitlementService:
 
     @with_resilient_execution(service_name="OpenMeter")
     async def set_entitlement(
-        self, limit: EntitlementCreate, user_id: Optional[UUID] = None
+        self,
+        user_id: UUID,
+        limit: EntitlementCreate,
     ) -> None:
         """
         Set an entitlement for a user.
@@ -85,9 +87,7 @@ class EntitlementService:
         self.client.create_entitlement(user_id, entitlement)
 
     @with_resilient_execution(service_name="OpenMeter")
-    async def get_token_entitlement_status(
-        self, feature_key: str = "ai_tokens", user_id: Optional[UUID] = None
-    ) -> bool:
+    async def get_token_entitlement_status(self, user_id: UUID, feature_key: str) -> bool:
         """
         Check if a user has access to a feature.
 
@@ -119,9 +119,7 @@ class EntitlementService:
 
         return bool(response["hasAccess"])
 
-    async def has_access(
-        self, feature_key: str = "ai_tokens", user_id: Optional[UUID] = None
-    ) -> bool:
+    async def has_access(self, user_id: UUID, feature_key: str) -> bool:
         """
         Alias for get_token_entitlement_status for backward compatibility.
 
@@ -132,10 +130,10 @@ class EntitlementService:
         Returns:
             True if the user has access, False otherwise.
         """
-        return await self.get_token_entitlement_status(feature_key, user_id)
+        return await self.get_token_entitlement_status(user_id, feature_key)
 
     @with_resilient_execution(service_name="OpenMeter")
-    async def get_entitlement_value(self, user_id: UUID, feature_key: str = "ai_tokens") -> dict:
+    async def get_entitlement_value(self, user_id: UUID, feature_key: str) -> dict:
         """
         Get the entitlement value for a user.
 
