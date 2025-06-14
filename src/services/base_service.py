@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import logging
 import typing
-from typing import Type, Any
+from typing import Any, Type
 
 from pydantic import BaseModel
+
+from auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.utils.resilient import with_resilient_execution
 
 # Configure logger
@@ -39,6 +41,10 @@ class BaseService:
 
         # Use the resilient execution decorator to handle fallbacks and circuit breaking
         result = await self._execute_with_resilience(query)
+
+        token_service = TokenQuotaServiceProvider.get_token_consumption_service()
+        token_service.consume_tokens(result.response_info)
+
         return typing.cast(BaseModel, result)
 
     def _create_default_response(self, query: BaseModel) -> BaseModel:
@@ -53,6 +59,7 @@ class BaseService:
         information to ``response_info``.
         """
         from typing import get_args, get_origin
+
         from pydantic.fields import PydanticUndefined
 
         try:  # riskgpt is optional in the test environment
@@ -136,8 +143,9 @@ class BaseService:
                 else:
                     values[name] = default_for_annotation(field.annotation)
 
-        from src.utils.circuit_breaker import get_circuit_breaker
         from aiobreaker.state import CircuitBreakerState
+
+        from src.utils.circuit_breaker import get_circuit_breaker
 
         circuit = get_circuit_breaker(self.__class__.__name__)
         if circuit.state.state == CircuitBreakerState.OPEN:
