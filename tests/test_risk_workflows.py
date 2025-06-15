@@ -7,11 +7,10 @@ from riskgpt.models.schemas import default_response_info
 from src.main import app
 
 client = TestClient(app)
-client.headers.update({"Authorization": "Bearer test"})
 
 
 @patch("src.services.services.ContextQualityService.execute_query")
-def test_context_quality_endpoint(mock_execute):
+def test_context_quality_endpoint(mock_execute, auth_headers):
     mock_execute.return_value = rg_schemas.ContextQualityResponse(
         shortcomings=["too short"],
         rationale="r",
@@ -19,7 +18,7 @@ def test_context_quality_endpoint(mock_execute):
         response_info=default_response_info(),
     )
     payload = {"business_context": {"project_id": "p"}}
-    response = client.post("/api/context/check/", json=payload)
+    response = client.post("/api/context/check/", json=payload, headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
     assert data["shortcomings"] == ["too short"]

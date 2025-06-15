@@ -1,14 +1,15 @@
 from unittest.mock import patch
-from fastapi.testclient import TestClient
 
+from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+
 from src.main import app
 
 client = TestClient(app)
 
 
 @patch("src.services.services.RiskOpportunityService.execute_query")
-def test_risk_opportunity_endpoint(mock_execute_query):
+def test_risk_opportunity_endpoint(mock_execute_query, auth_headers):
     """Test that the risk opportunity endpoint works correctly with mocking."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.OpportunityResponse(
@@ -35,7 +36,7 @@ def test_risk_opportunity_endpoint(mock_execute_query):
         ],
     }
 
-    response = client.post("/api/risk/opportunities/", json=payload)
+    response = client.post("/api/risk/opportunities/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200
@@ -52,7 +53,7 @@ def test_risk_opportunity_endpoint(mock_execute_query):
 
 
 @patch("src.services.services.RiskOpportunityService.execute_query")
-def test_risk_opportunity_empty_risks(mock_execute_query):
+def test_risk_opportunity_empty_risks(mock_execute_query, auth_headers):
     """Test risk opportunity with empty risks list."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.OpportunityResponse(
@@ -73,7 +74,7 @@ def test_risk_opportunity_empty_risks(mock_execute_query):
         "risks": [],
     }
 
-    response = client.post("/api/risk/opportunities/", json=payload)
+    response = client.post("/api/risk/opportunities/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200

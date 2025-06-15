@@ -10,7 +10,7 @@ client = TestClient(app)
 
 
 @patch("src.services.services.RiskCostBenefitService.execute_query")
-def test_risk_cost_benefit_endpoint(mock_execute_query):
+def test_risk_cost_benefit_endpoint(mock_execute_query, auth_headers):
     """Test that the risk cost-benefit endpoint works correctly with mocking."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.CostBenefitResponse(
@@ -41,7 +41,7 @@ def test_risk_cost_benefit_endpoint(mock_execute_query):
         "mitigations": ["Implement backup solution", "Staff training"],
     }
 
-    response = client.post("/api/risk/cost-benefit/", json=payload)
+    response = client.post("/api/risk/cost-benefit/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200
@@ -59,7 +59,7 @@ def test_risk_cost_benefit_endpoint(mock_execute_query):
 
 
 @patch("src.services.services.RiskCostBenefitService.execute_query")
-def test_risk_cost_benefit_empty_mitigations(mock_execute_query):
+def test_risk_cost_benefit_empty_mitigations(mock_execute_query, auth_headers):
     """Test risk cost-benefit with empty mitigations list."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.CostBenefitResponse(
@@ -79,7 +79,7 @@ def test_risk_cost_benefit_empty_mitigations(mock_execute_query):
         "mitigations": [],
     }
 
-    response = client.post("/api/risk/cost-benefit/", json=payload)
+    response = client.post("/api/risk/cost-benefit/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200

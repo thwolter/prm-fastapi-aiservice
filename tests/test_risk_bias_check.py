@@ -10,7 +10,7 @@ client = TestClient(app)
 
 
 @patch("src.services.services.RiskBiasCheckService.execute_query")
-def test_risk_bias_check_endpoint(mock_execute_query):
+def test_risk_bias_check_endpoint(mock_execute_query, auth_headers):
     """Test that the risk bias check endpoint works correctly with mocking."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.BiasCheckResponse(
@@ -29,7 +29,7 @@ def test_risk_bias_check_endpoint(mock_execute_query):
         "risk_description": "The project might fail due to technical issues.",
     }
 
-    response = client.post("/api/risk/check/bias/", json=payload)
+    response = client.post("/api/risk/check/bias/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200
@@ -49,7 +49,7 @@ def test_risk_bias_check_endpoint(mock_execute_query):
 
 
 @patch("src.services.services.RiskBiasCheckService.execute_query")
-def test_risk_bias_check_no_biases(mock_execute_query):
+def test_risk_bias_check_no_biases(mock_execute_query, auth_headers):
     """Test risk bias check with no biases found."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.BiasCheckResponse(
@@ -62,7 +62,7 @@ def test_risk_bias_check_no_biases(mock_execute_query):
         "risk_description": "There is a 30% probability that the cloud migration will experience critical technical failures within the first 3 months of deployment, potentially causing 4 hours of downtime."
     }
 
-    response = client.post("/api/risk/check/bias/", json=payload)
+    response = client.post("/api/risk/check/bias/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200

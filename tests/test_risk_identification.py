@@ -10,7 +10,7 @@ client = TestClient(app)
 
 
 @patch("src.services.services.RiskIdentificationService.execute_query")
-def test_risk_identification_endpoint(mock_execute_query):
+def test_risk_identification_endpoint(mock_execute_query, auth_headers):
     """Test that the risk identification endpoint works correctly with mocking."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.RiskResponse(
@@ -42,7 +42,7 @@ def test_risk_identification_endpoint(mock_execute_query):
         "existing_risks": ["string"],
     }
 
-    response = client.post("/api/risk/identify/", json=payload)
+    response = client.post("/api/risk/identify/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200
@@ -57,7 +57,7 @@ def test_risk_identification_endpoint(mock_execute_query):
 
 
 @patch("src.services.services.RiskIdentificationService.execute_query")
-def test_risk_identification_with_mock(mock_execute_query):
+def test_risk_identification_with_mock(mock_execute_query, auth_headers):
     """Test risk identification with mocked service response."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.RiskResponse(
@@ -85,7 +85,7 @@ def test_risk_identification_with_mock(mock_execute_query):
         "existing_risks": ["string"],
     }
 
-    response = client.post("/api/risk/identify/", json=payload)
+    response = client.post("/api/risk/identify/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200

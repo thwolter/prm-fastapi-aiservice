@@ -10,7 +10,7 @@ client = TestClient(app)
 
 
 @patch("src.services.services.RiskCommunicationService.execute_query")
-def test_risk_communication_endpoint(mock_execute_query):
+def test_risk_communication_endpoint(mock_execute_query, auth_headers):
     """Test that the risk communication endpoint works correctly with mocking."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.CommunicationResponse(
@@ -29,7 +29,7 @@ def test_risk_communication_endpoint(mock_execute_query):
         "summary": "The project involves migrating on-premises infrastructure to the cloud. Key risks include data loss during migration, service interruption, and cost overruns.",
     }
 
-    response = client.post("/api/risk/communicate/", json=payload)
+    response = client.post("/api/risk/communicate/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200
@@ -45,7 +45,7 @@ def test_risk_communication_endpoint(mock_execute_query):
 
 
 @patch("src.services.services.RiskCommunicationService.execute_query")
-def test_risk_communication_minimal_summary(mock_execute_query):
+def test_risk_communication_minimal_summary(mock_execute_query, auth_headers):
     """Test risk communication with minimal summary."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.CommunicationResponse(
@@ -63,7 +63,7 @@ def test_risk_communication_minimal_summary(mock_execute_query):
         "summary": "Cloud migration project.",
     }
 
-    response = client.post("/api/risk/communicate/", json=payload)
+    response = client.post("/api/risk/communicate/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200

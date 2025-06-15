@@ -10,7 +10,7 @@ client = TestClient(app)
 
 
 @patch("src.services.services.RiskMonitoringService.execute_query")
-def test_risk_monitoring_endpoint(mock_execute_query):
+def test_risk_monitoring_endpoint(mock_execute_query, auth_headers):
     """Test that the risk monitoring endpoint works correctly with mocking."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.MonitoringResponse(
@@ -34,7 +34,7 @@ def test_risk_monitoring_endpoint(mock_execute_query):
         "risk_description": "Risk of data loss during migration",
     }
 
-    response = client.post("/api/risk/monitoring/", json=payload)
+    response = client.post("/api/risk/monitoring/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200
@@ -52,7 +52,7 @@ def test_risk_monitoring_endpoint(mock_execute_query):
 
 
 @patch("src.services.services.RiskMonitoringService.execute_query")
-def test_risk_monitoring_minimal_description(mock_execute_query):
+def test_risk_monitoring_minimal_description(mock_execute_query, auth_headers):
     """Test risk monitoring with minimal risk description."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.MonitoringResponse(
@@ -70,7 +70,7 @@ def test_risk_monitoring_minimal_description(mock_execute_query):
         "risk_description": "Project failure",
     }
 
-    response = client.post("/api/risk/monitoring/", json=payload)
+    response = client.post("/api/risk/monitoring/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200

@@ -10,7 +10,7 @@ client = TestClient(app)
 
 
 @patch("src.services.services.RiskCorrelationTagsService.execute_query")
-def test_risk_correlation_tags_endpoint(mock_execute_query):
+def test_risk_correlation_tags_endpoint(mock_execute_query, auth_headers):
     """Test that the risk correlation tags endpoint works correctly with mocking."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.CorrelationTagResponse(
@@ -44,7 +44,7 @@ def test_risk_correlation_tags_endpoint(mock_execute_query):
         ],
     }
 
-    response = client.post("/api/risk/correlation-tags/", json=payload)
+    response = client.post("/api/risk/correlation-tags/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200
@@ -62,7 +62,7 @@ def test_risk_correlation_tags_endpoint(mock_execute_query):
 
 
 @patch("src.services.services.RiskCorrelationTagsService.execute_query")
-def test_risk_correlation_tags_no_drivers(mock_execute_query):
+def test_risk_correlation_tags_no_drivers(mock_execute_query, auth_headers):
     """Test risk correlation tags with no known drivers."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.CorrelationTagResponse(
@@ -80,7 +80,7 @@ def test_risk_correlation_tags_no_drivers(mock_execute_query):
         "risk_titles": ["Project Delay", "Technical Failure"],
     }
 
-    response = client.post("/api/risk/correlation-tags/", json=payload)
+    response = client.post("/api/risk/correlation-tags/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert response.status_code == 200

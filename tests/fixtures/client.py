@@ -5,9 +5,9 @@ from src.main import app
 
 
 @pytest.fixture
-def client():
+def client(auth_headers):
     with TestClient(app) as c:
-        c.headers.update({"Authorization": "Bearer test"})
+        c.headers.update(auth_headers)
         yield c
 
 
