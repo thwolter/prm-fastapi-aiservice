@@ -116,8 +116,10 @@ class TestRouteRegistry:
             request = mock.MagicMock(spec=Request)
 
             # Call the route function (in local environment, no auth/metering)
+            # Mock the token
+            token = "test_token"
             result = await route_function(
-                request=request, request_model=TestRequestModel(query="test")
+                request=request, token=token, request_model=TestRequestModel(query="test")
             )
 
             # Check that the result is correct
@@ -175,9 +177,11 @@ class TestRouteRegistry:
                 mock_handle.side_effect = QuotaExceededException(detail="Token quota exceeded")
 
                 # Call the route function - should raise HTTPException
+                # Mock the token
+                token = "test_token"
                 with pytest.raises(HTTPException) as excinfo:
                     await route_function(
-                        request=request, request_model=TestRequestModel(query="test")
+                        request=request, token=token, request_model=TestRequestModel(query="test")
                     )
 
                 # Check that the exception has the correct status code and detail

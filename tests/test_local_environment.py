@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from src.auth.dependencies import get_current_user
 from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.core.config import settings
-from src.middleware.user_token_extraction import UserTokenExtractionMiddleware
+from src.middleware.authorization_middleware import AuthorizationMiddleware
 
 # Test app with user authentication dependency
 app_user_auth = FastAPI()
@@ -19,7 +19,7 @@ async def user_protected(user=Depends(get_current_user)):
 
 # Test app with token service
 app_token_service = FastAPI()
-app_token_service.add_middleware(UserTokenExtractionMiddleware)
+app_token_service.add_middleware(AuthorizationMiddleware)
 
 
 @app_token_service.get("/token-check")

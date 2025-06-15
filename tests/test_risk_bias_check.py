@@ -1,7 +1,9 @@
 from unittest.mock import patch
-from fastapi.testclient import TestClient
 
+from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
+
 from src.main import app
 
 client = TestClient(app)
@@ -14,7 +16,7 @@ def test_risk_bias_check_endpoint(mock_execute_query):
     mock_execute_query.return_value = rg_schemas.BiasCheckResponse(
         biases=["Ambiguity bias", "Confirmation bias", "Availability bias"],
         suggestions="Be more specific about the risk probability and impact. Consider data from multiple sources.",
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {
@@ -53,7 +55,7 @@ def test_risk_bias_check_no_biases(mock_execute_query):
     mock_execute_query.return_value = rg_schemas.BiasCheckResponse(
         biases=[],
         suggestions="No biases detected. The risk description is well-formulated.",
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {

@@ -1,7 +1,9 @@
 from unittest.mock import patch
-from fastapi.testclient import TestClient
 
+from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
+
 from src.main import app
 
 client = TestClient(app)
@@ -19,7 +21,7 @@ def test_risk_correlation_tags_endpoint(mock_execute_query):
             "cost_management",
         ],
         rationale="These tags represent common factors that could influence multiple risks in the cloud migration project.",
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {
@@ -66,7 +68,7 @@ def test_risk_correlation_tags_no_drivers(mock_execute_query):
     mock_execute_query.return_value = rg_schemas.CorrelationTagResponse(
         tags=["project_management", "technical_implementation"],
         rationale="Basic tags derived from risk titles only.",
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {

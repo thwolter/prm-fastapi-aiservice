@@ -10,7 +10,6 @@ from fastapi import Request
 from openmeter import Client
 from openmeter.aio import Client as AsyncClient
 
-from src.core.config import settings
 from src.utils import logutils
 from src.utils.exceptions import ResourceNotFoundException
 from src.utils.resilient import with_resilient_execution
@@ -45,16 +44,6 @@ class SubjectService:
             self.user_id = None
             self.user_email = None
 
-    @property
-    def is_local_env(self) -> bool:
-        """
-        Check if the current environment is local.
-
-        Returns:
-            True if the environment is local, False otherwise.
-        """
-        return settings.ENVIRONMENT == "local"
-
     @with_resilient_execution(service_name="OpenMeter")
     async def create_subject(
         self, user_id: Optional[UUID] = None, user_email: Optional[str] = None
@@ -64,11 +53,8 @@ class SubjectService:
 
         Args:
             user_id: Optional user ID. If not provided, uses the ID from the request.
-            user_email: Optional user email. If not provided, uses the email from the request.
+            user_email: Optional user email. If not provided, use the email from the request.
         """
-        if self.is_local_env:
-            logger.debug("Bypassing create_customer in local environment")
-            return
 
         user_id = str(user_id or self.user_id)
         user_email = user_email or self.user_email
@@ -88,7 +74,7 @@ class SubjectService:
 
         Args:
             user_id: Optional user ID. If not provided, uses the ID from the request.
-            user_email: Optional user email. If not provided, uses the email from the request.
+            user_email: Optional user email. If not provided, use the email from the request.
         """
         import asyncio
 
@@ -113,9 +99,6 @@ class SubjectService:
         Raises:
             ResourceNotFoundException: If the user is not found.
         """
-        if self.is_local_env:
-            logger.debug("Bypassing delete_customer in local environment")
-            return
 
         user_id = str(user_id or self.user_id)
 
@@ -163,9 +146,6 @@ class SubjectService:
         Returns:
             A list of UUIDs of subjects without entitlements.
         """
-        if self.is_local_env:
-            logger.debug("Bypassing list_subjects_without_entitlement in local environment")
-            return []
 
         # Get all subjects
         # Note: This assumes that the OpenMeter client has a list_subjects() method
@@ -200,7 +180,7 @@ class SubjectService:
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:
-            # If no event loop exists in current thread, create a new one
+            # If no event loop exists in the current thread, create a new one
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 

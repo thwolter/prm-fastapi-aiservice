@@ -1,7 +1,9 @@
 from unittest.mock import patch
-from fastapi.testclient import TestClient
 
+from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
+
 from src.main import app
 
 client = TestClient(app)
@@ -19,7 +21,7 @@ def test_risk_monitoring_endpoint(mock_execute_query):
             "Data integrity checks",
         ],
         references=["Industry best practices", "Previous project metrics"],
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {
@@ -56,7 +58,7 @@ def test_risk_monitoring_minimal_description(mock_execute_query):
     mock_execute_query.return_value = rg_schemas.MonitoringResponse(
         indicators=["Project milestone completion rate", "Budget variance"],
         references=None,
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {

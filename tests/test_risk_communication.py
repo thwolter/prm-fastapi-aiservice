@@ -1,7 +1,9 @@
 from unittest.mock import patch
-from fastapi.testclient import TestClient
 
+from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
+
 from src.main import app
 
 client = TestClient(app)
@@ -14,7 +16,7 @@ def test_risk_communication_endpoint(mock_execute_query):
     mock_execute_query.return_value = rg_schemas.CommunicationResponse(
         executive_summary="The cloud migration project faces three key risks: data loss, service interruption, and cost overruns. Mitigation strategies have been identified for each risk.",
         technical_annex="Detailed technical analysis of each risk:\n1. Data Loss: ...\n2. Service Interruption: ...\n3. Cost Overruns: ...",
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {
@@ -49,7 +51,7 @@ def test_risk_communication_minimal_summary(mock_execute_query):
     mock_execute_query.return_value = rg_schemas.CommunicationResponse(
         executive_summary="The project has minimal information available. More details are needed for a comprehensive risk assessment.",
         technical_annex=None,
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {

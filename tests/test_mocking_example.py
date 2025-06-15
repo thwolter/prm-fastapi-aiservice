@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
 from riskgpt.utils import search
 
 from src.main import app
@@ -51,7 +52,7 @@ def test_mock_chain_invoke(mock_execute_query):
             ),
         ],
         references=["Mocked Reference"],
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     # Create a request payload
@@ -126,7 +127,7 @@ def test_mock_specific_chain_invoke(mock_execute_query):
             ),
         ],
         references=["Specific Mocked Reference"],
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     # Create a request payload

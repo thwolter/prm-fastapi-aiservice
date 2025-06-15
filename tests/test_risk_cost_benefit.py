@@ -1,7 +1,9 @@
 from unittest.mock import patch
-from fastapi.testclient import TestClient
 
+from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
+
 from src.main import app
 
 client = TestClient(app)
@@ -25,7 +27,7 @@ def test_risk_cost_benefit_endpoint(mock_execute_query):
             ),
         ],
         references=["Industry best practices", "Previous project lessons"],
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {
@@ -63,7 +65,7 @@ def test_risk_cost_benefit_empty_mitigations(mock_execute_query):
     mock_execute_query.return_value = rg_schemas.CostBenefitResponse(
         analyses=[],
         references=None,
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {

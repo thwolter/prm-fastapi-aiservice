@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
 
 from src.main import app
 
@@ -15,7 +16,7 @@ def test_context_quality_endpoint(mock_execute):
         shortcomings=["too short"],
         rationale="r",
         suggested_improvements="i",
-        response_info=None,
+        response_info=default_response_info(),
     )
     payload = {"business_context": {"project_id": "p"}}
     response = client.post("/api/context/check/", json=payload)
@@ -32,7 +33,7 @@ def test_external_context_endpoint(mock_execute):
         source_table=[{"title": "t", "url": "u"}],
         workshop_recommendations=["rec"],
         full_report=None,
-        response_info=None,
+        response_info=default_response_info(),
     )
     payload = {"business_context": {"project_id": "p"}}
     response = client.post("/api/workflow/context/external/", json=payload)
@@ -44,7 +45,7 @@ def test_external_context_endpoint(mock_execute):
 @patch("src.services.services.PresentationWorkflowService.execute_query")
 def test_presentation_workflow_endpoint(mock_execute):
     mock_execute.return_value = rg_schemas.PresentationResponse(
-        executive_summary="exec", main_risks=["r"], response_info=None
+        executive_summary="exec", main_risks=["r"], response_info=default_response_info()
     )
     payload = {
         "business_context": {"project_id": "p"},
@@ -61,7 +62,7 @@ def test_risk_workflow_endpoint(mock_execute):
     mock_execute.return_value = rg_schemas.RiskResponse(
         risks=[rg_schemas.Risk(title="t", description="d", category="c")],
         references=None,
-        response_info=None,
+        response_info=default_response_info(),
     )
     payload = {"business_context": {"project_id": "p"}, "category": "c"}
     response = client.post("/api/workflow/risk/", json=payload)

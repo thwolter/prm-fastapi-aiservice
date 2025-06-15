@@ -10,17 +10,12 @@ from src.utils.exceptions import AuthenticationException
 
 def get_jwt_payload(request: Request) -> dict[str, Any]:
     """
-    Extract and verify JWT token from the ``Authorization`` header.
-    In local environment, authentication is bypassed.
+    Extract and verify the JWT token from the ``Authorization`` header.
     """
-    # Skip authentication in local environment
-    if settings.ENVIRONMENT == "local":
-        # Return a dummy payload with a user ID
-        return {"sub": "00000000-0000-0000-0000-000000000000"}
 
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
-        raise AuthenticationException(detail="Missing authentication token")
+        raise AuthenticationException(detail="Missing 'Authorization: Bearer <token>' header")
 
     token = auth_header.split(" ", 1)[1]
 

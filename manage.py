@@ -300,7 +300,7 @@ def create_test_user_with_entitlement(
     feature: str = "tokens",
     max_limit: int = 1000,
     period: str = "MONTH",
-    expiry_minutes: int = 60,
+    expiry_minutes: int = 24 * 60,
 ) -> None:
     """
     Creates a subject and an entitlement for a test user on OpenMeter and returns a bearer token.
@@ -311,7 +311,7 @@ def create_test_user_with_entitlement(
         feature: Feature key for the entitlement. Default is "tokens".
         max_limit: Maximum limit for the entitlement. Default is 1000.
         period: Period for the entitlement. Default is "MONTH".
-        expiry_minutes: Token expiry time in minutes. Default is 60.
+        expiry_minutes: Token expiry time in minutes. Default is 24*60.
 
     Returns:
         A bearer token string for authentication.

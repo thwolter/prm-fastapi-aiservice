@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import pytest
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
 
 
 @patch("src.services.services.RiskDefinitionCheckService.execute_query")
@@ -17,7 +18,7 @@ def test_risk_definition_check_valid_input(mock_execute_query, test_client):
         revised_description="The project might face delays due to unforeseen circumstances.",
         biases=["None detected"],
         rationale="This is a valid risk statement that identifies a potential negative event.",
-        response_info=None,
+        response_info=default_response_info(),
     )
     response = test_client.post("/api/risk/check/definition/", json=request_data)
     assert response.status_code == 200
@@ -45,7 +46,7 @@ def test_risk_definition_check_with_mock(mock_execute_query, test_client):
         revised_description="The project might face delays due to unforeseen circumstances.",
         biases=["None detected"],
         rationale="This is a valid risk statement that identifies a potential negative event.",
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     request_data = {
@@ -123,7 +124,7 @@ def test_risk_identification_valid_input(
             ),
         ],
         references=None,
-        response_info=None,
+        response_info=default_response_info(),
     )
     response = test_client.post("/api/risk/identify/", json=risk_identification_request_data)
     assert response.status_code == 200
@@ -165,7 +166,7 @@ def test_risk_identification_empty_existing(
             ),
         ],
         references=None,
-        response_info=None,
+        response_info=default_response_info(),
     )
     request_data = risk_identification_request_data
     request_data["existing_risks"] = []

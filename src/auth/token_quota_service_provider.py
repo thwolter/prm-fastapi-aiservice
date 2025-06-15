@@ -2,7 +2,6 @@
 TokenQuotaServiceProvider: Factory for creating token quota services.
 """
 
-from typing import Optional
 from uuid import UUID
 
 from fastapi import Request
@@ -19,8 +18,6 @@ class TokenQuotaServiceProvider:
     """
     Provider for token quota services.
     """
-
-    _test_request: Optional[Request] = None
 
     @staticmethod
     def create_clients(request: Request = None):
@@ -83,7 +80,7 @@ class TokenQuotaServiceProvider:
         )
 
     @staticmethod
-    def get_token_consumption_service(request: Request = None):
+    def get_token_consumption_service(request: Request):
         """
         Get a TokenConsumptionService instance.
 
@@ -93,10 +90,9 @@ class TokenQuotaServiceProvider:
         Returns:
             A TokenConsumptionService instance.
         """
+
         sync_client, async_client = TokenQuotaServiceProvider.create_clients()
-        return TokenConsumptionService(
-            sync_client, async_client, request or TokenQuotaServiceProvider._test_request
-        )
+        return TokenConsumptionService(sync_client, async_client, request)
 
     @classmethod
     def setup_for_testing(cls, test_user_id: UUID):

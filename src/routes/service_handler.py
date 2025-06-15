@@ -80,15 +80,8 @@ class ServiceHandler(Generic[TRequest, TResponse]):
             # Execute the query
             result = await service.execute_query(query)
 
-            # Preserve response_info if present
-            response_info = getattr(result, "response_info", None)
-
             # Validate the response
             validated = validate_model(result, self.response_model)
-
-            # Restore response_info if it was present
-            if response_info is not None:
-                setattr(validated, "response_info", response_info)
 
             return cast(TResponse, validated)
 

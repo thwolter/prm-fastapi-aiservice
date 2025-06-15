@@ -7,11 +7,9 @@ from fastapi import APIRouter, Body, Depends, Request
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 
-from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.core.config import settings
 from src.routes.service_handler import ServiceHandler, ServiceProtocol
 from src.utils import logutils
-from src.utils.exceptions import QuotaExceededException
 
 TRequest = TypeVar("TRequest", bound=BaseModel)
 TResponse = TypeVar("TResponse", bound=BaseModel)
@@ -113,22 +111,12 @@ class RouteRegistry:
                     BaseServiceException: If an error occurs during processing.
                 """
 
-                print(f"Received request for {request.url.path} with token: {token}")
-                # Check token quota
-                user_id = request.state.user_id
-                entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(request)
-                token_service = TokenQuotaServiceProvider.get_token_consumption_service(request)
-
-                has_access = await entitlement_service.has_access()
-                if not has_access:
-                    raise QuotaExceededException(detail="Token quota exceeded")
-
                 # Handle the request
                 handler.set_request(request)
                 result = await handler.handle(request_model)
 
-                # Consume tokens
-                await token_service.consume_tokens(result, user_id)
+                # Store the result in the request state for the middleware to access
+                request.state.result = result
 
                 return result
 
