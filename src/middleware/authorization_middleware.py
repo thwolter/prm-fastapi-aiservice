@@ -7,7 +7,6 @@ from starlette.responses import Response
 
 from middleware.middleware_mixins import MiddlewareSkipMixin
 from src.auth.auth import get_jwt_payload
-from src.core.config import settings
 from src.utils import logutils
 
 logger = logutils.get_logger(__name__)
@@ -29,12 +28,6 @@ class AuthorizationMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
 
         # Check if we should skip middleware processing for this path
         if self.should_skip_middleware(request):
-            return await call_next(request)
-
-        if settings.ENVIRONMENT == "local":
-            logger.debug("Local environment: injecting dummy credentials")
-            request.state.user_id = None
-            request.state.user_email = None
             return await call_next(request)
 
         try:

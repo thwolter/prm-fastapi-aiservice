@@ -7,9 +7,6 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
-from auth.entitlement_service import EntitlementService
-from auth.subject_service import SubjectService
-from middleware.service_bypass import ServiceBypassMiddleware, register_service
 from middleware.token_entitlement_middleware import TokenEntitlementMiddleware
 from src.core.config import settings
 from src.core.health_checks import router as core_router
@@ -69,13 +66,8 @@ async def custom_middleware(request: Request, call_next: RequestResponseEndpoint
     return await custom_error_format_middleware(request, call_next)
 
 
-# Register services to be bypassed
-register_service("entitlement_service", EntitlementService)
-register_service("subject_service", SubjectService)
-
 app.add_middleware(TokenEntitlementMiddleware)
 app.add_middleware(AuthorizationMiddleware)
-app.add_middleware(ServiceBypassMiddleware)
 
 
 app.include_router(base_router)

@@ -7,7 +7,6 @@ from fastapi import APIRouter, Body, Depends, Request
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 
-from src.core.config import settings
 from src.routes.service_handler import ServiceHandler, ServiceProtocol
 from src.utils import logutils
 
@@ -60,65 +59,34 @@ class RouteRegistry:
         # Create a service handler for this route
         handler = ServiceHandler(service_factory, request_model, response_model)
 
-        # Define a route function that bypasses authentication and metering in local environment
-        if settings.ENVIRONMENT == "local":
+        async def route_function(
+            request: Request,
+            token: Annotated[str, Depends(bearer_scheme)],
+            request_model: request_model = Body(..., embed=False),  # type: ignore[valid-type]
+        ) -> response_model:  # type: ignore[valid-type]
+            """
+            Route handler function with authentication and metering.
 
-            async def route_function(
-                request: Request,
-                token: Annotated[str, Depends(bearer_scheme)],
-                request_model: request_model = Body(..., embed=False),  # type: ignore[valid-type]
-            ) -> response_model:  # type: ignore[valid-type]
-                """
-                Route handler function for local environment (no auth/metering).
+            Args:
+                request: The FastAPI request object.
+                token: The authentication token from the request.
+                request_model: The request data.
 
-                Args:
-                    request: The FastAPI request object.
-                    token: The authentication token from the request.
-                    request_model: The request data.
+            Returns:
+                The response data.
 
-                Returns:
-                    The response data.
+            Raises:
+                BaseServiceException: If an error occurs during processing.
+            """
 
-                Raises:
-                    BaseServiceException: If an error occurs during processing.
-                """
-                logger.debug("Local environment: Bypassing authentication and metering")
+            # Handle the request
+            handler.set_request(request)
+            result = await handler.handle(request_model)
 
-                # Handle the request without authentication or metering
-                result = await handler.handle(request_model)
+            # Store the result in the request state for the middleware to access
+            request.state.result = result
 
-                return result
-
-        else:
-
-            async def route_function(
-                request: Request,
-                token: Annotated[str, Depends(bearer_scheme)],
-                request_model: request_model = Body(..., embed=False),  # type: ignore[valid-type]
-            ) -> response_model:  # type: ignore[valid-type]
-                """
-                Route handler function with authentication and metering.
-
-                Args:
-                    request: The FastAPI request object.
-                    token: The authentication token from the request.
-                    request_model: The request data.
-
-                Returns:
-                    The response data.
-
-                Raises:
-                    BaseServiceException: If an error occurs during processing.
-                """
-
-                # Handle the request
-                handler.set_request(request)
-                result = await handler.handle(request_model)
-
-                # Store the result in the request state for the middleware to access
-                request.state.result = result
-
-                return result
+            return result
 
         # Register the route with the FastAPI router
         self.router.post(
