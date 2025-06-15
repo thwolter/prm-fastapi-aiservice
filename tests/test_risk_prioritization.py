@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
 
 from src.main import app
 
@@ -19,7 +20,7 @@ def test_risk_prioritization_endpoint(mock_execute_query, auth_headers):
             "Low Priority Risk 3",
         ],
         rationale="Risks were prioritized based on impact and probability.",
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {
@@ -59,7 +60,7 @@ def test_risk_prioritization_empty_risks(mock_execute_query, auth_headers):
     mock_execute_query.return_value = rg_schemas.PrioritizationResponse(
         prioritized_risks=[],
         rationale="No risks to prioritize.",
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {

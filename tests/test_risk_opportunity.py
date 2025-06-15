@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from riskgpt.models import schemas as rg_schemas
+from riskgpt.models.schemas import default_response_info
 
 from src.main import app
 
@@ -19,7 +20,7 @@ def test_risk_opportunity_endpoint(mock_execute_query, auth_headers):
             "Potential for cost optimization through cloud resource management",
         ],
         references=["Industry best practices", "Previous project outcomes"],
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {
@@ -62,7 +63,7 @@ def test_risk_opportunity_empty_risks(mock_execute_query, auth_headers):
             "Chance to establish better risk assessment processes",
         ],
         references=None,
-        response_info=None,
+        response_info=default_response_info(),
     )
 
     payload = {
