@@ -4,6 +4,7 @@ import pytest
 import pytest_asyncio
 from openmeter import Client
 from openmeter.aio import Client as AsyncClient
+from riskgpt.models.schemas import BaseResponse, default_response_info
 from starlette.requests import Request
 
 from auth.entitlement_service import EntitlementService
@@ -117,8 +118,21 @@ async def token_consumption_service(openmeter_clients, test_user_id, subject_ser
             "state": {
                 "token": "test_token",
                 "user_id": test_user_id,
+                "result": BaseResponse(
+                    response_info=default_response_info(),
+                ),
             },
         }
     )
 
     yield TokenConsumptionService(sync_client, async_client, req)
+
+
+@pytest_asyncio.fixture
+async def bare_token_consumption_service(openmeter_clients, test_user_id, subject_service):
+    """
+    Fixture that provides a TokenConsumptionService instance without a response for testing.
+    """
+    sync_client, async_client = openmeter_clients
+
+    yield TokenConsumptionService(sync_client, async_client)

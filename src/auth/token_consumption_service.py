@@ -3,6 +3,8 @@ TokenConsumptionService: Manages token consumption via OpenMeter.
 """
 
 import uuid
+from typing import Optional
+from uuid import UUID
 
 from cloudevents.conversion import to_dict
 from cloudevents.http import CloudEvent
@@ -21,7 +23,10 @@ class TokenConsumptionService:
     Service for managing token consumption in OpenMeter.
     """
 
-    def __init__(self, client: Client, async_client: AsyncClient, request: BaseResponse):
+    # todo: Is it really a BaseResponse? Should it be a Request with state and BaseResponse? Define a schema.
+    def __init__(
+        self, client: Client, async_client: AsyncClient, request: Optional[BaseResponse] = None
+    ):
         """
         Initialize the TokenConsumptionService.
 
@@ -33,8 +38,9 @@ class TokenConsumptionService:
         self.client = client
         self.async_client = async_client
         self.request = request
-        self.response_info: ResponseInfo = request.state.result.response_info
-        self.user_id = request.state.user_id
+        if request:
+            self.response_info: ResponseInfo = request.state.result.response_info
+            self.user_id = request.state.user_id
 
     async def consume_tokens(self) -> bool:
         """
@@ -59,6 +65,43 @@ class TokenConsumptionService:
                 "type": "tokens",
                 "source": settings.OPENMETER_SOURCE,
                 "subject": self.user_id,
+            },
+            data=event_data,
+        )
+        self.client.ingest_events(to_dict(event))
+        return True
+
+    async def consume_tokens_for_user(
+        self,
+        user_id: UUID,
+        token: int,
+        model_name: Optional[str] = None,
+        prompt_name: Optional[str] = None,
+    ) -> bool:
+        """
+        Consumes token for a specific user by creating and ingesting a CloudEvent to OpenMeter.
+
+        Args:
+            user_id (str): The ID of the user for whom tokens are being consumed.
+            token (int): The number of tokens consumed.
+            model_name (str): The name of the model used.
+            prompt_name (str): The name of the prompt used.
+
+        Returns:
+            bool: True if the event was successfully ingested.
+        """
+        event_data = {
+            "tokens": token,
+            "model": model_name or "unknown_model",
+            "prompt": prompt_name or "unknown_prompt",
+        }
+
+        event = CloudEvent(
+            attributes={
+                "id": str(uuid.uuid4()),
+                "type": "tokens",
+                "source": settings.OPENMETER_SOURCE,
+                "subject": str(user_id),
             },
             data=event_data,
         )

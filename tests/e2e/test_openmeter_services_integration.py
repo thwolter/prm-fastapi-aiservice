@@ -9,7 +9,6 @@ import uuid
 
 import pytest
 from fastapi import Request
-from riskgpt.models.schemas import ResponseInfo
 
 from src.auth.schemas import EntitlementCreate
 from src.auth.subject_service import SubjectService
@@ -68,19 +67,19 @@ async def test_entitlement_service_set_get(subject_service, entitlement_service,
 
     # Set an entitlement
     limit = EntitlementCreate(feature="ai_tokens", max_limit=1000, period="MONTH")
-    await entitlement_service.set_entitlement(test_user_id, limit)
+    await entitlement_service.set_entitlement(limit)
 
     # Get the entitlement status
-    status = await entitlement_service.get_token_entitlement_status(test_user_id, feature)
+    status = await entitlement_service.get_token_entitlement_status(feature)
     assert status is True, "User should have access after setting entitlement"
 
     # Get the entitlement value
-    value = await entitlement_service.get_entitlement_value(test_user_id, feature)
+    value = await entitlement_service.get_entitlement_value(feature)
     assert value["hasAccess"] is True, "User should have access"
     assert value["balance"] == 1000, "Balance should be 1000"
 
     # Test has_access alias
-    has_access = await entitlement_service.has_access(test_user_id, feature)
+    has_access = await entitlement_service.has_access(feature)
     assert has_access is True, "has_access should return True"
 
 
@@ -88,7 +87,7 @@ async def test_entitlement_service_set_get(subject_service, entitlement_service,
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("e2e_environment")
 async def test_token_consumption_consume_tokens(
-    subject_service, entitlement_service, token_consumption_service, test_user_id
+    subject_service, entitlement_service, bare_token_consumption_service, test_user_id
 ):
     """
     Test that TokenConsumptionService can consume tokens directly in OpenMeter.
@@ -98,27 +97,20 @@ async def test_token_consumption_consume_tokens(
 
     # Set an entitlement
     limit = EntitlementCreate(feature=feature, max_limit=1000, period="MONTH")
-    await entitlement_service.set_entitlement(test_user_id, limit)
+    await entitlement_service.set_entitlement(limit)
 
     # Consume tokens directly
     tokens = 300
 
-    result_info = ResponseInfo(
-        consumed_tokens=tokens,
-        model_name="gpt-test",
-        prompt_name="e2e-test",
-        total_cost=0.0,  # Assuming cost is not relevant for this test
-    )
-
-    await token_consumption_service.consume_tokens(result_info)
+    await bare_token_consumption_service.consume_tokens_for_user(test_user_id, tokens)
 
     # Wait for OpenMeter to update the balance (polling with timeout)
     expected_balance = 1000 - tokens
-    value = await entitlement_service.get_entitlement_value(test_user_id, feature)
+    value = await entitlement_service.get_entitlement_value(feature)
     for _ in range(10):  # Try for up to ~5 seconds
         if value["balance"] == expected_balance:
             break
         await asyncio.sleep(0.5)
-        value = await entitlement_service.get_entitlement_value(test_user_id, feature)
+        value = await entitlement_service.get_entitlement_value(feature)
     else:
         assert value["balance"] == expected_balance, f"Balance should be {expected_balance}"

@@ -52,10 +52,10 @@ async def test_risk_definition_check_sufficient_tokens(
 
     # Set an entitlement with sufficient tokens (1000)
     limit = EntitlementCreate(feature=feature, max_limit=1000, period="MONTH")
-    await entitlement_service.set_entitlement(test_user_id, limit)
+    await entitlement_service.set_entitlement(limit)
 
     # Get initial balance
-    initial_value = await entitlement_service.get_entitlement_value(test_user_id, feature)
+    initial_value = await entitlement_service.get_entitlement_value(feature)
     initial_balance = initial_value["balance"]
 
     # Create a test request for the RiskDefinitionCheckService
@@ -78,12 +78,12 @@ async def test_risk_definition_check_sufficient_tokens(
     # Wait for OpenMeter to update the balance (polling with timeout)
     expected_balance = initial_balance - response.response_info.consumed_tokens
     for _ in range(10):  # Try for up to ~5 seconds
-        value = await entitlement_service.get_entitlement_value(test_user_id, feature)
+        value = await entitlement_service.get_entitlement_value(feature)
         if value["balance"] <= expected_balance:
             break
         await asyncio.sleep(0.5)
     else:
-        value = await entitlement_service.get_entitlement_value(test_user_id, feature)
+        value = await entitlement_service.get_entitlement_value(feature)
 
     # Verify token consumption
     assert value["balance"] <= initial_balance, "Tokens should have been consumed"
@@ -109,7 +109,7 @@ async def test_risk_definition_check_insufficient_tokens(
 
     # Set an entitlement with insufficient tokens (0)
     limit = EntitlementCreate(feature=feature, max_limit=0, period="MONTH")
-    await entitlement_service.set_entitlement(test_user_id, limit)
+    await entitlement_service.set_entitlement(limit)
 
     # Create a request with the middleware
     req = Request(
