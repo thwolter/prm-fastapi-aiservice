@@ -51,7 +51,7 @@ class TokenQuotaServiceProvider:
         return sync_client, async_client
 
     @staticmethod
-    def get_customer_service(request: Request = None):
+    def get_subject_service(request: Request = None):
         """
         Get a CustomerService instance.
 

@@ -75,6 +75,7 @@ class RouteRegistry:
 
                 Args:
                     request: The FastAPI request object.
+                    token: The authentication token from the request.
                     request_model: The request data.
 
                 Returns:
@@ -102,6 +103,7 @@ class RouteRegistry:
 
                 Args:
                     request: The FastAPI request object.
+                    token: The authentication token from the request.
                     request_model: The request data.
 
                 Returns:

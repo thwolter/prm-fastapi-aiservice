@@ -86,6 +86,26 @@ class EntitlementService:
 
         self.client.create_entitlement(user_id, entitlement)
 
+    def set_entitlement_sync(self, user_id: UUID, limit: EntitlementCreate) -> None:
+        """
+        Synchronous version of set_entitlement.
+
+        Args:
+            user_id: Optional user ID. If not provided, uses the ID from the request.
+            limit: The entitlement details.
+        """
+        import asyncio
+
+        # Run the async method in a new event loop
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            # If no event loop exists in current thread, create a new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        return loop.run_until_complete(self.set_entitlement(user_id, limit))
+
     @with_resilient_execution(service_name="OpenMeter")
     async def get_token_entitlement_status(self, user_id: UUID, feature_key: str) -> bool:
         """

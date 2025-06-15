@@ -29,7 +29,7 @@ async def test_subject(mock_openmeter_clients):
             },
         }
     )
-    customer_service = TokenQuotaServiceProvider.get_customer_service(req)
+    customer_service = TokenQuotaServiceProvider.get_subject_service(req)
     entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(req)
     await customer_service.create_subject()
 

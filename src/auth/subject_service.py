@@ -2,7 +2,7 @@
 CustomerService: Manages customer operations via OpenMeter.
 """
 
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from azure.core.exceptions import ResourceNotFoundError
@@ -80,6 +80,28 @@ class SubjectService:
         subj = {"key": user_id, "displayName": user_email}
         self.client.upsert_subject([subj])
 
+    def create_subject_sync(
+        self, user_id: Optional[UUID] = None, user_email: Optional[str] = None
+    ) -> None:
+        """
+        Synchronous version of create_subject.
+
+        Args:
+            user_id: Optional user ID. If not provided, uses the ID from the request.
+            user_email: Optional user email. If not provided, uses the email from the request.
+        """
+        import asyncio
+
+        # Run the async method in a new event loop
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            # If no event loop exists in current thread, create a new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        return loop.run_until_complete(self.create_subject(user_id, user_email))
+
     @with_resilient_execution(service_name="OpenMeter")
     async def delete_subject(self, user_id: Optional[UUID] = None) -> None:
         """
@@ -106,3 +128,80 @@ class SubjectService:
         except ResourceNotFoundError as e:
             logger.error(f"User {user_id} not found for deletion: {e}")
             raise ResourceNotFoundException(detail="User not found")
+
+    def delete_subject_sync(self, user_id: Optional[UUID] = None) -> None:
+        """
+        Synchronous version of delete_subject.
+
+        Args:
+            user_id: Optional user ID. If not provided, uses the ID from the request.
+
+        Raises:
+            ResourceNotFoundException: If the user is not found.
+        """
+        import asyncio
+
+        # Run the async method in a new event loop
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            # If no event loop exists in current thread, create a new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        return loop.run_until_complete(self.delete_subject(user_id))
+
+    @with_resilient_execution(service_name="OpenMeter")
+    async def list_subjects_without_entitlement(self) -> List[UUID]:
+        """
+        List all subjects without an entitlement.
+
+        Note: This implementation assumes that the OpenMeter client provides methods
+        like `list_subjects()` and `list_entitlements(subject_id)`. If these methods
+        don't exist, this implementation will need to be modified.
+
+        Returns:
+            A list of UUIDs of subjects without entitlements.
+        """
+        if self.is_local_env:
+            logger.debug("Bypassing list_subjects_without_entitlement in local environment")
+            return []
+
+        # Get all subjects
+        # Note: This assumes that the OpenMeter client has a list_subjects() method
+        subjects = self.client.list_subjects()
+
+        # Filter subjects without entitlements
+        subjects_without_entitlement = []
+        for subject in subjects:
+            try:
+                # Check if subject has any entitlements
+                # Note: This assumes that the OpenMeter client has a list_entitlements(subject_id) method
+                entitlements = self.client.list_entitlements(subject=[str(subject["key"])])
+                if not entitlements:
+                    subjects_without_entitlement.append(UUID(subject["key"]))
+            except ResourceNotFoundError:
+                # If no entitlements found, add to the list
+                subjects_without_entitlement.append(UUID(subject["key"]))
+        logger.debug(f"Found {len(subjects_without_entitlement)} subjects without entitlements")
+
+        return subjects_without_entitlement
+
+    def list_subjects_without_entitlement_sync(self) -> List[UUID]:
+        """
+        Synchronous version of list_subjects_without_entitlement.
+
+        Returns:
+            A list of UUIDs of subjects without entitlements.
+        """
+        import asyncio
+
+        # Run the async method in a new event loop
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            # If no event loop exists in current thread, create a new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        return loop.run_until_complete(self.list_subjects_without_entitlement())
