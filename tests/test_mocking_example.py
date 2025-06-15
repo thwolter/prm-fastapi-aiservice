@@ -42,7 +42,7 @@ def test_mock_search_function(mock_search):
 
 
 @patch("src.services.services.RiskIdentificationService.execute_query")
-def test_mock_chain_invoke(mock_execute_query):
+def test_mock_chain_invoke(mock_execute_query, auth_headers):
     """Test mocking the service execute_query method."""
     # Mock the execute_query method to return a predefined result
     mock_execute_query.return_value = rg_schemas.RiskResponse(
@@ -69,7 +69,7 @@ def test_mock_chain_invoke(mock_execute_query):
     }
 
     # Call the risk identification endpoint
-    response = client.post("/api/risk/identify/", json=payload)
+    response = client.post("/api/risk/identify/", json=payload, headers=auth_headers)
 
     # Check that the response is successful
     assert (
