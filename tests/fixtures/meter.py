@@ -118,7 +118,7 @@ async def token_consumption_service(openmeter_clients, test_user_id, subject_ser
             "state": {
                 "token": "test_token",
                 "user_id": test_user_id,
-                "result": BaseResponse(
+                "response_info": BaseResponse(
                     response_info=default_response_info(),
                 ),
             },

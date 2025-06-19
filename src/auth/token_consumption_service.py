@@ -39,7 +39,7 @@ class TokenConsumptionService:
         self.async_client = async_client
         self.request = request
         if request:
-            self.response_info: ResponseInfo = request.state.result.response_info
+            self.response_info: ResponseInfo = request.state.response_info
             self.user_id = request.state.user_id
 
     async def consume_tokens(self) -> bool:

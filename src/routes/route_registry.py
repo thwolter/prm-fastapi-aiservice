@@ -6,6 +6,7 @@ from typing import Annotated, Callable, List, Optional, Type, TypeVar, Union
 from fastapi import APIRouter, Body, Depends, Request
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
+from riskgpt.models.schemas import ResponseInfo
 
 from src.routes.service_handler import ServiceHandler, ServiceProtocol
 from src.utils import logutils
@@ -84,7 +85,12 @@ class RouteRegistry:
             result = await handler.handle(request_model)
 
             # Store the result in the request state for the middleware to access
-            request.state.result = result
+            if not hasattr(result, "response_info") or not isinstance(
+                result.response_info, ResponseInfo
+            ):
+                raise ValueError("Response info not found in response")
+
+            request.state.response_info = result.response_info
 
             return result
 

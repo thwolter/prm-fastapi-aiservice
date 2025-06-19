@@ -5,6 +5,7 @@ from unittest import mock
 import pytest
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
+from riskgpt.models.schemas import BaseResponse, ResponseInfo
 
 from src.routes import RouteRegistry
 
@@ -15,7 +16,7 @@ class TestRequestModel(BaseModel):
     query: str
 
 
-class TestResponseModel(BaseModel):
+class TestResponseModel(BaseResponse):
     """Test response model for route registry tests."""
 
     result: str
@@ -26,7 +27,12 @@ class TestService:
 
     async def execute_query(self, query):
         """Mock execute_query method."""
-        return TestResponseModel(result=f"Result for {query.query}")
+        return TestResponseModel(
+            result=f"Result for {query.query}",
+            response_info=ResponseInfo(
+                consumed_tokens=10, total_cost=0, prompt_name="test", model_name="test"
+            ),
+        )
 
 
 class TestRouteRegistry:

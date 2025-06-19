@@ -81,9 +81,9 @@ class TokenEntitlementMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
 
             # The response object should be available in the request state
             # This assumes that the route handler sets the result in the request state
-            if hasattr(request.state, "result"):
+            if hasattr(request.state, "response_info"):
                 await token_service.consume_tokens()
             else:
-                logger.warning("No result found in request state to consume tokens")
+                raise Exception("Response info not found in request state")
 
         return response
