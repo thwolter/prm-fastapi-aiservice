@@ -5,8 +5,8 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-from middleware.middleware_mixins import MiddlewareSkipMixin
 from src.auth.auth import get_jwt_payload
+from src.middleware.middleware_mixins import MiddlewareSkipMixin
 from src.utils import logutils
 
 logger = logutils.get_logger(__name__)
