@@ -92,6 +92,7 @@ class Settings(BaseSettings):
     OPENMETER_SOURCE: str = "prm-ai-service"
     OPENMETER_TIMEOUT: float = 1.0
     OPENMETER_FEATURE_KEY: str = "ai_tokens"
+    OPENMETER_EVENT_TYPE: str = "tokens"
 
     @classmethod
     def from_env(cls):

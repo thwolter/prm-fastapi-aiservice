@@ -76,7 +76,7 @@ class OpenMeterClient(AbstractMeteringClient):
             event = CloudEvent(
                 attributes={
                     "id": str(uuid.uuid4()),
-                    "type": "tokens",
+                    "type": settings.OPENMETER_EVENT_TYPE,
                     "source": settings.OPENMETER_SOURCE,
                     "subject": subject_id,
                 },
