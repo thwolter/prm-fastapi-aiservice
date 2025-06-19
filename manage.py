@@ -1,19 +1,11 @@
-#!/usr/bin/env python
-import importlib
-import inspect
-import pkgutil
 import subprocess  # nosec
-import uuid
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Optional
 
 import jwt
 import typer
 import uvicorn
 
 from domain.services.service_factory import DomainServiceFactory
-from src.auth.schemas import EntitlementCreate
 from src.core.config import settings
 
 cmd = typer.Typer(no_args_is_help=True)
@@ -201,35 +193,8 @@ def lint():
     subprocess.run(["isort", "."])
 
 
-@cmd.command(name="list-prompts")
-def list_prompts():
-    """List all prompt names from services"""
-    services = []
-    prompt_names = []
-
-    # Discover and import all service modules
-    package_dir = Path(__file__).resolve().parent / "src" / "risk"
-    for _, module_name, _ in pkgutil.iter_modules([str(package_dir)]):
-        if module_name.endswith("service"):
-            module = importlib.import_module(f"src.risk.{module_name}")
-            for name, obj in inspect.getmembers(module, inspect.isclass):
-                if name.endswith("Service"):
-                    services.append(obj)
-
-    # Collect prompt names from services
-    for service in services:
-        if hasattr(service, "prompt_name"):
-            prompt_names.append(service.prompt_name)
-        if hasattr(service, "prompt_name_category") and hasattr(service, "prompt_name_categories"):
-            prompt_names.append(service.prompt_name_category)
-            prompt_names.append(service.prompt_name_categories)
-
-    for prompt in prompt_names:
-        print(prompt)
-
-
-@cmd.command(name="create_test_token")
-def create_test_token(
+@cmd.command(name="create_token")
+def create_token(
     user_id: str = typer.Option(
         "00000000-0000-0000-0000-000000000000",
         "--user-id",
@@ -246,17 +211,6 @@ def create_test_token(
     This generates a JWT token using the same parameters used for validation.
     """
 
-    token = create_token(email, expiry_minutes, user_id)
-
-    print(f"Bearer token for testing (valid for {expiry_minutes} minutes):")
-    print(f"Bearer {token}")
-    print("\nFor use in curl:")
-    print(f"curl -H 'Authorization: Bearer {token}' ...")
-
-
-def create_token(email, expiry_minutes, user_id):
-    # Create token payload
-
     expiry = datetime.utcnow() + timedelta(minutes=expiry_minutes)
     payload = {
         "sub": user_id,
@@ -270,50 +224,7 @@ def create_token(email, expiry_minutes, user_id):
         settings.SECRET_KEY,
         algorithm=settings.AUTH_TOKEN_ALGORITHM,
     )
-    return token
 
-
-@cmd.command(name="create_test_user")
-def create_test_user_with_entitlement(
-    user_id: Optional[uuid.UUID] = None,
-    user_email: str = "test@example.com",
-    feature: str = "tokens",
-    max_limit: int = 1000,
-    period: str = "MONTH",
-    expiry_minutes: int = 24 * 60,
-) -> None:
-    """
-    Creates a subject and an entitlement for a test user on OpenMeter and returns a bearer token.
-
-    Args:
-        user_id: Optional UUID for the user. If not provided, a random UUID will be generated.
-        user_email: Email for the test user. Default is "test@example.com".
-        feature: Feature key for the entitlement. Default is "tokens".
-        max_limit: Maximum limit for the entitlement. Default is 1000.
-        period: Period for the entitlement. Default is "MONTH".
-        expiry_minutes: Token expiry time in minutes. Default is 24*60.
-
-    Returns:
-        A bearer token string for authentication.
-    """
-    # Generate a random UUID if not provided
-    if user_id is None:
-        user_id = uuid.uuid4()
-
-    # Create subject in OpenMeter
-    subject_service = DomainServiceFactory.get_subject_service()
-    subject_service.create_subject_sync(user_id, user_email)
-
-    # Create entitlement in OpenMeter
-    entitlement_service = DomainServiceFactory.get_entitlement_service()
-    entitlement = EntitlementCreate(
-        feature=settings.OPENMETER_FEATURE_KEY or feature, max_limit=max_limit, period=period
-    )
-    entitlement_service.set_entitlement_sync(user_id, entitlement)
-
-    token = create_token(user_email, expiry_minutes, str(user_id))
-
-    print(f"Created test user with ID: {user_id}")
     print(f"Bearer token for testing (valid for {expiry_minutes} minutes):")
     print(f"Bearer {token}")
     print("\nFor use in curl:")

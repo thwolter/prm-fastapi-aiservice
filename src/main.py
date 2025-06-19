@@ -7,6 +7,12 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
+from src.api.routers import (
+    entitlements_router,
+    metering_router,
+    subjects_router,
+    subscriptions_router,
+)
 from src.core.config import settings
 from src.core.health_checks import router as core_router
 from src.keywords.router import router as keywords_router
@@ -67,6 +73,10 @@ app.add_middleware(AuthorizationMiddleware)
 app.include_router(base_router)
 app.include_router(keywords_router)
 app.include_router(core_router)
+app.include_router(subjects_router)
+app.include_router(entitlements_router)
+app.include_router(metering_router)
+app.include_router(subscriptions_router)
 
 
 @app.get("/api/_health", tags=["Health Check"], status_code=status.HTTP_204_NO_CONTENT)
