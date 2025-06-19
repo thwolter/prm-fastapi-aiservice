@@ -44,7 +44,7 @@ class Entitlement(BaseModel):
         Convert the entitlement to a dictionary format suitable for external APIs.
         """
         return {
-            "type": "metered",
+            "type": "tokens",
             "featureKey": self.feature_key,
             "issueAfterReset": self.limit,
             "usagePeriod": {"interval": self.period} if self.period else None,
