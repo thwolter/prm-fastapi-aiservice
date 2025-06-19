@@ -1,6 +1,6 @@
 """
 End-to-end tests for OpenMeter service integrations.
-These tests verify that the CustomerService, TokenConsumptionService, and EntitlementService
+These tests verify that the CustomerService, MeteringService, and EntitlementService
 can interact with the actual OpenMeter API.
 """
 
@@ -88,11 +88,11 @@ async def test_entitlement_service_set_get(subject_service, entitlement_service,
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("e2e_environment")
-async def test_token_consumption_consume_tokens(
-    subject_service, entitlement_service, bare_token_consumption_service, test_user_id
+async def test_metering_consume_tokens(
+    subject_service, entitlement_service, bare_metering_service, test_user_id
 ):
     """
-    Test that TokenConsumptionService can consume tokens directly in OpenMeter.
+    Test that MeteringService can consume tokens directly.
     """
 
     feature = settings.OPENMETER_FEATURE_KEY
@@ -104,7 +104,7 @@ async def test_token_consumption_consume_tokens(
     # Consume tokens directly
     tokens = 300
 
-    await bare_token_consumption_service.consume_tokens_for_user(test_user_id, tokens)
+    await bare_metering_service.consume_tokens_for_user(test_user_id, tokens)
 
     # Wait for OpenMeter to update the balance (polling with timeout)
     expected_balance = 1000 - tokens

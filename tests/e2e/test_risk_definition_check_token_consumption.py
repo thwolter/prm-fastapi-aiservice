@@ -146,7 +146,7 @@ async def get_auth_token(test_user_id: uuid.UUID) -> dict:
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("e2e_environment")
 async def test_risk_definition_check_insufficient_tokens(
-    subject_service, entitlement_service, token_consumption_service, test_user_id
+    subject_service, entitlement_service, metering_service, test_user_id
 ):
     """
     Test that requests are rejected when a user has insufficient tokens.

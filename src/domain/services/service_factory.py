@@ -9,10 +9,11 @@ from openmeter import Client
 from openmeter.aio import Client as AsyncClient
 
 from src.auth.subject_service import SubjectService
-from src.auth.token_consumption_service import TokenConsumptionService
 from src.core.config import settings
 from src.domain.services.entitlement_service import EntitlementService
+from src.domain.services.metering_service import MeteringService
 from src.external.entitlements.openmeter_entitlement_client import OpenMeterEntitlementClient
+from src.external.metering.openmeter_client import OpenMeterClient
 
 
 class DomainServiceFactory:
@@ -80,19 +81,20 @@ class DomainServiceFactory:
         return EntitlementService(entitlement_client, request or DomainServiceFactory._test_request)
 
     @staticmethod
-    def get_token_consumption_service(request: Request):
+    def get_metering_service(request: Request):
         """
-        Get a TokenConsumptionService instance.
+        Get a MeteringService instance.
 
         Args:
             request: Optional FastAPI request object.
 
         Returns:
-            A TokenConsumptionService instance.
+            A MeteringService instance.
         """
 
         sync_client, async_client = DomainServiceFactory.create_clients()
-        return TokenConsumptionService(sync_client, async_client, request)
+        metering_client = OpenMeterClient(sync_client, async_client)
+        return MeteringService(metering_client, request)
 
     @classmethod
     def setup_for_testing(cls, test_user_id: UUID):

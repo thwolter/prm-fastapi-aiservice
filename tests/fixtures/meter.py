@@ -7,9 +7,9 @@ from openmeter.aio import Client as AsyncClient
 from riskgpt.models.schemas import BaseResponse, default_response_info
 from starlette.requests import Request
 
-from src.auth.token_consumption_service import TokenConsumptionService
 from src.core.config import settings
 from src.domain.services.entitlement_service import EntitlementService
+from src.domain.services.metering_service import MeteringService
 from src.domain.services.subject_service import SubjectService
 from src.external.entitlements.openmeter_entitlement_client import OpenMeterEntitlementClient
 from src.external.metering.openmeter_client import OpenMeterClient
@@ -106,9 +106,9 @@ async def entitlement_service(openmeter_clients, test_user_id, subject_service):
 
 
 @pytest_asyncio.fixture
-async def token_consumption_service(openmeter_clients, test_user_id, subject_service):
+async def metering_service(openmeter_clients, test_user_id, subject_service):
     """
-    Fixture that provides a TokenConsumptionService instance with a test user.
+    Fixture that provides a MeteringService instance with a test user.
     """
     sync_client, async_client = openmeter_clients
 
@@ -129,14 +129,16 @@ async def token_consumption_service(openmeter_clients, test_user_id, subject_ser
         }
     )
 
-    yield TokenConsumptionService(sync_client, async_client, req)
+    metering_client = OpenMeterClient(sync_client, async_client)
+    yield MeteringService(metering_client, req)
 
 
 @pytest_asyncio.fixture
-async def bare_token_consumption_service(openmeter_clients, test_user_id, subject_service):
+async def bare_metering_service(openmeter_clients, test_user_id, subject_service):
     """
-    Fixture that provides a TokenConsumptionService instance without a response for testing.
+    Fixture that provides a MeteringService instance without a response for testing.
     """
     sync_client, async_client = openmeter_clients
+    metering_client = OpenMeterClient(sync_client, async_client)
 
-    yield TokenConsumptionService(sync_client, async_client)
+    yield MeteringService(metering_client)
