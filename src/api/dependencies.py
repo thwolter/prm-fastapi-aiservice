@@ -9,11 +9,13 @@ from src.core.config import settings
 from src.domain.services import (
     EntitlementService,
     MeteringService,
+    PaymentService,
     SubjectService,
     SubscriptionService,
 )
 from src.external.entitlements.openmeter_entitlement_client import OpenMeterEntitlementClient
 from src.external.metering.openmeter_client import OpenMeterClient
+from src.external.payment.openmeter_payment_client import OpenMeterPaymentClient
 
 
 def get_metering_client():
@@ -86,6 +88,31 @@ def get_metering_service(request: BaseResponse = None):
     return MeteringService(metering_client, request)
 
 
+def get_payment_client():
+    """
+    Get the appropriate payment client based on configuration.
+
+    Returns:
+        An instance of a class implementing AbstractPaymentClient.
+    """
+    if settings.PAYMENT_VENDOR == "openmeter":
+        sync_client, async_client = OpenMeterPaymentClient.create_clients()
+        return OpenMeterPaymentClient(sync_client, async_client)
+    # Add more vendors as needed
+    raise ValueError(f"Unknown payment vendor: {settings.PAYMENT_VENDOR}")
+
+
+def get_payment_service():
+    """
+    Get a PaymentService instance.
+
+    Returns:
+        A PaymentService instance.
+    """
+    payment_client = get_payment_client()
+    return PaymentService(payment_client)
+
+
 def get_subscription_service():
     """
     Get a SubscriptionService instance.
@@ -93,7 +120,8 @@ def get_subscription_service():
     Returns:
         A SubscriptionService instance.
     """
-    return SubscriptionService()
+    payment_service = get_payment_service()
+    return SubscriptionService(payment_service)
 
 
 # For testing purposes

@@ -23,10 +23,15 @@ async def create_subscription(
     end_date: Optional[datetime] = None,
     auto_renew: bool = False,
     metadata: Optional[dict] = None,
+    amount: Optional[float] = None,
+    currency: str = "USD",
+    payment_method: str = "credit_card",
     subscription_service: SubscriptionService = Depends(get_subscription_service),
 ):
     """
     Create a new subscription for a subject.
+
+    If amount is provided, a payment will be processed for the subscription.
     """
     try:
         subscription = await subscription_service.create_subscription(
@@ -36,6 +41,9 @@ async def create_subscription(
             end_date=end_date,
             auto_renew=auto_renew,
             metadata=metadata,
+            amount=amount,
+            currency=currency,
+            payment_method=payment_method,
         )
         return subscription
     except Exception as e:
@@ -125,13 +133,20 @@ async def update_subscription(
 @router.post("/{subscription_id}/cancel", response_model=Subscription)
 async def cancel_subscription(
     subscription_id: UUID,
+    refund: bool = False,
+    refund_amount: Optional[float] = None,
     subscription_service: SubscriptionService = Depends(get_subscription_service),
 ):
     """
     Cancel a subscription.
+
+    If refund is True, a refund will be processed for the subscription.
+    If refund_amount is provided, only that amount will be refunded; otherwise, the full amount will be refunded.
     """
     try:
-        subscription = await subscription_service.cancel_subscription(subscription_id)
+        subscription = await subscription_service.cancel_subscription(
+            subscription_id=subscription_id, refund=refund, refund_amount=refund_amount
+        )
         if not subscription:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

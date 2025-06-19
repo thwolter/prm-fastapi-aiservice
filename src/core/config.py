@@ -85,6 +85,7 @@ class Settings(BaseSettings):
     # Vendor configuration
     METERING_VENDOR: str = "openmeter"
     ENTITLEMENT_VENDOR: str = "openmeter"
+    PAYMENT_VENDOR: str = "openmeter"
 
     # OpenMeter configuration
     OPENMETER_API_KEY: str

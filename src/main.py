@@ -10,6 +10,7 @@ from starlette.responses import Response
 from src.api.routers import (
     entitlements_router,
     metering_router,
+    payments_router,
     subjects_router,
     subscriptions_router,
 )
@@ -77,6 +78,7 @@ app.include_router(subjects_router)
 app.include_router(entitlements_router)
 app.include_router(metering_router)
 app.include_router(subscriptions_router)
+app.include_router(payments_router)
 
 
 @app.get("/api/_health", tags=["Health Check"], status_code=status.HTTP_204_NO_CONTENT)
