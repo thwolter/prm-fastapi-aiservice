@@ -11,26 +11,29 @@ from src.main import app
 def override_auth(monkeypatch, request):
     """Override authentication dependencies for tests."""
 
-    from fastapi import Request
+    if request.node.get_closest_marker("integration"):
+        yield
+    else:
+        from fastapi import Request
 
-    async def dummy_get_current_user(request: Request):
-        return {"token": "test", "user_id": "00000000-0000-0000-0000-000000000000"}
+        async def dummy_get_current_user(request: Request):
+            return {"token": "test", "user_id": "00000000-0000-0000-0000-000000000000"}
 
-    from src.auth.dependencies import get_current_user
+        from src.auth.dependencies import get_current_user
 
-    app.dependency_overrides[get_current_user] = dummy_get_current_user
+        app.dependency_overrides[get_current_user] = dummy_get_current_user
 
-    # Always mock has_access
-    async def _allow(self, feature_key=None):
-        return True
+        # Always mock has_access
+        async def _allow(self, feature_key=None):
+            return True
 
-    monkeypatch.setattr(
-        "src.auth.entitlement_service.EntitlementService.has_access",
-        _allow,
-    )
+        monkeypatch.setattr(
+            "src.auth.entitlement_service.EntitlementService.has_access",
+            _allow,
+        )
 
-    yield
-    app.dependency_overrides.clear()
+        yield
+        app.dependency_overrides.clear()
 
 
 @pytest.fixture

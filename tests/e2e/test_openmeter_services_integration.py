@@ -19,9 +19,9 @@ from src.utils.exceptions import ExternalServiceException
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("e2e_environment")
-async def test_customer_service_create_delete(openmeter_clients):
+async def test_subject_service_create_delete(openmeter_clients):
     """
-    Test that CustomerService can create and delete customers in OpenMeter.
+    Test that SubjectService can create and delete customers in OpenMeter.
     """
     sync_client, async_client = openmeter_clients
     test_id = uuid.uuid4()
@@ -44,10 +44,10 @@ async def test_customer_service_create_delete(openmeter_clients):
 
     service = SubjectService(sync_client, async_client, req)
 
-    # Create the customer
+    # Create the subject
     await service.create_subject()
 
-    # Delete the customer
+    # Delete the subject
     await service.delete_subject()
 
     # Verify deletion by attempting to delete again, which should raise an exception
