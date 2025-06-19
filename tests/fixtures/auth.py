@@ -23,13 +23,12 @@ def override_auth(monkeypatch, request):
 
         app.dependency_overrides[get_current_user] = dummy_get_current_user
 
-        # Always mock has_access
-        async def _allow(self, feature_key=None):
-            return True
+        async def _get_entitlement_value(self, feature_key):
+            return {"hasAccess": True, "balance": 100, "overage": 0, "usage": 0}
 
         monkeypatch.setattr(
-            "src.auth.entitlement_service.EntitlementService.has_access",
-            _allow,
+            "src.auth.entitlement_service.EntitlementService.get_entitlement_value",
+            _get_entitlement_value,
         )
 
         yield
