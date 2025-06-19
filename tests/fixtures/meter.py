@@ -7,10 +7,10 @@ from openmeter.aio import Client as AsyncClient
 from riskgpt.models.schemas import BaseResponse, default_response_info
 from starlette.requests import Request
 
-from auth.entitlement_service import EntitlementService
-from auth.subject_service import SubjectService
-from auth.token_consumption_service import TokenConsumptionService
-from core.config import settings
+from src.auth.entitlement_service import EntitlementService
+from src.auth.subject_service import SubjectService
+from src.auth.token_consumption_service import TokenConsumptionService
+from src.core.config import settings
 
 
 @pytest_asyncio.fixture

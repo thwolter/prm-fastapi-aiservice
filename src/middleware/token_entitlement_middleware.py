@@ -4,9 +4,9 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
 
-from core.config import settings
-from middleware.middleware_mixins import MiddlewareSkipMixin
 from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
+from src.core.config import settings
+from src.middleware.middleware_mixins import MiddlewareSkipMixin
 from src.utils import logutils
 from src.utils.exceptions import QuotaExceededException, ResourceNotFoundException
 
