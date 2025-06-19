@@ -7,12 +7,12 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
-from middleware.token_entitlement_middleware import TokenEntitlementMiddleware
 from src.core.config import settings
 from src.core.health_checks import router as core_router
 from src.keywords.router import router as keywords_router
 from src.middleware.authorization_middleware import AuthorizationMiddleware
 from src.middleware.custom_error_format import custom_error_format_middleware
+from src.middleware.token_entitlement_middleware import TokenEntitlementMiddleware
 from src.router import router as base_router
 from src.utils import logutils
 
