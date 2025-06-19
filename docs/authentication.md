@@ -1,8 +1,8 @@
 # Authentication
 
 This service uses JSON Web Tokens (JWT) supplied in the `Authorization` header to authenticate requests.
-The `TokenExtractionMiddleware` reads the header, decodes the token with `get_jwt_payload` and stores
-both the raw token and the user identifier on `request.state`.
+The `AuthorizationMiddleware` reads the header, decodes the token with `get_jwt_payload` and stores
+the user identifier and email on `request.state`.
 
 Authentication is bypassed when `ENVIRONMENT` is set to `local`. In this case dummy
 values are stored so that the rest of the application can operate without valid credentials.

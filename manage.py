@@ -25,26 +25,6 @@ def run():
     uvicorn.run(app="src.main:app", reload=True, port=8010)
 
 
-@cmd.command(name="migrate")
-def migrate():
-    process = subprocess.Popen(
-        ["alembic", "upgrade", "head"], stdout=subprocess.PIPE, shell=False
-    )  # nosec
-    print(process.communicate()[0])
-
-
-@cmd.command(name="makemigrations")
-def makemigrations(
-    msg: str = typer.Option("autogenerate", "--msg", "-m", help="message"),
-):
-    process = subprocess.Popen(
-        ["alembic", "revision", "--autogenerate", "-m", f"{msg}"],
-        stdout=subprocess.PIPE,
-        shell=False,
-    )  # nosec
-    print(process.communicate()[0])
-
-
 # todo: fix this command to use the new token quota service provider
 @cmd.command(name="delete_user")
 def delete_user(
