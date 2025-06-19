@@ -3,8 +3,8 @@ import uuid
 import pytest
 from fastapi import Request
 
-from src.auth.schemas import EntitlementCreate
 from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
+from src.domain.models.entitlement import EntitlementCreate
 
 
 @pytest.fixture(scope="module")

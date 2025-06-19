@@ -4,7 +4,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
 
-from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
+from src.api.dependencies import get_entitlement_service, get_metering_service
 from src.core.config import settings
 from src.middleware.middleware_mixins import MiddlewareSkipMixin
 from src.utils import logutils
@@ -40,7 +40,7 @@ class TokenEntitlementMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
             return await call_next(request)
 
         # Check entitlement before processing the request
-        entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(request)
+        entitlement_service = get_entitlement_service(request)
         try:
             entitlement = await entitlement_service.get_entitlement_value(
                 feature_key=settings.OPENMETER_FEATURE_KEY
@@ -55,7 +55,7 @@ class TokenEntitlementMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
             logger.error(f"Error checking entitlement for user {request.state.user_id}: {e}")
             raise QuotaExceededException(detail="Error checking entitlement")
 
-        if entitlement["balance"] <= 0:
+        if entitlement.balance is not None and entitlement.balance <= 0:
             return JSONResponse(
                 status_code=403,
                 content={
@@ -63,7 +63,7 @@ class TokenEntitlementMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
                 },
             )
 
-        if not entitlement["hasAccess"]:
+        if not entitlement.has_access:
             return JSONResponse(
                 status_code=403,
                 content={
@@ -77,12 +77,12 @@ class TokenEntitlementMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
         # Consume tokens after the request is processed
         # Only consume tokens if the response was successful
         if response.status_code < 400:
-            token_service = TokenQuotaServiceProvider.get_token_consumption_service(request)
+            metering_service = get_metering_service(request)
 
             # The response object should be available in the request state
             # This assumes that the route handler sets the result in the request state
             if hasattr(request.state, "response_info"):
-                await token_service.consume_tokens()
+                await metering_service.consume_tokens()
             else:
                 raise Exception("Response info not found in request state")
 

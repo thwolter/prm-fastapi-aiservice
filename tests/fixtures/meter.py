@@ -7,10 +7,12 @@ from openmeter.aio import Client as AsyncClient
 from riskgpt.models.schemas import BaseResponse, default_response_info
 from starlette.requests import Request
 
-from src.auth.entitlement_service import EntitlementService
-from src.auth.subject_service import SubjectService
 from src.auth.token_consumption_service import TokenConsumptionService
 from src.core.config import settings
+from src.domain.services.entitlement_service import EntitlementService
+from src.domain.services.subject_service import SubjectService
+from src.external.entitlements.openmeter_entitlement_client import OpenMeterEntitlementClient
+from src.external.metering.openmeter_client import OpenMeterClient
 
 
 @pytest_asyncio.fixture
@@ -62,7 +64,8 @@ async def subject_service(openmeter_clients, test_user_id):
         }
     )
 
-    service = SubjectService(sync_client, async_client, req)
+    metering_client = OpenMeterClient(sync_client, async_client)
+    service = SubjectService(metering_client, req)
 
     # Create the customer for testing
     await service.create_subject()
@@ -98,7 +101,8 @@ async def entitlement_service(openmeter_clients, test_user_id, subject_service):
         }
     )
 
-    yield EntitlementService(sync_client, async_client, req)
+    entitlement_client = OpenMeterEntitlementClient(sync_client, async_client)
+    yield EntitlementService(entitlement_client, req)
 
 
 @pytest_asyncio.fixture

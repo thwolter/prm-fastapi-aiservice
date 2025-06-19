@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import jwt
 import pytest
 
+from domain.models import Entitlement
 from src.core.config import settings
 from src.main import app
 
@@ -24,10 +25,15 @@ def override_auth(monkeypatch, request):
         app.dependency_overrides[get_current_user] = dummy_get_current_user
 
         async def _get_entitlement_value(self, feature_key):
-            return {"hasAccess": True, "balance": 100, "overage": 0, "usage": 0}
+            return Entitlement(
+                feature_key=feature_key,
+                has_access=True,
+                balance=100,
+                usage=0,
+            )
 
         monkeypatch.setattr(
-            "src.auth.entitlement_service.EntitlementService.get_entitlement_value",
+            "src.domain.services.entitlement_service.EntitlementService.get_entitlement_value",
             _get_entitlement_value,
         )
 

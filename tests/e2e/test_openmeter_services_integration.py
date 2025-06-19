@@ -10,9 +10,10 @@ import uuid
 import pytest
 from fastapi import Request
 
-from src.auth.schemas import EntitlementCreate
-from src.auth.subject_service import SubjectService
 from src.core.config import settings
+from src.domain.models.entitlement import EntitlementCreate
+from src.domain.services.subject_service import SubjectService
+from src.external.metering.openmeter_client import OpenMeterClient
 from src.utils.exceptions import ExternalServiceException
 
 
@@ -42,7 +43,8 @@ async def test_subject_service_create_delete(openmeter_clients):
         }
     )
 
-    service = SubjectService(sync_client, async_client, req)
+    metering_client = OpenMeterClient(sync_client, async_client)
+    service = SubjectService(metering_client, req)
 
     # Create the subject
     await service.create_subject()
@@ -75,8 +77,8 @@ async def test_entitlement_service_set_get(subject_service, entitlement_service,
 
     # Get the entitlement value
     value = await entitlement_service.get_entitlement_value(feature)
-    assert value["hasAccess"] is True, "User should have access"
-    assert value["balance"] == 1000, "Balance should be 1000"
+    assert value.has_access is True, "User should have access"
+    assert value.balance == 1000, "Balance should be 1000"
 
     # Test has_access alias
     has_access = await entitlement_service.has_access(feature)
@@ -108,9 +110,9 @@ async def test_token_consumption_consume_tokens(
     expected_balance = 1000 - tokens
     value = await entitlement_service.get_entitlement_value(feature)
     for _ in range(10):  # Try for up to ~5 seconds
-        if value["balance"] == expected_balance:
+        if value.balance == expected_balance:
             break
         await asyncio.sleep(0.5)
         value = await entitlement_service.get_entitlement_value(feature)
     else:
-        assert value["balance"] == expected_balance, f"Balance should be {expected_balance}"
+        assert value.balance == expected_balance, f"Balance should be {expected_balance}"

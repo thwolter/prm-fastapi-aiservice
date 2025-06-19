@@ -17,9 +17,9 @@ from riskgpt.models.schemas import (
     ResponseInfo,
 )
 
-from src.auth.schemas import EntitlementCreate
 from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.core.config import settings
+from src.domain.models.entitlement import EntitlementCreate
 from src.main import app
 from src.services.services import RiskDefinitionCheckService
 
@@ -91,7 +91,7 @@ async def test_risk_definition_check_sufficient_tokens(
 
     # Get initial balance
     initial_value = await entitlement_service.get_entitlement_value(feature)
-    initial_balance = initial_value["balance"]
+    initial_balance = initial_value.balance
 
     # Create a test request for the RiskDefinitionCheckService
     payload = DefinitionCheckRequest(
@@ -111,15 +111,15 @@ async def test_risk_definition_check_sufficient_tokens(
     expected_balance = initial_balance - response_info.consumed_tokens
     for _ in range(10):  # Try for up to ~5 seconds
         value = await entitlement_service.get_entitlement_value(feature)
-        if value["balance"] <= expected_balance:
+        if value.balance <= expected_balance:
             break
         await asyncio.sleep(0.5)
     else:
         value = await entitlement_service.get_entitlement_value(feature)
 
     # Verify token consumption
-    assert value["balance"] <= initial_balance, "Tokens should have been consumed"
-    assert value["balance"] <= expected_balance, f"Balance should be at most {expected_balance}"
+    assert value.balance <= initial_balance, "Tokens should have been consumed"
+    assert value.balance <= expected_balance, f"Balance should be at most {expected_balance}"
 
 
 async def get_auth_token(test_user_id: uuid.UUID) -> dict:
