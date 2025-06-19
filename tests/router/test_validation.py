@@ -1,4 +1,5 @@
 """Tests for the validation module."""
+
 import pytest
 from fastapi import HTTPException
 from pydantic import BaseModel
@@ -6,8 +7,10 @@ from pydantic import BaseModel
 from src.routes.validation import validate_model
 
 
+@pytest.mark.ignore
 class TestModel(BaseModel):
     """Test model for validation tests."""
+
     name: str
     age: int
 
@@ -29,6 +32,7 @@ class TestValidation:
 
     def test_validate_model_invalid(self):
         """Test that validate_model raises an HTTPException with invalid data."""
+
         # Create a model with invalid data
         class InvalidModel(BaseModel):
             name: str

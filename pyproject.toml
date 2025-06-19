@@ -12,7 +12,6 @@ fastapi = {extras = ["standard"], version = "^0.115.2"}
 uvicorn = "^0.31.1"
 langchain = "^0.3.25"
 langchain-openai = "^0.3.21"
-python-dotenv = "^1.0.1"
 pydantic-settings = "^2.9.1"
 pytest = "^8.3.3"
 yake = {git = "https://github.com/LIAAD/yake"}
@@ -31,7 +30,6 @@ aiobreaker = "^1.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
-pytest-dotenv = "^0.5.2"
 isort = "^5.13.2"
 ruff = "^0.6.9"
 mypy = "^1.9.0"
@@ -83,6 +81,5 @@ markers = [
     "no_quota_patch: do not patch quota service in this test",
     "integration: marks end-to-end tests that hit external services",
 ]
-dotenv_file = ".env.test"
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"

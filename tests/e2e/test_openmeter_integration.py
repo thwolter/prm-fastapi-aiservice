@@ -1,7 +1,7 @@
 import pytest
 from openmeter import Client
 
-from core.config import settings
+from src.core.config import settings
 
 
 @pytest.mark.integration

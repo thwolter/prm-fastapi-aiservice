@@ -7,7 +7,6 @@ from src.auth.schemas import EntitlementCreate
 from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 
 
-@pytest.mark.asyncio
 @pytest.fixture(scope="module")
 async def test_subject(mock_openmeter_clients):
     """

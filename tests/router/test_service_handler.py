@@ -7,12 +7,14 @@ from pydantic import BaseModel
 from src.routes.service_handler import ServiceHandler
 
 
+@pytest.mark.ignore
 class TestRequestModel(BaseModel):
     """Test request model for service handler tests."""
 
     query: str
 
 
+@pytest.mark.ignore
 class TestResponseModel(BaseModel):
     """Test response model for service handler tests."""
 

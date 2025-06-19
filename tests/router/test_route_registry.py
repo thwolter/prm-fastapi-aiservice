@@ -10,12 +10,14 @@ from riskgpt.models.schemas import BaseResponse, ResponseInfo
 from src.routes import RouteRegistry
 
 
+@pytest.mark.ignore
 class TestRequestModel(BaseModel):
     """Test request model for route registry tests."""
 
     query: str
 
 
+@pytest.mark.ignore
 class TestResponseModel(BaseResponse):
     """Test response model for route registry tests."""
 

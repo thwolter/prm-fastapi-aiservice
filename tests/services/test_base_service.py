@@ -9,12 +9,14 @@ from riskgpt.models.schemas import ResponseInfo
 from src.services.base_service import BaseService
 
 
+@pytest.mark.ignore
 class TestQueryModel(BaseModel):
     """Test query model."""
 
     query: str
 
 
+@pytest.mark.ignore
 class TestResultModel(BaseModel):
     """Test result model."""
 
