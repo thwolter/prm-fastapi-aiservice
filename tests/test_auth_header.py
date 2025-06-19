@@ -1,7 +1,6 @@
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.auth.dependencies import get_current_user
 from src.core.config import settings
 from src.middleware.authorization_middleware import AuthorizationMiddleware
 
@@ -10,8 +9,8 @@ app.add_middleware(AuthorizationMiddleware)
 
 
 @app.get("/protected")
-async def protected(user=Depends(get_current_user)):
-    return {"user": user}
+async def protected():
+    return {"user": ""}
 
 
 def test_missing_authorization_header(monkeypatch):

@@ -5,26 +5,6 @@ from src.core.config import settings
 from src.utils.exceptions import AuthenticationException
 
 
-# todo: seem only be used in tests, consider removing
-async def get_current_user(request: Request) -> dict[str, str]:
-    """
-    Dependency to enforce token validation and access control.
-    In local environment, authentication is bypassed.
-    """
-    # Skip authentication in local environment
-    if settings.ENVIRONMENT == "local":
-        # Return a dummy user with a dummy token and user ID
-        return {"token": "dummy_token", "user_id": "00000000-0000-0000-0000-000000000000"}
-
-    token = getattr(request.state, "token", None)
-    user_id = getattr(request.state, "user_id", None)
-
-    if not token or not user_id:
-        raise AuthenticationException(detail="Unauthorized")
-
-    return {"token": token, "user_id": user_id}
-
-
 async def verify_service_jwt(
     request: Request,
     service_authorization: str | None = Header(None, alias="X-Service-Authorization"),

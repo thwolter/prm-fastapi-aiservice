@@ -15,14 +15,6 @@ def override_auth(monkeypatch, request):
     if request.node.get_closest_marker("integration"):
         yield
     else:
-        from fastapi import Request
-
-        async def dummy_get_current_user(request: Request):
-            return {"token": "test", "user_id": "00000000-0000-0000-0000-000000000000"}
-
-        from src.auth.dependencies import get_current_user
-
-        app.dependency_overrides[get_current_user] = dummy_get_current_user
 
         async def _get_entitlement_value(self, feature_key):
             return Entitlement(
