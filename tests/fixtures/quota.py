@@ -3,7 +3,7 @@ import uuid
 import pytest
 from fastapi import Request
 
-from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
+from domain.services.service_factory import DomainServiceFactory
 from src.domain.models.entitlement import EntitlementCreate
 
 
@@ -28,8 +28,8 @@ async def test_subject(mock_openmeter_clients):
             },
         }
     )
-    customer_service = TokenQuotaServiceProvider.get_subject_service(req)
-    entitlement_service = TokenQuotaServiceProvider.get_entitlement_service(req)
+    customer_service = DomainServiceFactory.get_subject_service(req)
+    entitlement_service = DomainServiceFactory.get_entitlement_service(req)
     await customer_service.create_subject()
 
     # Verify customer was created

@@ -15,7 +15,7 @@ from src.domain.services.entitlement_service import EntitlementService
 from src.external.entitlements.openmeter_entitlement_client import OpenMeterEntitlementClient
 
 
-class TokenQuotaServiceProvider:
+class DomainServiceFactory:
     """
     Provider for token quota services.
     """
@@ -59,9 +59,9 @@ class TokenQuotaServiceProvider:
         Returns:
             A CustomerService instance.
         """
-        sync_client, async_client = TokenQuotaServiceProvider.create_clients()
+        sync_client, async_client = DomainServiceFactory.create_clients()
         return SubjectService(
-            sync_client, async_client, request or TokenQuotaServiceProvider._test_request
+            sync_client, async_client, request or DomainServiceFactory._test_request
         )
 
     @staticmethod
@@ -75,11 +75,9 @@ class TokenQuotaServiceProvider:
         Returns:
             An EntitlementService instance.
         """
-        sync_client, async_client = TokenQuotaServiceProvider.create_clients()
+        sync_client, async_client = DomainServiceFactory.create_clients()
         entitlement_client = OpenMeterEntitlementClient(sync_client, async_client)
-        return EntitlementService(
-            entitlement_client, request or TokenQuotaServiceProvider._test_request
-        )
+        return EntitlementService(entitlement_client, request or DomainServiceFactory._test_request)
 
     @staticmethod
     def get_token_consumption_service(request: Request):
@@ -93,7 +91,7 @@ class TokenQuotaServiceProvider:
             A TokenConsumptionService instance.
         """
 
-        sync_client, async_client = TokenQuotaServiceProvider.create_clients()
+        sync_client, async_client = DomainServiceFactory.create_clients()
         return TokenConsumptionService(sync_client, async_client, request)
 
     @classmethod

@@ -17,7 +17,7 @@ from riskgpt.models.schemas import (
     ResponseInfo,
 )
 
-from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
+from domain.services.service_factory import DomainServiceFactory
 from src.core.config import settings
 from src.domain.models.entitlement import EntitlementCreate
 from src.main import app
@@ -32,7 +32,7 @@ async def risk_definition_check_service(test_user_id) -> RiskDefinitionCheckServ
     Create a RiskDefinitionCheckService instance for testing.
     """
     # Set up the token quota service provider with the test user ID
-    TokenQuotaServiceProvider.setup_for_testing(test_user_id)
+    DomainServiceFactory.setup_for_testing(test_user_id)
 
     return RiskDefinitionCheckService()
 

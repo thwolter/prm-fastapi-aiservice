@@ -12,8 +12,8 @@ import jwt
 import typer
 import uvicorn
 
+from domain.services.service_factory import DomainServiceFactory
 from src.auth.schemas import EntitlementCreate
-from src.auth.token_quota_service_provider import TokenQuotaServiceProvider
 from src.core.config import settings
 
 cmd = typer.Typer(no_args_is_help=True)
@@ -71,7 +71,7 @@ def delete_user(
         return
 
     # Get services
-    subject_service = TokenQuotaServiceProvider.get_subject_service()
+    subject_service = DomainServiceFactory.get_subject_service()
 
     try:
         # First, try to delete the user's entitlements
@@ -134,7 +134,7 @@ def delete_all_users(
         return
 
     # Get subject service
-    subject_service = TokenQuotaServiceProvider.get_subject_service()
+    subject_service = DomainServiceFactory.get_subject_service()
 
     # Get all subjects without entitlements
     typer.secho(
@@ -301,11 +301,11 @@ def create_test_user_with_entitlement(
         user_id = uuid.uuid4()
 
     # Create subject in OpenMeter
-    subject_service = TokenQuotaServiceProvider.get_subject_service()
+    subject_service = DomainServiceFactory.get_subject_service()
     subject_service.create_subject_sync(user_id, user_email)
 
     # Create entitlement in OpenMeter
-    entitlement_service = TokenQuotaServiceProvider.get_entitlement_service()
+    entitlement_service = DomainServiceFactory.get_entitlement_service()
     entitlement = EntitlementCreate(
         feature=settings.OPENMETER_FEATURE_KEY or feature, max_limit=max_limit, period=period
     )
