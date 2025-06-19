@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import jwt
 import pytest
 
-from core.config import settings
+from src.core.config import settings
 from src.main import app
 
 
