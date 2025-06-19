@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import jwt
 import pytest
 
-from domain.models import Entitlement
 from src.core.config import settings
+from src.domain.models import Entitlement
 from src.main import app
 
 

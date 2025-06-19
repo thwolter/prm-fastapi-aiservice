@@ -1,7 +1,9 @@
 """Wrapper utilities for the pybreaker-based circuit breaker."""
+
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, TypeVar
 
@@ -21,7 +23,14 @@ _circuit_breakers: Dict[str, aiobreaker.CircuitBreaker] = {}
 def get_circuit_breaker(service_name: str) -> aiobreaker.CircuitBreaker:
     """Return a circuit breaker for the given service name."""
     if service_name not in _circuit_breakers:
-        _circuit_breakers[service_name] = aiobreaker.CircuitBreaker(name=service_name)
+        # Configure the circuit breaker with appropriate timeout settings
+        # - fail_max: Maximum number of failures before opening the circuit
+        # - timeout_duration: Time to wait before attempting to reset the circuit (in seconds)
+        _circuit_breakers[service_name] = aiobreaker.CircuitBreaker(
+            name=service_name,
+            fail_max=3,
+            timeout_duration=timedelta(seconds=30),  # 30 seconds before attempting to reset
+        )
     return _circuit_breakers[service_name]
 
 

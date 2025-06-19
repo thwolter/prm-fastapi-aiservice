@@ -55,6 +55,22 @@ async def delete_subject(
         )
 
 
+@router.get("/", response_model=List[dict])
+async def list_subjects(
+    subject_service: SubjectService = Depends(get_subject_service),
+):
+    """
+    List all subjects.
+    """
+    try:
+        return await subject_service.list_subjects()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to list subjects: {str(e)}",
+        )
+
+
 @router.get("/without-entitlement", response_model=List[UUID])
 async def list_subjects_without_entitlement(
     subject_service: SubjectService = Depends(get_subject_service),

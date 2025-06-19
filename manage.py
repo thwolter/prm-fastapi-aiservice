@@ -5,8 +5,8 @@ import jwt
 import typer
 import uvicorn
 
-from domain.services.service_factory import DomainServiceFactory
 from src.core.config import settings
+from src.domain.services.service_factory import DomainServiceFactory
 
 cmd = typer.Typer(no_args_is_help=True)
 
@@ -17,7 +17,6 @@ def run():
     uvicorn.run(app="src.main:app", reload=True, port=8010)
 
 
-# todo: fix this command to use the new token quota service provider
 @cmd.command(name="delete_user")
 def delete_user(
     msg: str = typer.Option(
@@ -87,7 +86,6 @@ def delete_user(
         typer.secho(f"Error: {e}", fg=typer.colors.RED)
 
 
-# todo: fix this command to use the new token quota service provider
 @cmd.command(name="delete_all_users")
 def delete_all_users(
     msg: str = typer.Option(
@@ -105,7 +103,7 @@ def delete_all_users(
     """
     # Show warning
     typer.secho(
-        "WARNING: This command will delete ALL users without entitlements and their associated data from the system.",
+        "WARNING: This command will delete ALL users and their associated data from the system.",
         fg=typer.colors.RED,
         bold=True,
     )
@@ -130,31 +128,29 @@ def delete_all_users(
 
     # Get all subjects without entitlements
     typer.secho(
-        "Fetching all users without entitlements...",
+        "Fetching all subjects...",
         fg=typer.colors.YELLOW,
     )
 
     try:
-        users_without_entitlement = subject_service.list_subjects_without_entitlement_sync()
+        subjects = subject_service.list_subjects_sync()
 
-        if not users_without_entitlement:
-            typer.secho(
-                "No users without entitlements found. Operation completed.", fg=typer.colors.GREEN
-            )
+        if not subjects:
+            typer.secho("No subjects  found. Operation completed.", fg=typer.colors.GREEN)
             return
 
         # Show the list of users to be deleted
         typer.secho(
-            f"Found {len(users_without_entitlement)} user(s) without entitlements:",
+            f"Found {len(subjects)} user(s) without entitlements:",
             fg=typer.colors.YELLOW,
         )
 
-        for user_id in users_without_entitlement:
+        for user_id in subjects:
             typer.secho(f"  - {user_id}", fg=typer.colors.YELLOW)
 
         # Final confirmation for deleting users
         final_confirmation = typer.prompt(
-            f"You are about to delete {len(users_without_entitlement)} user(s). Are you sure you want to proceed? (y/n)",
+            f"You are about to delete {len(subjects)} subject(s). Are you sure you want to proceed? (y/n)",
             default="n",
         )
 
@@ -166,19 +162,21 @@ def delete_all_users(
         success_count = 0
         error_count = 0
 
-        for user_id in users_without_entitlement:
+        for subject in subjects:
             try:
-                typer.secho(f"Deleting user {user_id}... ({msg})", fg=typer.colors.YELLOW)
-                subject_service.delete_subject_sync(user_id)
+                typer.secho(f"Deleting subjects {subject.id}... ({msg})", fg=typer.colors.YELLOW)
+                subject_service.metering_client.delete_subject(subject.id)
                 success_count += 1
-                typer.secho(f"User {user_id} deleted successfully. ({msg})", fg=typer.colors.GREEN)
+                typer.secho(
+                    f"User {subject.id} deleted successfully. ({msg})", fg=typer.colors.GREEN
+                )
             except Exception as e:
                 error_count += 1
-                typer.secho(f"Error deleting user {user_id}: {e}", fg=typer.colors.RED)
+                typer.secho(f"Error deleting subjects {subject.id}: {e}", fg=typer.colors.RED)
 
         # Summary
         typer.secho(
-            f"Operation completed. {success_count} user(s) deleted successfully, {error_count} error(s). ({msg})",
+            f"Operation completed. {success_count} subject(s) deleted successfully, {error_count} error(s). ({msg})",
             fg=typer.colors.GREEN if error_count == 0 else typer.colors.YELLOW,
         )
     except Exception as e:

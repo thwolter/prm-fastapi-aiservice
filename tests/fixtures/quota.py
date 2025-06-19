@@ -3,8 +3,8 @@ import uuid
 import pytest
 from fastapi import Request
 
-from domain.services.service_factory import DomainServiceFactory
 from src.domain.models.entitlement import EntitlementCreate
+from src.domain.services.service_factory import DomainServiceFactory
 
 
 @pytest.fixture(scope="module")

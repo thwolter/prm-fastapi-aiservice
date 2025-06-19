@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -9,8 +10,8 @@ class Subject(BaseModel):
     """
 
     id: UUID
-    email: str = None
-    display_name: str = None
+    email: Optional[str] = None
+    display_name: Optional[str] = None
 
     def to_dict(self):
         """

@@ -131,6 +131,37 @@ class SubjectService:
         return loop.run_until_complete(self.delete_subject(user_id))
 
     @with_resilient_execution(service_name="MeteringService")
+    async def list_subjects(self) -> List[Subject]:
+        """
+        List all subjects.
+
+        Returns:
+            A list of all subjects.
+        """
+        subjects = self.metering_client.list_subjects()
+        logger.debug(f"Found {len(subjects)} subjects")
+        return subjects
+
+    def list_subjects_sync(self) -> List[Subject]:
+        """
+        Synchronous version of list_subjects.
+
+        Returns:
+            A list of all subjects.
+        """
+        import asyncio
+
+        # Run the async method in a new event loop
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            # If no event loop exists in current thread, create a new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        return loop.run_until_complete(self.list_subjects())
+
+    @with_resilient_execution(service_name="MeteringService")
     async def list_subjects_without_entitlement(self) -> List[UUID]:
         """
         List all subjects without an entitlement.
@@ -140,7 +171,7 @@ class SubjectService:
         """
 
         # Get all subjects
-        subjects = self.metering_client.list_subjects()
+        subjects = await self.list_subjects()
 
         # Filter subjects without entitlements
         subjects_without_entitlement = []

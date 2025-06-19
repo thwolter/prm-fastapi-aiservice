@@ -52,18 +52,17 @@ class DomainServiceFactory:
     @staticmethod
     def get_subject_service(request: Request = None):
         """
-        Get a CustomerService instance.
+        Get a SubjectService instance.
 
         Args:
             request: Optional FastAPI request object.
 
         Returns:
-            A CustomerService instance.
+            A SubjectService instance.
         """
         sync_client, async_client = DomainServiceFactory.create_clients()
-        return SubjectService(
-            sync_client, async_client, request or DomainServiceFactory._test_request
-        )
+        metering_client = OpenMeterClient(sync_client, async_client)
+        return SubjectService(metering_client, request)
 
     @staticmethod
     def get_entitlement_service(request: Request = None):
