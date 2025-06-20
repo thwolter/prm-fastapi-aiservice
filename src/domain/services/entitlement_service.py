@@ -10,8 +10,8 @@ from fastapi import Request
 from src.domain.models import Entitlement
 from src.external.entitlements.abstract_entitlement_client import AbstractEntitlementClient
 from src.utils import logutils
+from src.utils.context_managers import handle_resource_not_found
 from src.utils.resilient import with_resilient_execution
-from utils.context_managers import handle_resource_not_found
 
 logger = logutils.get_logger(__name__)
 
