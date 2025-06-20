@@ -52,15 +52,10 @@ class OpenMeterEntitlementClient(AbstractEntitlementClient):
 
         return sync_client, async_client
 
-    def create_entitlement(self, subject_id: str, entitlement: Entitlement) -> None:
-        """
-        Create an entitlement for a subject using OpenMeter.
-
-        Args:
-            subject_id: The ID of the subject.
-            entitlement: The entitlement data as an Entitlement object.
-        """
-        self.sync_client.create_entitlement(subject_id, entitlement.to_dict())
+    @classmethod
+    def from_default_config(cls):
+        sync_client, async_client = cls.create_clients()
+        return cls(sync_client, async_client)
 
     def get_entitlement_value(self, subject_id: str, feature_key: str) -> Entitlement:
         """

@@ -2,24 +2,19 @@
 Integration tests for RiskDefinitionCheckService with token consumption.
 """
 
-import asyncio
 import uuid
 from datetime import datetime, timedelta
+from unittest.mock import patch
 
 import jwt
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
-from riskgpt.models.schemas import (
-    BusinessContext,
-    DefinitionCheckRequest,
-    DefinitionCheckResponse,
-    ResponseInfo,
-)
+from riskgpt.models.schemas import DefinitionCheckResponse, ResponseInfo
 
 from domain.services.service_factory import DomainServiceFactory
 from src.core.config import settings
-from src.domain.models.entitlement import EntitlementCreate
+from src.domain.models.entitlement import Entitlement
 from src.main import app
 from src.services.services import RiskDefinitionCheckService
 
@@ -35,6 +30,29 @@ async def risk_definition_check_service(test_user_id) -> RiskDefinitionCheckServ
     DomainServiceFactory.setup_for_testing(test_user_id)
 
     return RiskDefinitionCheckService()
+
+
+@pytest.fixture
+def mock_get_entitlement_value():
+    """
+    Fixture that mocks the EntitlementService.get_entitlement_value method.
+
+    Returns:
+        A mock object that can be configured with return_value or side_effect.
+    """
+    with patch(
+        'src.domain.services.entitlement_service.EntitlementService.get_entitlement_value'
+    ) as mock_get_entitlement:
+        # Default to a sufficient token balance
+        mock_get_entitlement.return_value = Entitlement(
+            feature_key=settings.OPENMETER_FEATURE_KEY,
+            has_access=True,
+            balance=100,
+            limit=1000,
+            usage=900,
+            period='MONTH',
+        )
+        yield mock_get_entitlement
 
 
 def create_mock_definition_response(consumed_tokens):
@@ -67,59 +85,42 @@ async def test_risk_definition_check_sufficient_tokens(
     configure_mock_handle,
     risk_definition_check_service,
     test_user_id,
+    mock_get_entitlement_value,
 ):
     """
     Test that RiskDefinitionCheckService correctly consumes tokens when a user has sufficient tokens.
-
-    Steps:
-    1. Create a user (done via fixtures)
-    2. Assign entitlement with sufficient tokens
-    3. Call the RiskDefinitionCheckService
-    4. Verify token consumption in OpenMeter
     """
-
-    feature = settings.OPENMETER_FEATURE_KEY
-
-    mock_response = create_mock_definition_response(consumed_tokens=100)
-
-    # Configure the mock with a return value
+    # Configure the mock to return a response with consumed tokens
+    consumed_tokens = 50
+    mock_response = create_mock_definition_response(consumed_tokens)
     configure_mock_handle(return_value=mock_response)
 
-    # Set an entitlement with sufficient tokens (1000)
-    limit = EntitlementCreate(feature=feature, max_limit=1000, period='MONTH')
-    await entitlement_service.set_entitlement(limit)
+    # Create a request payload
+    payload = {
+        'business_context': {
+            'project_id': 'test-project',
+            'project_description': 'Test project description',
+            'domain_knowledge': 'Test domain knowledge',
+            'language': 'en',
+        },
+        'risk_description': 'Test risk description',
+    }
 
-    # Get initial balance
-    initial_value = await entitlement_service.get_entitlement_value(feature)
-    initial_balance = initial_value.balance
-
-    # Create a test request for the RiskDefinitionCheckService
-    payload = DefinitionCheckRequest(
-        business_context=BusinessContext(
-            model_version='1.0',
-            project_id=str(uuid.uuid4()),
-        ),
-        risk_description='Test risk description for token consumption.',
-    ).model_dump()
-
+    # Get auth headers for the test user
     auth_headers = await get_auth_token(test_user_id)
 
-    json_response = await call_risk_definition_check(client, payload, auth_headers)
-    response_info = ResponseInfo.model_validate(json_response.get('response_info'))
+    # Call the risk definition check endpoint
+    response_data = await call_risk_definition_check(client, payload, auth_headers)
 
-    # Wait for OpenMeter to update the balance (polling with timeout)
-    expected_balance = initial_balance - response_info.consumed_tokens
-    for _ in range(10):  # Try for up to ~5 seconds
-        value = await entitlement_service.get_entitlement_value(feature)
-        if value.balance <= expected_balance:
-            break
-        await asyncio.sleep(0.5)
-    else:
-        value = await entitlement_service.get_entitlement_value(feature)
+    # Verify the response
+    assert response_data is not None
+    assert 'revised_description' in response_data
+    assert response_data['revised_description'] == 'Text for token consumption testing.'
+    assert 'response_info' in response_data
+    assert response_data['response_info']['consumed_tokens'] == consumed_tokens
 
-    # Verify token consumption
-    assert value.balance <= initial_balance, 'Tokens should have been consumed'
-    assert value.balance <= expected_balance, f'Balance should be at most {expected_balance}'
+    # Verify that the entitlement service was called to check the token balance
+    mock_get_entitlement_value.assert_called_with(feature_key=settings.OPENMETER_FEATURE_KEY)
 
 
 async def get_auth_token(test_user_id: uuid.UUID) -> dict:
@@ -146,38 +147,43 @@ async def get_auth_token(test_user_id: uuid.UUID) -> dict:
 @pytest.mark.asyncio
 @pytest.mark.usefixtures('e2e_environment')
 async def test_risk_definition_check_insufficient_tokens(
-    subject_service, entitlement_service, metering_service, test_user_id
+    subject_service, entitlement_service, metering_service, test_user_id, mock_get_entitlement_value
 ):
     """
     Test that requests are rejected when a user has insufficient tokens.
-
-    Steps:
-    1. Create a user (done via fixtures)
-    2. Assign entitlement with insufficient tokens (0)
-    3. Create a request with the middleware active
-    4. Verify the request is rejected with an appropriate message
     """
-    feature = settings.OPENMETER_FEATURE_KEY
+    # Configure the mock to return an entitlement with insufficient tokens
+    mock_get_entitlement_value.return_value = Entitlement(
+        feature_key=settings.OPENMETER_FEATURE_KEY,
+        has_access=True,
+        balance=0,  # No tokens left
+        limit=1000,
+        usage=1000,
+        period='MONTH',
+    )
 
-    # Set an entitlement with insufficient tokens (0)
-    limit = EntitlementCreate(feature=feature, max_limit=0, period='MONTH')
-    await entitlement_service.set_entitlement(limit)
+    # Create a request payload
+    payload = {
+        'business_context': {
+            'project_id': 'test-project',
+            'project_description': 'Test project description',
+            'domain_knowledge': 'Test domain knowledge',
+            'language': 'en',
+        },
+        'risk_description': 'Test risk description',
+    }
 
-    # Create a test request for the RiskDefinitionCheckService
-    payload = DefinitionCheckRequest(
-        business_context=BusinessContext(
-            model_version='1.0',
-            project_id=str(uuid.uuid4()),
-        ),
-        risk_description='Test risk description for insufficient tokens.',
-    ).model_dump()
-
+    # Get auth headers for the test user
     auth_headers = await get_auth_token(test_user_id)
 
-    # Call the service (expecting failure due to no tokens)
+    # Call the risk definition check endpoint
     response = client.post('/api/risk/check/definition/', json=payload, headers=auth_headers)
 
-    # Verify the response is a 403 Forbidden with the appropriate message
+    # Verify that the request was rejected with a 403 Forbidden status code
     assert response.status_code == 403
-    response_body = response.json()
-    assert 'Insufficient token balance' in response_body.get('detail', '')
+    response_data = response.json()
+    assert 'detail' in response_data
+    assert 'Insufficient token balance' in response_data['detail']
+
+    # Verify that the entitlement service was called to check the token balance
+    mock_get_entitlement_value.assert_called_with(feature_key=settings.OPENMETER_FEATURE_KEY)

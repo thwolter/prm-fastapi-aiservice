@@ -11,7 +11,6 @@ from openmeter.aio import Client as AsyncClient
 from src.core.config import settings
 from src.domain.services.entitlement_service import EntitlementService
 from src.domain.services.metering_service import MeteringService
-from src.domain.services.subject_service import SubjectService
 from src.external.entitlements.openmeter_entitlement_client import OpenMeterEntitlementClient
 from src.external.metering.openmeter_client import OpenMeterClient
 
@@ -48,21 +47,6 @@ class DomainServiceFactory:
         )
 
         return sync_client, async_client
-
-    @staticmethod
-    def get_subject_service(request: Request = None):
-        """
-        Get a SubjectService instance.
-
-        Args:
-            request: Optional FastAPI request object.
-
-        Returns:
-            A SubjectService instance.
-        """
-        sync_client, async_client = DomainServiceFactory.create_clients()
-        metering_client = OpenMeterClient(sync_client, async_client)
-        return SubjectService(metering_client, request)
 
     @staticmethod
     def get_entitlement_service(request: Request = None):

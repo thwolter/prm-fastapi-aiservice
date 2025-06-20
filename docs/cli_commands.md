@@ -60,31 +60,3 @@ Creates a valid bearer token for testing purposes.
 ```bash
 python manage.py create_test_token --user-id "123e4567-e89b-12d3-a456-426614174000" --email "user@example.com" --expiry 120
 ```
-
-## Create Test User
-
-```bash
-python manage.py create_test_user [OPTIONS]
-```
-
-Creates a subject and an entitlement for a test user on OpenMeter and returns a bearer token.
-
-**Purpose**: Set up a test user with appropriate entitlements for testing the application.
-
-**Parameters**:
-- `user_id`: Optional UUID for the user. If not provided, a random UUID will be generated.
-- `user_email`: Email for the test user. (default: "test@example.com")
-- `feature`: Feature key for the entitlement. (default: "tokens")
-- `max_limit`: Maximum limit for the entitlement. (default: 1000)
-- `period`: Period for the entitlement. (default: "MONTH")
-- `expiry_minutes`: Token expiry time in minutes. (default: 24*60 = 1440 minutes/24 hours)
-
-**Example**:
-```bash
-python manage.py create_test_user --user_email "tester@example.com" --max_limit 2000 --period "WEEK"
-```
-
-The command will output:
-- The created user ID
-- A bearer token for testing
-- An example curl command using the token

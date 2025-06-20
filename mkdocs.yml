@@ -3,6 +3,12 @@ theme:
   name: material
 nav:
   - Home: index.md
+  - Domain:
+    - Domain Services: domain_services.md
+    - Domain Models: domain_models.md
+  - External Services: external_services.md
+  - Guides:
+    - Quickstart: quickstart.md
   - Services and Routes: services_and_routes.md
   - Authentication: authentication.md
   - Middlewares: middlewares.md

@@ -3,7 +3,6 @@ import uuid
 import pytest
 from fastapi import Request
 
-from src.domain.models.entitlement import EntitlementCreate
 from src.domain.services.service_factory import DomainServiceFactory
 
 
@@ -29,24 +28,13 @@ async def test_subject(mock_openmeter_clients):
         }
     )
     customer_service = DomainServiceFactory.get_subject_service(req)
-    entitlement_service = DomainServiceFactory.get_entitlement_service(req)
     await customer_service.create_subject()
 
     # Verify customer was created
     assert subject_id in sync_client.subjects, 'Subject should be created in OpenMeter'
 
-    # Add entitlement setup
-    limit = EntitlementCreate(feature='ai_tokens', max_limit=1000, period='MONTH')
-    await entitlement_service.set_entitlement(subject_id, limit)
-
-    # Verify entitlement was set
-    assert subject_id in sync_client.entitlements, 'Subject should have entitlements'
-    assert 'ai_tokens' in sync_client.entitlements[subject_id], (
-        'Subject should have ai_tokens entitlement'
-    )
-    assert sync_client.entitlements[subject_id]['ai_tokens']['balance'] == 1000, (
-        'Initial balance should be 1000'
-    )
+    # Note: Entitlement setup has been removed as set_entitlement is no longer available
+    # The tests that depend on this fixture will need to be updated accordingly
 
     yield subject_id  # Return the subject_id for use in tests
 

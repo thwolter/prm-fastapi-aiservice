@@ -5,14 +5,13 @@ EntitlementService: Manages entitlements.
 from typing import Optional
 from uuid import UUID
 
-from azure.core.exceptions import ResourceNotFoundError
 from fastapi import Request
 
-from src.domain.models import Entitlement, EntitlementCreate
+from src.domain.models import Entitlement
 from src.external.entitlements.abstract_entitlement_client import AbstractEntitlementClient
 from src.utils import logutils
-from src.utils.exceptions import ResourceNotFoundException
 from src.utils.resilient import with_resilient_execution
+from utils.context_managers import handle_resource_not_found
 
 logger = logutils.get_logger(__name__)
 
@@ -45,43 +44,6 @@ class EntitlementService:
             self.user_id = request.state.user_id
 
     @with_resilient_execution(service_name='EntitlementService')
-    async def set_entitlement(self, limit: EntitlementCreate) -> None:
-        """
-        Set an entitlement for a user.
-
-        Args:
-            limit: The entitlement details.
-        """
-
-        entitlement = Entitlement(
-            feature_key=limit.feature,
-            has_access=True,
-            limit=limit.max_limit,
-            period=limit.period,
-        )
-
-        self.entitlement_client.create_entitlement(str(self.user_id), entitlement)
-
-    def set_entitlement_sync(self, limit: EntitlementCreate) -> None:
-        """
-        Synchronous version of set_entitlement.
-
-        Args:
-            limit: The entitlement details.
-        """
-        import asyncio
-
-        # Run the async method in a new event loop
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            # If no event loop exists in the current thread, create a new one
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        return loop.run_until_complete(self.set_entitlement(limit))
-
-    @with_resilient_execution(service_name='EntitlementService')
     async def get_token_entitlement_status(self, feature_key: str) -> bool:
         """
         Check if a user has access to a feature.
@@ -96,14 +58,11 @@ class EntitlementService:
             ResourceNotFoundException: If the user is not found.
         """
 
-        try:
+        with handle_resource_not_found(self.user_id):
             entitlement = self.entitlement_client.get_entitlement_value(
                 str(self.user_id), feature_key
             )
             return entitlement.has_access
-        except ResourceNotFoundError as e:
-            logger.error(f'User {self.user_id}: {e}')
-            raise ResourceNotFoundException(detail='User not found')
 
     async def has_access(self, feature_key: str) -> bool:
         """
@@ -131,8 +90,5 @@ class EntitlementService:
         Raises:
             ResourceNotFoundException: If the user is not found.
         """
-        try:
+        with handle_resource_not_found(self.user_id):
             return self.entitlement_client.get_entitlement_value(str(self.user_id), feature_key)
-        except ResourceNotFoundError as e:
-            logger.error(f'User {self.user_id}: {e}')
-            raise ResourceNotFoundException(detail='User not found')
