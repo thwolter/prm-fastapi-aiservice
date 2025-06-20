@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from azure.core.exceptions import ResourceNotFoundError
 
 from src.utils import logutils
-from utils.exceptions import ResourceNotFoundException
+from src.utils.exceptions import ResourceNotFoundException
 
 logger = logutils.get_logger(__name__)
 
