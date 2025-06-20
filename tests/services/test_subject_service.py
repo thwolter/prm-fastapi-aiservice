@@ -37,20 +37,20 @@ class MockMeteringClient(AbstractMeteringClient):
         """Mock implementation of upsert_subject."""
         self.upsert_subject_mock(subjects)
         for subject in subjects:
-            self.subjects[subject["key"]] = subject
+            self.subjects[subject['key']] = subject
 
     def delete_subject(self, subject_id: str) -> None:
         """Mock implementation of delete_subject."""
         self.delete_subject_mock(subject_id)
         if subject_id not in self.subjects:
-            raise ResourceNotFoundError(f"Subject {subject_id} not found")
+            raise ResourceNotFoundError(f'Subject {subject_id} not found')
         del self.subjects[subject_id]
 
     def list_subjects(self) -> List[Dict[str, Any]]:
         """Mock implementation of list_subjects."""
         self.list_subjects_mock()
         return [
-            {"key": key, "displayName": value.get("displayName")}
+            {'key': key, 'displayName': value.get('displayName')}
             for key, value in self.subjects.items()
         ]
 
@@ -66,7 +66,7 @@ class MockMeteringClient(AbstractMeteringClient):
                 result.append(self.entitlements[subj_id])
 
         if not result and subject:
-            raise ResourceNotFoundError(f"No entitlements found for subjects {subject}")
+            raise ResourceNotFoundError(f'No entitlements found for subjects {subject}')
 
         return result
 
@@ -87,7 +87,7 @@ async def test_create_subject():
 
     # Create a subject service with the mock client
     user_id = uuid.uuid4()
-    user_email = "test@example.com"
+    user_email = 'test@example.com'
     service = SubjectService(mock_client)
 
     # Create a subject
@@ -97,8 +97,8 @@ async def test_create_subject():
     mock_client.upsert_subject_mock.assert_called_once()
     call_args = mock_client.upsert_subject_mock.call_args[0][0]
     assert len(call_args) == 1
-    assert call_args[0]["key"] == str(user_id)
-    assert call_args[0]["displayName"] == user_email
+    assert call_args[0]['key'] == str(user_id)
+    assert call_args[0]['displayName'] == user_email
 
 
 @pytest.mark.asyncio
@@ -108,9 +108,9 @@ async def test_create_subject_with_request():
     mock_client = MockMeteringClient()
 
     # Create a mock request
-    mock_request = Request(scope={"type": "http"})
+    mock_request = Request(scope={'type': 'http'})
     mock_request.state.user_id = uuid.uuid4()
-    mock_request.state.user_email = "test@example.com"
+    mock_request.state.user_email = 'test@example.com'
 
     # Create a subject service with the mock client and request
     service = SubjectService(mock_client, request=mock_request)
@@ -122,8 +122,8 @@ async def test_create_subject_with_request():
     mock_client.upsert_subject_mock.assert_called_once()
     call_args = mock_client.upsert_subject_mock.call_args[0][0]
     assert len(call_args) == 1
-    assert call_args[0]["key"] == str(mock_request.state.user_id)
-    assert call_args[0]["displayName"] == mock_request.state.user_email
+    assert call_args[0]['key'] == str(mock_request.state.user_id)
+    assert call_args[0]['displayName'] == mock_request.state.user_email
 
 
 @pytest.mark.asyncio
@@ -153,7 +153,7 @@ async def test_delete_subject():
     service = SubjectService(mock_client)
 
     # Add a subject to the mock client
-    mock_client.upsert_subject([{"key": str(user_id), "displayName": "test@example.com"}])
+    mock_client.upsert_subject([{'key': str(user_id), 'displayName': 'test@example.com'}])
 
     # Delete the subject
     await service.delete_subject(user_id=user_id)
@@ -198,14 +198,14 @@ async def test_list_subjects_without_entitlement():
 
     mock_client.upsert_subject(
         [
-            {"key": str(subject1_id), "displayName": "test1@example.com"},
-            {"key": str(subject2_id), "displayName": "test2@example.com"},
-            {"key": str(subject3_id), "displayName": "test3@example.com"},
+            {'key': str(subject1_id), 'displayName': 'test1@example.com'},
+            {'key': str(subject2_id), 'displayName': 'test2@example.com'},
+            {'key': str(subject3_id), 'displayName': 'test3@example.com'},
         ]
     )
 
     # Add an entitlement for subject2
-    mock_client.add_entitlement(str(subject2_id), {"id": "ent1", "subject": str(subject2_id)})
+    mock_client.add_entitlement(str(subject2_id), {'id': 'ent1', 'subject': str(subject2_id)})
 
     # List subjects without entitlement
     subjects = await service.list_subjects_without_entitlement()
@@ -228,7 +228,7 @@ def test_create_subject_sync():
 
     # Create a subject service with the mock client
     user_id = uuid.uuid4()
-    user_email = "test@example.com"
+    user_email = 'test@example.com'
     service = SubjectService(mock_client)
 
     # Create a subject
@@ -238,8 +238,8 @@ def test_create_subject_sync():
     mock_client.upsert_subject_mock.assert_called_once()
     call_args = mock_client.upsert_subject_mock.call_args[0][0]
     assert len(call_args) == 1
-    assert call_args[0]["key"] == str(user_id)
-    assert call_args[0]["displayName"] == user_email
+    assert call_args[0]['key'] == str(user_id)
+    assert call_args[0]['displayName'] == user_email
 
 
 def test_delete_subject_sync():
@@ -252,7 +252,7 @@ def test_delete_subject_sync():
     service = SubjectService(mock_client)
 
     # Add a subject to the mock client
-    mock_client.upsert_subject([{"key": str(user_id), "displayName": "test@example.com"}])
+    mock_client.upsert_subject([{'key': str(user_id), 'displayName': 'test@example.com'}])
 
     # Delete the subject
     service.delete_subject_sync(user_id=user_id)
@@ -276,14 +276,14 @@ def test_list_subjects_without_entitlement_sync():
 
     mock_client.upsert_subject(
         [
-            {"key": str(subject1_id), "displayName": "test1@example.com"},
-            {"key": str(subject2_id), "displayName": "test2@example.com"},
-            {"key": str(subject3_id), "displayName": "test3@example.com"},
+            {'key': str(subject1_id), 'displayName': 'test1@example.com'},
+            {'key': str(subject2_id), 'displayName': 'test2@example.com'},
+            {'key': str(subject3_id), 'displayName': 'test3@example.com'},
         ]
     )
 
     # Add an entitlement for subject2
-    mock_client.add_entitlement(str(subject2_id), {"id": "ent1", "subject": str(subject2_id)})
+    mock_client.add_entitlement(str(subject2_id), {'id': 'ent1', 'subject': str(subject2_id)})
 
     # List subjects without entitlement
     subjects = service.list_subjects_without_entitlement_sync()
@@ -315,9 +315,9 @@ async def test_list_subjects():
 
     mock_client.upsert_subject(
         [
-            {"key": str(subject1_id), "displayName": "test1@example.com"},
-            {"key": str(subject2_id), "displayName": "test2@example.com"},
-            {"key": str(subject3_id), "displayName": "test3@example.com"},
+            {'key': str(subject1_id), 'displayName': 'test1@example.com'},
+            {'key': str(subject2_id), 'displayName': 'test2@example.com'},
+            {'key': str(subject3_id), 'displayName': 'test3@example.com'},
         ]
     )
 
@@ -326,7 +326,7 @@ async def test_list_subjects():
 
     # Verify the result
     assert len(subjects) == 3
-    subject_keys = [subject["key"] for subject in subjects]
+    subject_keys = [subject['key'] for subject in subjects]
     assert str(subject1_id) in subject_keys
     assert str(subject2_id) in subject_keys
     assert str(subject3_id) in subject_keys
@@ -350,9 +350,9 @@ def test_list_subjects_sync():
 
     mock_client.upsert_subject(
         [
-            {"key": str(subject1_id), "displayName": "test1@example.com"},
-            {"key": str(subject2_id), "displayName": "test2@example.com"},
-            {"key": str(subject3_id), "displayName": "test3@example.com"},
+            {'key': str(subject1_id), 'displayName': 'test1@example.com'},
+            {'key': str(subject2_id), 'displayName': 'test2@example.com'},
+            {'key': str(subject3_id), 'displayName': 'test3@example.com'},
         ]
     )
 
@@ -361,7 +361,7 @@ def test_list_subjects_sync():
 
     # Verify the result
     assert len(subjects) == 3
-    subject_keys = [subject["key"] for subject in subjects]
+    subject_keys = [subject['key'] for subject in subjects]
     assert str(subject1_id) in subject_keys
     assert str(subject2_id) in subject_keys
     assert str(subject3_id) in subject_keys

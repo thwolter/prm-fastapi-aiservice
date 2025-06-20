@@ -42,8 +42,8 @@ class OpenMeterPaymentClient(AbstractPaymentClient):
             A tuple of (sync_client, async_client).
         """
         headers = {
-            "Accept": "application/json",
-            "Authorization": f"Bearer {settings.OPENMETER_API_KEY}",
+            'Accept': 'application/json',
+            'Authorization': f'Bearer {settings.OPENMETER_API_KEY}',
         }
 
         sync_client = Client(
@@ -75,10 +75,10 @@ class OpenMeterPaymentClient(AbstractPaymentClient):
             # Create a CloudEvent for the payment
             event = CloudEvent(
                 attributes={
-                    "id": str(payment_id),
-                    "type": "payment.processed",
-                    "source": settings.OPENMETER_SOURCE,
-                    "subject": str(payment_event.subscription_id),
+                    'id': str(payment_id),
+                    'type': 'payment.processed',
+                    'source': settings.OPENMETER_SOURCE,
+                    'subject': str(payment_event.subscription_id),
                 },
                 data=payment_event.to_dict(),
             )
@@ -92,7 +92,7 @@ class OpenMeterPaymentClient(AbstractPaymentClient):
                 subscription_id=payment_event.subscription_id,
                 amount=payment_event.amount,
                 currency=payment_event.currency,
-                status="processed",
+                status='processed',
                 payment_date=datetime.now(),
                 payment_method=payment_event.payment_method,
                 metadata=payment_event.metadata,
@@ -103,7 +103,7 @@ class OpenMeterPaymentClient(AbstractPaymentClient):
 
             return payment
         except Exception as e:
-            logger.error(f"Error processing payment: {e}")
+            logger.error(f'Error processing payment: {e}')
             raise
 
     def get_payment(self, payment_id: UUID) -> Optional[Payment]:
@@ -147,21 +147,21 @@ class OpenMeterPaymentClient(AbstractPaymentClient):
         """
         payment = self.get_payment(payment_id)
         if not payment:
-            raise ValueError(f"Payment with ID {payment_id} not found")
+            raise ValueError(f'Payment with ID {payment_id} not found')
 
         # Create a CloudEvent for the refund
         refund_amount = amount if amount is not None else payment.amount
         event = CloudEvent(
             attributes={
-                "id": str(uuid4()),
-                "type": "payment.refunded",
-                "source": settings.OPENMETER_SOURCE,
-                "subject": str(payment.subscription_id),
+                'id': str(uuid4()),
+                'type': 'payment.refunded',
+                'source': settings.OPENMETER_SOURCE,
+                'subject': str(payment.subscription_id),
             },
             data={
-                "paymentId": str(payment_id),
-                "amount": refund_amount,
-                "currency": payment.currency,
+                'paymentId': str(payment_id),
+                'amount': refund_amount,
+                'currency': payment.currency,
             },
         )
 
@@ -169,11 +169,11 @@ class OpenMeterPaymentClient(AbstractPaymentClient):
         self.sync_client.ingest_events(to_dict(event))
 
         # Update the payment status
-        payment.status = "refunded"
+        payment.status = 'refunded'
         if amount is not None and amount < payment.amount:
-            payment.status = "partially_refunded"
+            payment.status = 'partially_refunded'
             payment.metadata = payment.metadata or {}
-            payment.metadata["refunded_amount"] = amount
+            payment.metadata['refunded_amount'] = amount
 
         # Store the updated payment
         self.payments[str(payment_id)] = payment
@@ -193,20 +193,20 @@ class OpenMeterPaymentClient(AbstractPaymentClient):
         """
         payment = self.get_payment(payment_id)
         if not payment:
-            raise ValueError(f"Payment with ID {payment_id} not found")
+            raise ValueError(f'Payment with ID {payment_id} not found')
 
         # Create a CloudEvent for the status update
         event = CloudEvent(
             attributes={
-                "id": str(uuid4()),
-                "type": "payment.status_updated",
-                "source": settings.OPENMETER_SOURCE,
-                "subject": str(payment.subscription_id),
+                'id': str(uuid4()),
+                'type': 'payment.status_updated',
+                'source': settings.OPENMETER_SOURCE,
+                'subject': str(payment.subscription_id),
             },
             data={
-                "paymentId": str(payment_id),
-                "oldStatus": payment.status,
-                "newStatus": status,
+                'paymentId': str(payment_id),
+                'oldStatus': payment.status,
+                'newStatus': status,
             },
         )
 

@@ -1,4 +1,5 @@
 """Configuration utilities for logutils."""
+
 import logging
 import sys
 from typing import List, Optional

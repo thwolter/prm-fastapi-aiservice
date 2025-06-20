@@ -17,4 +17,4 @@ class Subject(BaseModel):
         """
         Convert the subject to a dictionary format suitable for external APIs.
         """
-        return {"key": str(self.id), "displayName": self.email or self.display_name or str(self.id)}
+        return {'key': str(self.id), 'displayName': self.email or self.display_name or str(self.id)}

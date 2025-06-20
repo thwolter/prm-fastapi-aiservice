@@ -31,7 +31,7 @@ class MockPaymentClient(AbstractPaymentClient):
             subscription_id=payment_event.subscription_id,
             amount=payment_event.amount,
             currency=payment_event.currency,
-            status="processed",
+            status='processed',
             payment_date=datetime.now(),
             payment_method=payment_event.payment_method,
             metadata=payment_event.metadata,
@@ -58,12 +58,12 @@ class MockPaymentClient(AbstractPaymentClient):
         self.refund_payment_mock(payment_id, amount)
         payment = self.get_payment(payment_id)
         if not payment:
-            raise ValueError(f"Payment with ID {payment_id} not found")
-        payment.status = "refunded"
+            raise ValueError(f'Payment with ID {payment_id} not found')
+        payment.status = 'refunded'
         if amount is not None and amount < payment.amount:
-            payment.status = "partially_refunded"
+            payment.status = 'partially_refunded'
             payment.metadata = payment.metadata or {}
-            payment.metadata["refunded_amount"] = amount
+            payment.metadata['refunded_amount'] = amount
         self.payments[str(payment_id)] = payment
         return payment
 
@@ -72,7 +72,7 @@ class MockPaymentClient(AbstractPaymentClient):
         self.update_payment_status_mock(payment_id, status)
         payment = self.get_payment(payment_id)
         if not payment:
-            raise ValueError(f"Payment with ID {payment_id} not found")
+            raise ValueError(f'Payment with ID {payment_id} not found')
         payment.status = status
         self.payments[str(payment_id)] = payment
         return payment
@@ -90,9 +90,9 @@ async def test_process_payment_success():
     # Process a payment
     subscription_id = uuid.uuid4()
     amount = 100.0
-    currency = "USD"
-    payment_method = "credit_card"
-    metadata = {"test": "data"}
+    currency = 'USD'
+    payment_method = 'credit_card'
+    metadata = {'test': 'data'}
 
     payment = await service.process_payment(
         subscription_id=subscription_id,
@@ -108,7 +108,7 @@ async def test_process_payment_success():
     assert payment.currency == currency
     assert payment.payment_method == payment_method
     assert payment.metadata == metadata
-    assert payment.status == "processed"
+    assert payment.status == 'processed'
 
     # Verify the mock was called with the correct arguments
     mock_client.process_payment_mock.assert_called_once()
@@ -125,7 +125,7 @@ async def test_process_payment_error():
     """Test that process_payment handles errors correctly."""
     # Create a mock payment client that raises an exception
     mock_client = MockPaymentClient()
-    mock_client.process_payment_mock.side_effect = Exception("Test error")
+    mock_client.process_payment_mock.side_effect = Exception('Test error')
 
     # Create a payment service with the mock client
     service = PaymentService(mock_client)
@@ -133,12 +133,12 @@ async def test_process_payment_error():
     # Process a payment - should raise the exception
     subscription_id = uuid.uuid4()
 
-    with pytest.raises(Exception, match="Test error"):
+    with pytest.raises(Exception, match='Test error'):
         await service.process_payment(
             subscription_id=subscription_id,
             amount=100.0,
-            currency="USD",
-            payment_method="credit_card",
+            currency='USD',
+            payment_method='credit_card',
         )
 
 
@@ -156,8 +156,8 @@ async def test_get_payment_success():
     payment = await service.process_payment(
         subscription_id=subscription_id,
         amount=100.0,
-        currency="USD",
-        payment_method="credit_card",
+        currency='USD',
+        payment_method='credit_card',
     )
 
     # Get the payment
@@ -207,22 +207,22 @@ async def test_get_payments_for_subscription():
     payment1 = await service.process_payment(
         subscription_id=subscription_id1,
         amount=100.0,
-        currency="USD",
-        payment_method="credit_card",
+        currency='USD',
+        payment_method='credit_card',
     )
 
     payment2 = await service.process_payment(
         subscription_id=subscription_id1,
         amount=200.0,
-        currency="USD",
-        payment_method="credit_card",
+        currency='USD',
+        payment_method='credit_card',
     )
 
     payment3 = await service.process_payment(
         subscription_id=subscription_id2,
         amount=300.0,
-        currency="USD",
-        payment_method="credit_card",
+        currency='USD',
+        payment_method='credit_card',
     )
 
     # Get payments for subscription 1
@@ -252,8 +252,8 @@ async def test_refund_payment():
     payment = await service.process_payment(
         subscription_id=subscription_id,
         amount=100.0,
-        currency="USD",
-        payment_method="credit_card",
+        currency='USD',
+        payment_method='credit_card',
     )
 
     # Refund the payment
@@ -261,7 +261,7 @@ async def test_refund_payment():
 
     # Verify the result
     assert refunded_payment.id == payment.id
-    assert refunded_payment.status == "refunded"
+    assert refunded_payment.status == 'refunded'
 
     # Verify the mock was called with the correct arguments
     mock_client.refund_payment_mock.assert_called_once_with(payment.id, None)
@@ -281,8 +281,8 @@ async def test_refund_payment_partial():
     payment = await service.process_payment(
         subscription_id=subscription_id,
         amount=100.0,
-        currency="USD",
-        payment_method="credit_card",
+        currency='USD',
+        payment_method='credit_card',
     )
 
     # Refund part of the payment
@@ -291,8 +291,8 @@ async def test_refund_payment_partial():
 
     # Verify the result
     assert refunded_payment.id == payment.id
-    assert refunded_payment.status == "partially_refunded"
-    assert refunded_payment.metadata["refunded_amount"] == refund_amount
+    assert refunded_payment.status == 'partially_refunded'
+    assert refunded_payment.metadata['refunded_amount'] == refund_amount
 
     # Verify the mock was called with the correct arguments
     mock_client.refund_payment_mock.assert_called_once_with(payment.id, refund_amount)
@@ -303,7 +303,7 @@ async def test_refund_payment_not_found():
     """Test that refund_payment handles not found correctly."""
     # Create a mock payment client
     mock_client = MockPaymentClient()
-    mock_client.refund_payment_mock.side_effect = ValueError("Payment not found")
+    mock_client.refund_payment_mock.side_effect = ValueError('Payment not found')
 
     # Create a payment service with the mock client
     service = PaymentService(mock_client)
@@ -311,7 +311,7 @@ async def test_refund_payment_not_found():
     # Refund a payment that doesn't exist
     payment_id = uuid.uuid4()
 
-    with pytest.raises(ValueError, match="Payment not found"):
+    with pytest.raises(ValueError, match='Payment not found'):
         await service.refund_payment(payment_id)
 
     # Verify the mock was called with the correct arguments
@@ -332,12 +332,12 @@ async def test_update_payment_status():
     payment = await service.process_payment(
         subscription_id=subscription_id,
         amount=100.0,
-        currency="USD",
-        payment_method="credit_card",
+        currency='USD',
+        payment_method='credit_card',
     )
 
     # Update the payment status
-    new_status = "failed"
+    new_status = 'failed'
     updated_payment = await service.update_payment_status(payment.id, new_status)
 
     # Verify the result
@@ -353,7 +353,7 @@ async def test_update_payment_status_not_found():
     """Test that update_payment_status handles not found correctly."""
     # Create a mock payment client
     mock_client = MockPaymentClient()
-    mock_client.update_payment_status_mock.side_effect = ValueError("Payment not found")
+    mock_client.update_payment_status_mock.side_effect = ValueError('Payment not found')
 
     # Create a payment service with the mock client
     service = PaymentService(mock_client)
@@ -361,8 +361,8 @@ async def test_update_payment_status_not_found():
     # Update a payment that doesn't exist
     payment_id = uuid.uuid4()
 
-    with pytest.raises(ValueError, match="Payment not found"):
-        await service.update_payment_status(payment_id, "failed")
+    with pytest.raises(ValueError, match='Payment not found'):
+        await service.update_payment_status(payment_id, 'failed')
 
     # Verify the mock was called with the correct arguments
-    mock_client.update_payment_status_mock.assert_called_once_with(payment_id, "failed")
+    mock_client.update_payment_status_mock.assert_called_once_with(payment_id, 'failed')

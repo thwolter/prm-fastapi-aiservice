@@ -1,22 +1,25 @@
 """Integration tests for the logutils package."""
+
 import io
 import logging
-from src.utils import logutils, logutils as logging_module, logutils as original_logging
 
 from src.utils.logutils import (
     CustomFormatter,
+    configure_root_logger,
+    create_console_handler,
     create_default_formatter,
     get_log_level,
-    create_console_handler,
-    configure_root_logger,
-    setup_logging,
     get_logger,
+    setup_logging,
 )
 
 
 def test_package_exports():
     """Test that the package exports the expected symbols."""
     # Check that the package exports the standard logutils module
+    from src.utils import logutils
+    from src.utils import logutils as logging_module
+
     assert logging_module == logutils
 
     # Check that the package exports the expected functions and classes
@@ -53,12 +56,12 @@ def test_logger_integration():
         )
 
         # Get a logutils and log a message
-        logger = get_logger("test_integration")
-        logger.info("Test message")
+        logger = get_logger('test_integration')
+        logger.info('Test message')
 
         # Check that the message was logged correctly
         output = stream.getvalue()
-        assert "INFO:     [test_integration] Test message" in output
+        assert 'INFO:     [test_integration] Test message' in output
 
     finally:
         # Restore the original root logutils configuration
@@ -66,4 +69,3 @@ def test_logger_integration():
         logging.root.handlers.clear()
         for handler in original_handlers:
             logging.root.addHandler(handler)
-

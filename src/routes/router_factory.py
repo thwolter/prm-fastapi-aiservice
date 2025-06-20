@@ -1,18 +1,18 @@
 """Factory for creating routers with routes for all discovered services."""
 
-from src.utils import logutils
-from typing import Callable, List, Type, Optional
+from typing import Callable, List, Optional, Type
 
 from fastapi import APIRouter
 
 from src.routes.route_registry import RouteRegistry
 from src.services import discover_services
+from src.utils import logutils
 
 logger = logutils.get_logger(__name__)
 
 
 def create_router(
-    prefix: str = "/api",
+    prefix: str = '/api',
     service_discovery_fn: Optional[Callable[[], List[Type]]] = None,
     responses: Optional[dict] = None,
 ) -> APIRouter:
@@ -29,7 +29,7 @@ def create_router(
         An APIRouter with routes for all discovered services.
     """
     if responses is None:
-        responses = {404: {"description": "Not found"}}
+        responses = {404: {'description': 'Not found'}}
 
     if service_discovery_fn is None:
         service_discovery_fn = discover_services
@@ -46,15 +46,15 @@ def create_router(
     # Discover services
     try:
         services = service_discovery_fn()
-        logger.info(f"Discovered {len(services)} services")
+        logger.info(f'Discovered {len(services)} services')
     except Exception as e:
-        logger.error(f"Error discovering services: {e}")
+        logger.error(f'Error discovering services: {e}')
         services = []
 
     # Register routes for each service
     for service_class in services:
         try:
-            module_parts = service_class.__module__.split(".")
+            module_parts = service_class.__module__.split('.')
             if len(module_parts) >= 2:
                 module_name = module_parts[-2]
             else:
@@ -69,9 +69,9 @@ def create_router(
                 tags=tags,
             )
             logger.debug(
-                f"Registered route for {service_class.__name__} at {service_class.route_path}"
+                f'Registered route for {service_class.__name__} at {service_class.route_path}'
             )
         except Exception as e:
-            logger.error(f"Error registering route for {service_class.__name__}: {e}")
+            logger.error(f'Error registering route for {service_class.__name__}: {e}')
 
     return router

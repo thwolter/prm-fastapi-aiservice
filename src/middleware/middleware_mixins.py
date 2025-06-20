@@ -20,23 +20,23 @@ class MiddlewareSkipMixin:
         # Define paths and patterns to exclude
         self.excluded_paths = {
             # Documentation routes
-            "/docs",
-            "/redoc",
-            "/openapi.json",
+            '/docs',
+            '/redoc',
+            '/openapi.json',
             # Root health check
-            "/api/_health",
+            '/api/_health',
         }
 
         # Define path patterns to exclude (using regex)
         self.excluded_patterns = [
             # Health check routes
-            r"^/health-check.*",
+            r'^/health-check.*',
             # Static files
-            r"^/static/.*",
+            r'^/static/.*',
         ]
 
-        logger.info(f"TokenEntitlementMiddleware will exclude paths: {self.excluded_paths}")
-        logger.info(f"TokenEntitlementMiddleware will exclude patterns: {self.excluded_patterns}")
+        logger.info(f'TokenEntitlementMiddleware will exclude paths: {self.excluded_paths}')
+        logger.info(f'TokenEntitlementMiddleware will exclude patterns: {self.excluded_patterns}')
 
     def should_skip_middleware(self, request: Request) -> bool:
         """
@@ -53,17 +53,17 @@ class MiddlewareSkipMixin:
 
         # Check if path is in excluded paths
         if path in self.excluded_paths:
-            logger.debug(f"Skipping middleware for excluded path: {path}")
+            logger.debug(f'Skipping middleware for excluded path: {path}')
             return True
 
         # Check if path matches any excluded pattern
         for pattern in self.excluded_patterns:
             if re.match(pattern, path):
-                logger.debug(f"Skipping middleware for excluded pattern match: {path}")
+                logger.debug(f'Skipping middleware for excluded pattern match: {path}')
                 return True
 
         # Check if this is a service route we should process
-        if hasattr(self, "service_routes") and self.service_routes:
+        if hasattr(self, 'service_routes') and self.service_routes:
             is_service_route = False
             for route in self.service_routes:
                 # Handle both exact matches and routes with API prefix
@@ -73,7 +73,7 @@ class MiddlewareSkipMixin:
 
             # Skip if not a service route
             if not is_service_route:
-                logger.debug(f"Skipping middleware for non-service path: {path}")
+                logger.debug(f'Skipping middleware for non-service path: {path}')
                 return True
 
         return False

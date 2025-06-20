@@ -19,26 +19,26 @@ from src.utils.exceptions import ExternalServiceException
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-@pytest.mark.usefixtures("e2e_environment")
+@pytest.mark.usefixtures('e2e_environment')
 async def test_subject_service_create_delete(openmeter_clients):
     """
     Test that SubjectService can create and delete customers in OpenMeter.
     """
     sync_client, async_client = openmeter_clients
     test_id = uuid.uuid4()
-    test_email = f"test-{test_id}@example.com"
+    test_email = f'test-{test_id}@example.com'
 
     # Create a request with a test user
     req = Request(
         scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": test_id,
-                "user_email": test_email,
+            'type': 'http',
+            'method': 'POST',
+            'path': '/test',
+            'headers': [(b'accept', b'application/json')],
+            'state': {
+                'token': 'test_token',
+                'user_id': test_id,
+                'user_email': test_email,
             },
         }
     )
@@ -59,7 +59,7 @@ async def test_subject_service_create_delete(openmeter_clients):
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-@pytest.mark.usefixtures("e2e_environment")
+@pytest.mark.usefixtures('e2e_environment')
 async def test_entitlement_service_set_get(subject_service, entitlement_service, test_user_id):
     """
     Test that EntitlementService can set and get entitlements in OpenMeter.
@@ -68,26 +68,26 @@ async def test_entitlement_service_set_get(subject_service, entitlement_service,
     feature = settings.OPENMETER_FEATURE_KEY
 
     # Set an entitlement
-    limit = EntitlementCreate(feature="ai_tokens", max_limit=1000, period="MONTH")
+    limit = EntitlementCreate(feature='ai_tokens', max_limit=1000, period='MONTH')
     await entitlement_service.set_entitlement(limit)
 
     # Get the entitlement status
     status = await entitlement_service.get_token_entitlement_status(feature)
-    assert status is True, "User should have access after setting entitlement"
+    assert status is True, 'User should have access after setting entitlement'
 
     # Get the entitlement value
     value = await entitlement_service.get_entitlement_value(feature)
-    assert value.has_access is True, "User should have access"
-    assert value.balance == 1000, "Balance should be 1000"
+    assert value.has_access is True, 'User should have access'
+    assert value.balance == 1000, 'Balance should be 1000'
 
     # Test has_access alias
     has_access = await entitlement_service.has_access(feature)
-    assert has_access is True, "has_access should return True"
+    assert has_access is True, 'has_access should return True'
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-@pytest.mark.usefixtures("e2e_environment")
+@pytest.mark.usefixtures('e2e_environment')
 async def test_metering_consume_tokens(
     subject_service, entitlement_service, bare_metering_service, test_user_id
 ):
@@ -98,7 +98,7 @@ async def test_metering_consume_tokens(
     feature = settings.OPENMETER_FEATURE_KEY
 
     # Set an entitlement
-    limit = EntitlementCreate(feature=feature, max_limit=1000, period="MONTH")
+    limit = EntitlementCreate(feature=feature, max_limit=1000, period='MONTH')
     await entitlement_service.set_entitlement(limit)
 
     # Consume tokens directly
@@ -115,4 +115,4 @@ async def test_metering_consume_tokens(
         await asyncio.sleep(0.5)
         value = await entitlement_service.get_entitlement_value(feature)
     else:
-        assert value.balance == expected_balance, f"Balance should be {expected_balance}"
+        assert value.balance == expected_balance, f'Balance should be {expected_balance}'

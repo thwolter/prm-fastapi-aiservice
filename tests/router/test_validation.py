@@ -21,13 +21,13 @@ class TestValidation:
     def test_validate_model_valid(self):
         """Test that validate_model works with valid data."""
         # Create a model with valid data
-        model = TestModel(name="Test", age=30)
+        model = TestModel(name='Test', age=30)
 
         # Validate the model
         validated = validate_model(model, TestModel)
 
         # Check that the validated model is correct
-        assert validated.name == "Test"
+        assert validated.name == 'Test'
         assert validated.age == 30
 
     def test_validate_model_invalid(self):
@@ -37,7 +37,7 @@ class TestValidation:
         class InvalidModel(BaseModel):
             name: str
 
-        model = InvalidModel(name="Test")
+        model = InvalidModel(name='Test')
 
         # Validate the model - should raise an HTTPException
         with pytest.raises(HTTPException) as excinfo:
@@ -45,4 +45,4 @@ class TestValidation:
 
         # Check that the exception has the correct status code and detail
         assert excinfo.value.status_code == 422
-        assert "Validation Error" in excinfo.value.detail
+        assert 'Validation Error' in excinfo.value.detail

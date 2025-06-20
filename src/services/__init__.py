@@ -1,10 +1,12 @@
 import importlib
 import inspect
-from src.utils import logutils
 import pkgutil
-from typing import Type, List, Optional
+from typing import List, Optional, Type
+
+from src.utils import logutils
 
 logger = logutils.get_logger(__name__)
+
 
 def discover_services() -> List[Type]:
     """
@@ -21,18 +23,16 @@ def discover_services() -> List[Type]:
     try:
         # Get the src package
         src_package = importlib.import_module('src')
-        logger.debug(f"Starting service discovery in package: src")
+        logger.debug('Starting service discovery in package: src')
 
         # Walk through all modules in the src package
-        for _, module_name, is_pkg in pkgutil.walk_packages(
-            src_package.__path__, prefix='src.'
-        ):
+        for _, module_name, is_pkg in pkgutil.walk_packages(src_package.__path__, prefix='src.'):
             # Skip modules that don't look like service modules
             module_basename = module_name.split('.')[-1]
             if not (module_basename.endswith('service') or module_basename.endswith('services')):
                 continue
 
-            logger.debug(f"Found potential service module: {module_name}")
+            logger.debug(f'Found potential service module: {module_name}')
 
             try:
                 # Import the module
@@ -42,18 +42,18 @@ def discover_services() -> List[Type]:
                 for name, member in inspect.getmembers(module, inspect.isclass):
                     route_path: Optional[str] = getattr(member, 'route_path', None)
                     if route_path:
-                        logger.debug(f"Found service: {name} with route_path: {route_path}")
+                        logger.debug(f'Found service: {name} with route_path: {route_path}')
                         services.append(member)
 
             except ImportError as e:
-                logger.error(f"Error importing module {module_name}: {e}")
+                logger.error(f'Error importing module {module_name}: {e}')
             except Exception as e:
-                logger.error(f"Unexpected error processing module {module_name}: {e}")
+                logger.error(f'Unexpected error processing module {module_name}: {e}')
 
     except ImportError as e:
-        logger.error(f"Error importing src package: {e}")
+        logger.error(f'Error importing src package: {e}')
     except Exception as e:
-        logger.error(f"Unexpected error during service discovery: {e}")
+        logger.error(f'Unexpected error during service discovery: {e}')
 
-    logger.info(f"Discovered {len(services)} services")
+    logger.info(f'Discovered {len(services)} services')
     return services

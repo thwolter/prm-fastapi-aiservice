@@ -46,20 +46,20 @@ class TokenEntitlementMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
                 feature_key=settings.OPENMETER_FEATURE_KEY
             )
         except ResourceNotFoundException:
-            logger.warning(f"Entitlement not found for user {request.state.user_id}")
+            logger.warning(f'Entitlement not found for user {request.state.user_id}')
             return JSONResponse(
                 status_code=403,
-                content={"detail": "User not found."},
+                content={'detail': 'User not found.'},
             )
         except Exception as e:
-            logger.error(f"Error checking entitlement for user {request.state.user_id}: {e}")
-            raise QuotaExceededException(detail="Error checking entitlement")
+            logger.error(f'Error checking entitlement for user {request.state.user_id}: {e}')
+            raise QuotaExceededException(detail='Error checking entitlement')
 
         if entitlement.balance is not None and entitlement.balance <= 0:
             return JSONResponse(
                 status_code=403,
                 content={
-                    "detail": "Insufficient token balance. Please add more tokens to your account."
+                    'detail': 'Insufficient token balance. Please add more tokens to your account.'
                 },
             )
 
@@ -67,7 +67,7 @@ class TokenEntitlementMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
             return JSONResponse(
                 status_code=403,
                 content={
-                    "detail": "Insufficient token entitlement. Please check your subscription."
+                    'detail': 'Insufficient token entitlement. Please check your subscription.'
                 },
             )
 
@@ -81,9 +81,9 @@ class TokenEntitlementMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
 
             # The response object should be available in the request state
             # This assumes that the route handler sets the result in the request state
-            if hasattr(request.state, "response_info"):
+            if hasattr(request.state, 'response_info'):
                 await metering_service.consume_tokens()
             else:
-                raise Exception("Response info not found in request state")
+                raise Exception('Response info not found in request state')
 
         return response

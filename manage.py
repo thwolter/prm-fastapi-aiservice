@@ -11,22 +11,22 @@ from src.domain.services.service_factory import DomainServiceFactory
 cmd = typer.Typer(no_args_is_help=True)
 
 
-@cmd.command(name="run")
+@cmd.command(name='run')
 def run():
     """run application"""
-    uvicorn.run(app="src.main:app", reload=True, port=8010)
+    uvicorn.run(app='src.main:app', reload=True, port=8010)
 
 
-@cmd.command(name="delete_user")
+@cmd.command(name='delete_user')
 def delete_user(
     msg: str = typer.Option(
-        "User deletion", "--msg", "-m", help="Custom message for the operation"
+        'User deletion', '--msg', '-m', help='Custom message for the operation'
     ),
     user_id: str = typer.Option(
-        "00000000-0000-0000-0000-000000000000",
-        "--user-id",
-        "-u",
-        help="User ID to include in the token",
+        '00000000-0000-0000-0000-000000000000',
+        '--user-id',
+        '-u',
+        help='User ID to include in the token',
     ),
 ):
     """
@@ -41,24 +41,24 @@ def delete_user(
     """
     # Show warning
     typer.secho(
-        f"WARNING: This command will delete user {user_id} and their associated data from the system.",
+        f'WARNING: This command will delete user {user_id} and their associated data from the system.',
         fg=typer.colors.RED,
         bold=True,
     )
     typer.secho(
-        "This action is IRREVERSIBLE and should be used with caution.",
+        'This action is IRREVERSIBLE and should be used with caution.',
         fg=typer.colors.RED,
         bold=True,
     )
 
     # Ask for confirmation
     confirmation = typer.prompt(
-        "Are you sure you want to proceed? (y/n)",
-        default="n",
+        'Are you sure you want to proceed? (y/n)',
+        default='n',
     )
 
-    if confirmation.lower() != "y":
-        typer.secho("Operation cancelled.", fg=typer.colors.GREEN)
+    if confirmation.lower() != 'y':
+        typer.secho('Operation cancelled.', fg=typer.colors.GREEN)
         return
 
     # Get services
@@ -67,29 +67,29 @@ def delete_user(
     try:
         # First, try to delete the user's entitlements
         typer.secho(
-            f"Attempting to delete entitlements for user {user_id}...", fg=typer.colors.YELLOW
+            f'Attempting to delete entitlements for user {user_id}...', fg=typer.colors.YELLOW
         )
 
         # Note: Since we don't have a direct method to delete entitlements,
         # we'll just inform the user that entitlements will be deleted along with the user
         typer.secho(
-            "Note: Entitlements will be deleted along with the user account.",
+            'Note: Entitlements will be deleted along with the user account.',
             fg=typer.colors.YELLOW,
         )
 
         # Delete the user
-        typer.secho(f"Deleting user {user_id}... ({msg})", fg=typer.colors.YELLOW)
+        typer.secho(f'Deleting user {user_id}... ({msg})', fg=typer.colors.YELLOW)
         subject_service.delete_subject_sync(user_id)
-        typer.secho(f"User {user_id} deleted successfully. ({msg})", fg=typer.colors.GREEN)
+        typer.secho(f'User {user_id} deleted successfully. ({msg})', fg=typer.colors.GREEN)
 
     except Exception as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        typer.secho(f'Error: {e}', fg=typer.colors.RED)
 
 
-@cmd.command(name="delete_all_users")
+@cmd.command(name='delete_all_users')
 def delete_all_users(
     msg: str = typer.Option(
-        "Bulk user deletion", "--msg", "-m", help="Custom message for the operation"
+        'Bulk user deletion', '--msg', '-m', help='Custom message for the operation'
     ),
 ):
     """
@@ -103,24 +103,24 @@ def delete_all_users(
     """
     # Show warning
     typer.secho(
-        "WARNING: This command will delete ALL users and their associated data from the system.",
+        'WARNING: This command will delete ALL users and their associated data from the system.',
         fg=typer.colors.RED,
         bold=True,
     )
     typer.secho(
-        "This action is IRREVERSIBLE and should be used with extreme caution.",
+        'This action is IRREVERSIBLE and should be used with extreme caution.',
         fg=typer.colors.RED,
         bold=True,
     )
 
     # Ask for confirmation
     confirmation = typer.prompt(
-        "Are you sure you want to proceed? (y/n)",
-        default="n",
+        'Are you sure you want to proceed? (y/n)',
+        default='n',
     )
 
-    if confirmation.lower() != "y":
-        typer.secho("Operation cancelled.", fg=typer.colors.GREEN)
+    if confirmation.lower() != 'y':
+        typer.secho('Operation cancelled.', fg=typer.colors.GREEN)
         return
 
     # Get subject service
@@ -128,7 +128,7 @@ def delete_all_users(
 
     # Get all subjects without entitlements
     typer.secho(
-        "Fetching all subjects...",
+        'Fetching all subjects...',
         fg=typer.colors.YELLOW,
     )
 
@@ -136,26 +136,26 @@ def delete_all_users(
         subjects = subject_service.list_subjects_sync()
 
         if not subjects:
-            typer.secho("No subjects  found. Operation completed.", fg=typer.colors.GREEN)
+            typer.secho('No subjects  found. Operation completed.', fg=typer.colors.GREEN)
             return
 
         # Show the list of users to be deleted
         typer.secho(
-            f"Found {len(subjects)} user(s) without entitlements:",
+            f'Found {len(subjects)} user(s) without entitlements:',
             fg=typer.colors.YELLOW,
         )
 
         for user_id in subjects:
-            typer.secho(f"  - {user_id}", fg=typer.colors.YELLOW)
+            typer.secho(f'  - {user_id}', fg=typer.colors.YELLOW)
 
         # Final confirmation for deleting users
         final_confirmation = typer.prompt(
-            f"You are about to delete {len(subjects)} subject(s). Are you sure you want to proceed? (y/n)",
-            default="n",
+            f'You are about to delete {len(subjects)} subject(s). Are you sure you want to proceed? (y/n)',
+            default='n',
         )
 
-        if final_confirmation.lower() != "y":
-            typer.secho("Operation cancelled.", fg=typer.colors.GREEN)
+        if final_confirmation.lower() != 'y':
+            typer.secho('Operation cancelled.', fg=typer.colors.GREEN)
             return
 
         # Delete each user
@@ -164,45 +164,45 @@ def delete_all_users(
 
         for subject in subjects:
             try:
-                typer.secho(f"Deleting subjects {subject.id}... ({msg})", fg=typer.colors.YELLOW)
+                typer.secho(f'Deleting subjects {subject.id}... ({msg})', fg=typer.colors.YELLOW)
                 subject_service.metering_client.delete_subject(subject.id)
                 success_count += 1
                 typer.secho(
-                    f"User {subject.id} deleted successfully. ({msg})", fg=typer.colors.GREEN
+                    f'User {subject.id} deleted successfully. ({msg})', fg=typer.colors.GREEN
                 )
             except Exception as e:
                 error_count += 1
-                typer.secho(f"Error deleting subjects {subject.id}: {e}", fg=typer.colors.RED)
+                typer.secho(f'Error deleting subjects {subject.id}: {e}', fg=typer.colors.RED)
 
         # Summary
         typer.secho(
-            f"Operation completed. {success_count} subject(s) deleted successfully, {error_count} error(s). ({msg})",
+            f'Operation completed. {success_count} subject(s) deleted successfully, {error_count} error(s). ({msg})',
             fg=typer.colors.GREEN if error_count == 0 else typer.colors.YELLOW,
         )
     except Exception as e:
-        typer.secho(f"Error: {e}", fg=typer.colors.RED)
+        typer.secho(f'Error: {e}', fg=typer.colors.RED)
 
 
-@cmd.command(name="lint")
+@cmd.command(name='lint')
 def lint():
     """Run ruff check --fix, ruff format, and isort on all files"""
-    subprocess.run(["ruff", "check", "--fix", "."])
-    subprocess.run(["ruff", "format", "."])
-    subprocess.run(["isort", "."])
+    subprocess.run(['ruff', 'check', '--fix', '.'])
+    subprocess.run(['ruff', 'format', '.'])
+    subprocess.run(['isort', '.'])
 
 
-@cmd.command(name="create_token")
+@cmd.command(name='create_token')
 def create_token(
     user_id: str = typer.Option(
-        "00000000-0000-0000-0000-000000000000",
-        "--user-id",
-        "-u",
-        help="User ID to include in the token",
+        '00000000-0000-0000-0000-000000000000',
+        '--user-id',
+        '-u',
+        help='User ID to include in the token',
     ),
     email: str = typer.Option(
-        "test@example.com", "--email", "-e", help="Email to include in the token"
+        'test@example.com', '--email', '-e', help='Email to include in the token'
     ),
-    expiry_minutes: int = typer.Option(60, "--expiry", "-x", help="Token expiry time in minutes"),
+    expiry_minutes: int = typer.Option(60, '--expiry', '-x', help='Token expiry time in minutes'),
 ):
     """
     Create a valid bearer token for testing.
@@ -211,10 +211,10 @@ def create_token(
 
     expiry = datetime.utcnow() + timedelta(minutes=expiry_minutes)
     payload = {
-        "sub": user_id,
-        "email": email,
-        "exp": expiry,
-        "aud": settings.AUTH_TOKEN_AUDIENCE,
+        'sub': user_id,
+        'email': email,
+        'exp': expiry,
+        'aud': settings.AUTH_TOKEN_AUDIENCE,
     }
     # Encode the token
     token = jwt.encode(
@@ -223,11 +223,11 @@ def create_token(
         algorithm=settings.AUTH_TOKEN_ALGORITHM,
     )
 
-    print(f"Bearer token for testing (valid for {expiry_minutes} minutes):")
-    print(f"Bearer {token}")
-    print("\nFor use in curl:")
+    print(f'Bearer token for testing (valid for {expiry_minutes} minutes):')
+    print(f'Bearer {token}')
+    print('\nFor use in curl:')
     print(f"curl -H 'Authorization: Bearer {token}' ...")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cmd()

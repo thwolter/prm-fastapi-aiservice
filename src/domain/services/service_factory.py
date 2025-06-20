@@ -33,8 +33,8 @@ class DomainServiceFactory:
             A tuple of (sync_client, async_client).
         """
         headers = {
-            "Accept": "application/json",
-            "Authorization": f"Bearer {settings.OPENMETER_API_KEY}",
+            'Accept': 'application/json',
+            'Authorization': f'Bearer {settings.OPENMETER_API_KEY}',
         }
 
         sync_client = Client(
@@ -106,13 +106,13 @@ class DomainServiceFactory:
         # Create a mock request with the test user ID
         cls._test_request = Request(
             scope={
-                "type": "http",
-                "method": "POST",
-                "path": "/test",
-                "headers": [(b"accept", b"application/json")],
-                "state": {
-                    "token": "test_token",
-                    "user_id": test_user_id,
+                'type': 'http',
+                'method': 'POST',
+                'path': '/test',
+                'headers': [(b'accept', b'application/json')],
+                'state': {
+                    'token': 'test_token',
+                    'user_id': test_user_id,
                 },
             }
         )

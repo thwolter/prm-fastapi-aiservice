@@ -10,7 +10,7 @@ class EntitlementCreate(BaseModel):
 
     feature: str
     max_limit: int
-    period: Literal["DAY", "WEEK", "MONTH", "YEAR"]
+    period: Literal['DAY', 'WEEK', 'MONTH', 'YEAR']
 
 
 class Entitlement(BaseModel):
@@ -26,17 +26,17 @@ class Entitlement(BaseModel):
     period: Optional[str] = None
 
     @classmethod
-    def from_dict(cls, data: dict) -> "Entitlement":
+    def from_dict(cls, data: dict) -> 'Entitlement':
         """
         Create an Entitlement instance from a dictionary.
         """
         return cls(
-            feature_key=data.get("featureKey", ""),
-            has_access=data.get("hasAccess", False),
-            balance=data.get("balance"),
-            limit=data.get("limit"),
-            usage=data.get("usage"),
-            period=data.get("period"),
+            feature_key=data.get('featureKey', ''),
+            has_access=data.get('hasAccess', False),
+            balance=data.get('balance'),
+            limit=data.get('limit'),
+            usage=data.get('usage'),
+            period=data.get('period'),
         )
 
     def to_dict(self) -> dict:
@@ -44,8 +44,8 @@ class Entitlement(BaseModel):
         Convert the entitlement to a dictionary format suitable for external APIs.
         """
         return {
-            "type": "metered",
-            "featureKey": self.feature_key,
-            "issueAfterReset": self.limit,
-            "usagePeriod": {"interval": self.period} if self.period else None,
+            'type': 'metered',
+            'featureKey': self.feature_key,
+            'issueAfterReset': self.limit,
+            'usagePeriod': {'interval': self.period} if self.period else None,
         }

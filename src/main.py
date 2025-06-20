@@ -32,7 +32,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 
 if settings.IS_PRODUCTION:
-    logger.info("Setting up Sentry")
+    logger.info('Setting up Sentry')
     sentry_sdk.init(
         dsn=settings.SENTRY_DSN,
         # Set traces_sample_rate to 1.0 to capture 100%
@@ -42,7 +42,7 @@ if settings.IS_PRODUCTION:
             # Set continuous_profiling_auto_start to True
             # to automatically start the profiler on when
             # possible.
-            "continuous_profiling_auto_start": True,
+            'continuous_profiling_auto_start': True,
         },
     )
 
@@ -51,18 +51,18 @@ app = FastAPI(lifespan=lifespan)
 
 
 if settings.BACKEND_CORS_ORIGINS:
-    origins = [str(origin).strip("/") for origin in settings.BACKEND_CORS_ORIGINS]
-    logger.info(f"Allowed origins: {origins}")
+    origins = [str(origin).strip('/') for origin in settings.BACKEND_CORS_ORIGINS]
+    logger.info(f'Allowed origins: {origins}')
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=['*'],
+        allow_headers=['*'],
     )
 
 
-@app.middleware("http")
+@app.middleware('http')
 async def custom_middleware(request: Request, call_next: RequestResponseEndpoint) -> Response:
     return await custom_error_format_middleware(request, call_next)
 
@@ -81,6 +81,6 @@ app.include_router(subscriptions_router)
 app.include_router(payments_router)
 
 
-@app.get("/api/_health", tags=["Health Check"], status_code=status.HTTP_204_NO_CONTENT)
+@app.get('/api/_health', tags=['Health Check'], status_code=status.HTTP_204_NO_CONTENT)
 async def root() -> None:
     return

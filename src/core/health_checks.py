@@ -7,8 +7,8 @@ from openmeter import Client
 
 from src.core.config import settings
 from src.core.redis import redis_client
-from src.utils.exceptions import ExternalServiceException
 from src.utils.circuit_breaker import with_circuit_breaker
+from src.utils.exceptions import ExternalServiceException
 
 router = APIRouter(tags=['Health Check'])
 

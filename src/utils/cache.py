@@ -1,7 +1,6 @@
-from src.utils import logutils
-
 from src.core.config import settings
 from src.core.redis import initialize_redis
+from src.utils import logutils
 
 logger = logutils.get_logger(__name__)
 

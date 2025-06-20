@@ -27,7 +27,7 @@ class TestService:
 
     async def execute_query(self, query):
         """Mock execute_query method."""
-        return TestResponseModel(result=f"Result for {query.query}")
+        return TestResponseModel(result=f'Result for {query.query}')
 
 
 class TestServiceHandler:
@@ -45,14 +45,14 @@ class TestServiceHandler:
         handler = ServiceHandler(service_factory, TestRequestModel, TestResponseModel)
 
         # Create a request
-        request = TestRequestModel(query="test")
+        request = TestRequestModel(query='test')
 
         # Handle the request
         result = await handler.handle(request)
 
         # Check that the result is correct
         assert isinstance(result, TestResponseModel)
-        assert result.result == "Result for test"
+        assert result.result == 'Result for test'
 
     @pytest.mark.asyncio
     async def test_handle_with_response_info(self):
@@ -62,7 +62,7 @@ class TestServiceHandler:
         class TestServiceWithResponseInfo:
             async def execute_query(self, query):
                 return TestResponseModel(
-                    result=f"Result for {query.query}", response_info={"tokens": 100}
+                    result=f'Result for {query.query}', response_info={'tokens': 100}
                 )
 
         # Create a service factory
@@ -73,15 +73,15 @@ class TestServiceHandler:
         handler = ServiceHandler(service_factory, TestRequestModel, TestResponseModel)
 
         # Create a request
-        request = TestRequestModel(query="test")
+        request = TestRequestModel(query='test')
 
         # Handle the request
         result = await handler.handle(request)
 
         # Check that the result is correct and has response_info
         assert isinstance(result, TestResponseModel)
-        assert result.result == "Result for test"
-        assert result.response_info == {"tokens": 100}
+        assert result.result == 'Result for test'
+        assert result.response_info == {'tokens': 100}
 
     @pytest.mark.asyncio
     async def test_handle_attribute_error(self):
@@ -90,7 +90,7 @@ class TestServiceHandler:
         # Create a service that raises AttributeError
         class ErrorService:
             async def execute_query(self, query):
-                raise AttributeError("Test attribute error")
+                raise AttributeError('Test attribute error')
 
         # Create a service factory
         def service_factory():
@@ -100,7 +100,7 @@ class TestServiceHandler:
         handler = ServiceHandler(service_factory, TestRequestModel, TestResponseModel)
 
         # Create a request
-        request = TestRequestModel(query="test")
+        request = TestRequestModel(query='test')
 
         # Handle the request - should raise HTTPException
         with pytest.raises(HTTPException) as excinfo:
@@ -108,7 +108,7 @@ class TestServiceHandler:
 
         # Check that the exception has the correct status code and detail
         assert excinfo.value.status_code == 400
-        assert "Invalid request structure" in excinfo.value.detail
+        assert 'Invalid request structure' in excinfo.value.detail
 
     @pytest.mark.asyncio
     async def test_handle_type_error(self):
@@ -117,7 +117,7 @@ class TestServiceHandler:
         # Create a service that raises TypeError
         class ErrorService:
             async def execute_query(self, query):
-                raise TypeError("Test type error")
+                raise TypeError('Test type error')
 
         # Create a service factory
         def service_factory():
@@ -127,7 +127,7 @@ class TestServiceHandler:
         handler = ServiceHandler(service_factory, TestRequestModel, TestResponseModel)
 
         # Create a request
-        request = TestRequestModel(query="test")
+        request = TestRequestModel(query='test')
 
         # Handle the request - should raise HTTPException
         with pytest.raises(HTTPException) as excinfo:
@@ -135,7 +135,7 @@ class TestServiceHandler:
 
         # Check that the exception has the correct status code and detail
         assert excinfo.value.status_code == 400
-        assert "Invalid request structure" in excinfo.value.detail
+        assert 'Invalid request structure' in excinfo.value.detail
 
     @pytest.mark.asyncio
     async def test_handle_http_exception(self):
@@ -144,7 +144,7 @@ class TestServiceHandler:
         # Create a service that raises HTTPException
         class ErrorService:
             async def execute_query(self, query):
-                raise HTTPException(status_code=403, detail="Test HTTP exception")
+                raise HTTPException(status_code=403, detail='Test HTTP exception')
 
         # Create a service factory
         def service_factory():
@@ -154,7 +154,7 @@ class TestServiceHandler:
         handler = ServiceHandler(service_factory, TestRequestModel, TestResponseModel)
 
         # Create a request
-        request = TestRequestModel(query="test")
+        request = TestRequestModel(query='test')
 
         # Handle the request - should raise HTTPException
         with pytest.raises(HTTPException) as excinfo:
@@ -162,7 +162,7 @@ class TestServiceHandler:
 
         # Check that the exception has the correct status code and detail
         assert excinfo.value.status_code == 403
-        assert "Test HTTP exception" in excinfo.value.detail
+        assert 'Test HTTP exception' in excinfo.value.detail
 
     @pytest.mark.asyncio
     async def test_handle_generic_exception(self):
@@ -171,7 +171,7 @@ class TestServiceHandler:
         # Create a service that raises a generic exception
         class ErrorService:
             async def execute_query(self, query):
-                raise Exception("Test exception")
+                raise Exception('Test exception')
 
         # Create a service factory
         def service_factory():
@@ -181,7 +181,7 @@ class TestServiceHandler:
         handler = ServiceHandler(service_factory, TestRequestModel, TestResponseModel)
 
         # Create a request
-        request = TestRequestModel(query="test")
+        request = TestRequestModel(query='test')
 
         # Handle the request - should raise HTTPException
         with pytest.raises(HTTPException) as excinfo:
@@ -189,7 +189,7 @@ class TestServiceHandler:
 
         # Check that the exception has the correct status code and detail
         assert excinfo.value.status_code == 500
-        assert "Internal Server Error" in excinfo.value.detail
+        assert 'Internal Server Error' in excinfo.value.detail
 
     def test_get_service_name(self):
         """Test that _get_service_name works correctly."""
@@ -202,7 +202,7 @@ class TestServiceHandler:
         handler = ServiceHandler(named_factory, TestRequestModel, TestResponseModel)
 
         # Check that _get_service_name returns the correct name
-        assert handler._get_service_name() == "named_factory"
+        assert handler._get_service_name() == 'named_factory'
 
         # Create a lambda service factory
         def lambda_factory():

@@ -1,22 +1,23 @@
 """Formatters for logutils messages."""
+
 import logging
 
 
 class CustomFormatter(logging.Formatter):
     """
     Custom formatter that pads log level names for better readability.
-    
+
     This formatter ensures that all log level names have consistent width
     in the log output, making it easier to read and parse logs visually.
     """
-    
+
     def format(self, record):
         """
         Format the log record by padding the level name.
-        
+
         Args:
             record: The log record to format.
-            
+
         Returns:
             The formatted log message.
         """
@@ -38,7 +39,7 @@ class CustomFormatter(logging.Formatter):
 def create_default_formatter():
     """
     Create the default formatter used by the application.
-    
+
     Returns:
         A CustomFormatter instance with the default format string.
     """

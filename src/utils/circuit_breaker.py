@@ -12,7 +12,7 @@ from aiobreaker import CircuitBreakerError
 
 from src.utils.exceptions import ExternalServiceException
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +45,11 @@ def with_circuit_breaker(service_name: str, fallback_value: Optional[Any] = None
             try:
                 return breaker.call(func, *args, **kwargs)
             except CircuitBreakerError:
-                logger.warning("Circuit breaker for %s is open, failing fast", service_name)
+                logger.warning('Circuit breaker for %s is open, failing fast', service_name)
                 if fallback_value is not None:
                     return fallback_value
                 raise ExternalServiceException(
-                    detail=f"Service {service_name} is currently unavailable",
+                    detail=f'Service {service_name} is currently unavailable',
                     service_name=service_name,
                 )
 

@@ -1,28 +1,25 @@
 """Tests for the config module."""
+
 import logging as logutils
 import sys
 from unittest import mock
 
-from src.utils.logutils.config import (
-    get_log_level,
-    create_console_handler,
-    configure_root_logger,
-)
+from src.utils.logutils.config import configure_root_logger, create_console_handler, get_log_level
 
 
 def test_get_log_level():
     """Test getting the log level from settings."""
-    with mock.patch("src.utils.logutils.config.settings") as mock_settings:
+    with mock.patch('src.utils.logutils.config.settings') as mock_settings:
         # Test with a valid log level
-        mock_settings.LOG_LEVEL = "DEBUG"
+        mock_settings.LOG_LEVEL = 'DEBUG'
         assert get_log_level() == logutils.DEBUG
 
         # Test with a valid log level in lowercase
-        mock_settings.LOG_LEVEL = "info"
+        mock_settings.LOG_LEVEL = 'info'
         assert get_log_level() == logutils.INFO
 
         # Test with an invalid log level (should default to INFO)
-        mock_settings.LOG_LEVEL = "INVALID"
+        mock_settings.LOG_LEVEL = 'INVALID'
         assert get_log_level() == logutils.INFO
 
 
@@ -51,7 +48,7 @@ def test_configure_root_logger():
         logutils.root.handlers.clear()
 
         # Test with default parameters
-        with mock.patch("src.utils.logutils.config.get_log_level") as mock_get_log_level:
+        with mock.patch('src.utils.logutils.config.get_log_level') as mock_get_log_level:
             mock_get_log_level.return_value = logutils.WARNING
             configure_root_logger()
 
@@ -67,7 +64,7 @@ def test_configure_root_logger():
         # Test with custom parameters
         custom_level = logutils.DEBUG
         custom_handler = logutils.StreamHandler(sys.stderr)
-        custom_formatter = logutils.Formatter("%(message)s")
+        custom_formatter = logutils.Formatter('%(message)s')
 
         configure_root_logger(
             level=custom_level,

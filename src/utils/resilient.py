@@ -1,4 +1,5 @@
 """Utilities for resilient service execution using a circuit breaker."""
+
 from __future__ import annotations
 
 import inspect
@@ -11,7 +12,7 @@ from aiobreaker import CircuitBreakerError
 from src.utils.circuit_breaker import get_circuit_breaker
 from src.utils.exceptions import ExternalServiceException
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,9 @@ def with_resilient_execution(
 ) -> Callable[[Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]]:
     """Decorate an async function with circuit breaker and fallback handling."""
 
-    def decorator(func: Callable[..., Coroutine[Any, Any, T]]) -> Callable[..., Coroutine[Any, Any, T]]:
+    def decorator(
+        func: Callable[..., Coroutine[Any, Any, T]],
+    ) -> Callable[..., Coroutine[Any, Any, T]]:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> T:
             svc_name = service_name(*args, **kwargs) if callable(service_name) else service_name
@@ -31,18 +34,18 @@ def with_resilient_execution(
             try:
                 return await breaker.call_async(func, *args, **kwargs)
             except CircuitBreakerError:
-                logger.warning("Circuit breaker for %s is open, failing fast", svc_name)
+                logger.warning('Circuit breaker for %s is open, failing fast', svc_name)
                 if create_default_response:
                     result = create_default_response(*args, **kwargs)
                     if inspect.isawaitable(result):
                         result = await result
                     return result
                 raise ExternalServiceException(
-                    detail=f"Service {svc_name} is currently unavailable", service_name=svc_name
+                    detail=f'Service {svc_name} is currently unavailable', service_name=svc_name
                 )
 
             except Exception as error:  # pragma: no cover - unexpected error
-                logger.warning("Service %s failed: %s", svc_name, error)
+                logger.warning('Service %s failed: %s', svc_name, error)
 
                 if create_default_response:
                     try:
@@ -51,14 +54,14 @@ def with_resilient_execution(
                             result = await result
                         return result
                     except Exception as fallback_error:
-                        logger.error(f"Fallback for {svc_name} failed: {fallback_error}")
+                        logger.error(f'Fallback for {svc_name} failed: {fallback_error}')
                         # If the fallback fails, raise the original error
                         raise ExternalServiceException(
-                            detail=f"Service {svc_name} failed: {str(error)}",
+                            detail=f'Service {svc_name} failed: {str(error)}',
                             service_name=svc_name,
                         )
                 raise ExternalServiceException(
-                    detail=f"Service {svc_name} failed: {error}", service_name=svc_name
+                    detail=f'Service {svc_name} failed: {error}', service_name=svc_name
                 )
 
         return wrapper

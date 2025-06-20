@@ -39,8 +39,8 @@ class SubscriptionService:
         auto_renew: bool = False,
         metadata: Optional[dict] = None,
         amount: Optional[float] = None,
-        currency: str = "USD",
-        payment_method: str = "credit_card",
+        currency: str = 'USD',
+        payment_method: str = 'credit_card',
     ) -> Subscription:
         """
         Create a new subscription.
@@ -66,7 +66,7 @@ class SubscriptionService:
             id=subscription_id,
             subject_id=subject_id,
             plan_id=plan_id,
-            status="active",
+            status='active',
             start_date=start_date or datetime.now(),
             end_date=end_date,
             auto_renew=auto_renew,
@@ -80,10 +80,10 @@ class SubscriptionService:
         if amount is not None and self.payment_service:
             try:
                 payment_metadata = {
-                    "subscription_id": str(subscription_id),
-                    "plan_id": plan_id,
-                    "subject_id": str(subject_id),
-                    "type": "subscription_creation",
+                    'subscription_id': str(subscription_id),
+                    'plan_id': plan_id,
+                    'subject_id': str(subject_id),
+                    'type': 'subscription_creation',
                 }
 
                 # Merge with any existing metadata
@@ -98,12 +98,12 @@ class SubscriptionService:
                     metadata=payment_metadata,
                 )
 
-                logger.info(f"Payment processed for subscription {subscription_id}")
+                logger.info(f'Payment processed for subscription {subscription_id}')
             except Exception as e:
-                logger.error(f"Failed to process payment for subscription {subscription_id}: {e}")
+                logger.error(f'Failed to process payment for subscription {subscription_id}: {e}')
                 # In a real implementation, you might want to handle payment failures differently
                 # For example, you might want to mark the subscription as pending or failed
-                subscription.status = "payment_failed"
+                subscription.status = 'payment_failed'
                 self.subscriptions[str(subscription_id)] = subscription
 
         return subscription
@@ -188,7 +188,7 @@ class SubscriptionService:
         Returns:
             The cancelled subscription, or None if not found.
         """
-        subscription = await self.update_subscription(subscription_id, status="cancelled")
+        subscription = await self.update_subscription(subscription_id, status='cancelled')
 
         # Process refund if requested and payment service is available
         if refund and self.payment_service and subscription:
@@ -205,13 +205,13 @@ class SubscriptionService:
                         payment_id=latest_payment.id, amount=refund_amount
                     )
 
-                    logger.info(f"Refund processed for subscription {subscription_id}")
+                    logger.info(f'Refund processed for subscription {subscription_id}')
                 else:
                     logger.warning(
-                        f"No payments found for subscription {subscription_id} to refund"
+                        f'No payments found for subscription {subscription_id} to refund'
                     )
             except Exception as e:
-                logger.error(f"Failed to process refund for subscription {subscription_id}: {e}")
+                logger.error(f'Failed to process refund for subscription {subscription_id}: {e}')
                 # In a real implementation, you might want to handle refund failures differently
 
         return subscription

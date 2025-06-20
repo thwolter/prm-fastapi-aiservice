@@ -25,11 +25,11 @@ def get_metering_client():
     Returns:
         An instance of a class implementing AbstractMeteringClient.
     """
-    if settings.METERING_VENDOR == "openmeter":
+    if settings.METERING_VENDOR == 'openmeter':
         sync_client, async_client = OpenMeterClient.create_clients()
         return OpenMeterClient(sync_client, async_client)
     # Add more vendors as needed
-    raise ValueError(f"Unknown metering vendor: {settings.METERING_VENDOR}")
+    raise ValueError(f'Unknown metering vendor: {settings.METERING_VENDOR}')
 
 
 def get_entitlement_client():
@@ -39,11 +39,11 @@ def get_entitlement_client():
     Returns:
         An instance of a class implementing AbstractEntitlementClient.
     """
-    if settings.ENTITLEMENT_VENDOR == "openmeter":
+    if settings.ENTITLEMENT_VENDOR == 'openmeter':
         sync_client, async_client = OpenMeterEntitlementClient.create_clients()
         return OpenMeterEntitlementClient(sync_client, async_client)
     # Add more vendors as needed
-    raise ValueError(f"Unknown entitlement vendor: {settings.ENTITLEMENT_VENDOR}")
+    raise ValueError(f'Unknown entitlement vendor: {settings.ENTITLEMENT_VENDOR}')
 
 
 def get_subject_service(request: Request = None):
@@ -95,11 +95,11 @@ def get_payment_client():
     Returns:
         An instance of a class implementing AbstractPaymentClient.
     """
-    if settings.PAYMENT_VENDOR == "openmeter":
+    if settings.PAYMENT_VENDOR == 'openmeter':
         sync_client, async_client = OpenMeterPaymentClient.create_clients()
         return OpenMeterPaymentClient(sync_client, async_client)
     # Add more vendors as needed
-    raise ValueError(f"Unknown payment vendor: {settings.PAYMENT_VENDOR}")
+    raise ValueError(f'Unknown payment vendor: {settings.PAYMENT_VENDOR}')
 
 
 def get_payment_service():
@@ -141,13 +141,13 @@ def setup_for_testing(test_user_id):
 
     _test_request = Request(
         scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": test_user_id,
+            'type': 'http',
+            'method': 'POST',
+            'path': '/test',
+            'headers': [(b'accept', b'application/json')],
+            'state': {
+                'token': 'test_token',
+                'user_id': test_user_id,
             },
         }
     )

@@ -22,11 +22,11 @@ def openmeter_clients():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     headers = {
-        "Accept": "application/json",
-        "Authorization": f"Bearer {api_key}",
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {api_key}',
     }
     sync_client = Client(endpoint=settings.OPENMETER_API_URL, headers=headers)
     async_client = AsyncClient(endpoint=settings.OPENMETER_API_URL, headers=headers)
@@ -52,14 +52,14 @@ async def subject_service(openmeter_clients, test_user_id):
     # Create a request with the test user
     req = Request(
         scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": test_user_id,
-                "user_email": f"test-{test_user_id}@example.com",
+            'type': 'http',
+            'method': 'POST',
+            'path': '/test',
+            'headers': [(b'accept', b'application/json')],
+            'state': {
+                'token': 'test_token',
+                'user_id': test_user_id,
+                'user_email': f'test-{test_user_id}@example.com',
             },
         }
     )
@@ -77,7 +77,7 @@ async def subject_service(openmeter_clients, test_user_id):
         await service.delete_subject()
     except Exception as e:
         # Log but don't fail if cleanup fails
-        print(f"Cleanup failed: {e}")
+        print(f'Cleanup failed: {e}')
 
 
 @pytest_asyncio.fixture
@@ -90,13 +90,13 @@ async def entitlement_service(openmeter_clients, test_user_id, subject_service):
     # Create a request with the test user
     req = Request(
         scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": test_user_id,
+            'type': 'http',
+            'method': 'POST',
+            'path': '/test',
+            'headers': [(b'accept', b'application/json')],
+            'state': {
+                'token': 'test_token',
+                'user_id': test_user_id,
             },
         }
     )
@@ -115,14 +115,14 @@ async def metering_service(openmeter_clients, test_user_id, subject_service):
     # Create a request with the test user
     req = Request(
         scope={
-            "type": "http",
-            "method": "POST",
-            "path": "/test",
-            "headers": [(b"accept", b"application/json")],
-            "state": {
-                "token": "test_token",
-                "user_id": test_user_id,
-                "response_info": BaseResponse(
+            'type': 'http',
+            'method': 'POST',
+            'path': '/test',
+            'headers': [(b'accept', b'application/json')],
+            'state': {
+                'token': 'test_token',
+                'user_id': test_user_id,
+                'response_info': BaseResponse(
                     response_info=default_response_info(),
                 ),
             },

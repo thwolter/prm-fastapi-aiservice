@@ -44,7 +44,7 @@ class EntitlementService:
         if request and not user_id:
             self.user_id = request.state.user_id
 
-    @with_resilient_execution(service_name="EntitlementService")
+    @with_resilient_execution(service_name='EntitlementService')
     async def set_entitlement(self, limit: EntitlementCreate) -> None:
         """
         Set an entitlement for a user.
@@ -81,7 +81,7 @@ class EntitlementService:
 
         return loop.run_until_complete(self.set_entitlement(limit))
 
-    @with_resilient_execution(service_name="EntitlementService")
+    @with_resilient_execution(service_name='EntitlementService')
     async def get_token_entitlement_status(self, feature_key: str) -> bool:
         """
         Check if a user has access to a feature.
@@ -102,8 +102,8 @@ class EntitlementService:
             )
             return entitlement.has_access
         except ResourceNotFoundError as e:
-            logger.error(f"User {self.user_id}: {e}")
-            raise ResourceNotFoundException(detail="User not found")
+            logger.error(f'User {self.user_id}: {e}')
+            raise ResourceNotFoundException(detail='User not found')
 
     async def has_access(self, feature_key: str) -> bool:
         """
@@ -117,7 +117,7 @@ class EntitlementService:
         """
         return await self.get_token_entitlement_status(feature_key)
 
-    @with_resilient_execution(service_name="EntitlementService")
+    @with_resilient_execution(service_name='EntitlementService')
     async def get_entitlement_value(self, feature_key: str) -> Entitlement:
         """
         Get the entitlement value for a user.
@@ -134,5 +134,5 @@ class EntitlementService:
         try:
             return self.entitlement_client.get_entitlement_value(str(self.user_id), feature_key)
         except ResourceNotFoundError as e:
-            logger.error(f"User {self.user_id}: {e}")
-            raise ResourceNotFoundException(detail="User not found")
+            logger.error(f'User {self.user_id}: {e}')
+            raise ResourceNotFoundException(detail='User not found')

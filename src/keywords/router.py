@@ -1,9 +1,8 @@
-from src.utils import logutils
-
 from fastapi import APIRouter
 
 from src.keywords.keywords import get_keywords
 from src.keywords.models import KeywordRequest, KeywordResponse
+from src.utils import logutils
 from src.utils.exceptions import InternalServerException
 
 router = APIRouter(

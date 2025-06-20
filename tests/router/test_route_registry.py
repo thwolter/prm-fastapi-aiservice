@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from riskgpt.models.schemas import BaseResponse, ResponseInfo
 
-from src.routes import RouteRegistry
+from src.routes.route_registry import RouteRegistry
 
 
 @pytest.mark.ignore
@@ -30,9 +30,9 @@ class TestService:
     async def execute_query(self, query):
         """Mock execute_query method."""
         return TestResponseModel(
-            result=f"Result for {query.query}",
+            result=f'Result for {query.query}',
             response_info=ResponseInfo(
-                consumed_tokens=10, total_cost=0, prompt_name="test", model_name="test"
+                consumed_tokens=10, total_cost=0, prompt_name='test', model_name='test'
             ),
         )
 
@@ -65,16 +65,16 @@ class TestRouteRegistry:
 
         # Register a route
         registry.register_route(
-            path="/test",
+            path='/test',
             request_model=TestRequestModel,
             response_model=TestResponseModel,
             service_factory=service_factory,
-            tags=["test"],
+            tags=['test'],
         )
 
         # Check that router.post was called with the correct arguments
         router.post.assert_called_once_with(
-            "/test", response_model=TestResponseModel, tags=["test"]
+            '/test', response_model=TestResponseModel, tags=['test']
         )
 
         # Check that the route function was registered
@@ -100,7 +100,7 @@ class TestRouteRegistry:
         router.post.side_effect = post_side_effect
 
         # Mock the environment to be 'local' to simplify testing
-        with mock.patch("src.core.config.settings.ENVIRONMENT", "local"):
+        with mock.patch('src.core.config.settings.ENVIRONMENT', 'local'):
             # Create a route registry
             registry = RouteRegistry(router)
 
@@ -110,11 +110,11 @@ class TestRouteRegistry:
 
             # Register a route
             registry.register_route(
-                path="/test",
+                path='/test',
                 request_model=TestRequestModel,
                 response_model=TestResponseModel,
                 service_factory=service_factory,
-                tags=["test"],
+                tags=['test'],
             )
 
             # Check that the route function was captured
@@ -125,14 +125,14 @@ class TestRouteRegistry:
 
             # Call the route function (in local environment, no auth/metering)
             # Mock the token
-            token = "test_token"
+            token = 'test_token'
             result = await route_function(
-                request=request, token=token, request_model=TestRequestModel(query="test")
+                request=request, token=token, request_model=TestRequestModel(query='test')
             )
 
             # Check that the result is correct
             assert isinstance(result, TestResponseModel)
-            assert result.result == "Result for test"
+            assert result.result == 'Result for test'
 
     @pytest.mark.asyncio
     async def test_route_function_token_quota_exceeded(self):
@@ -154,7 +154,7 @@ class TestRouteRegistry:
         router.post.side_effect = post_side_effect
 
         # Mock the environment to be 'local' to simplify testing
-        with mock.patch("src.core.config.settings.ENVIRONMENT", "local"):
+        with mock.patch('src.core.config.settings.ENVIRONMENT', 'local'):
             # Create a route registry
             registry = RouteRegistry(router)
 
@@ -164,11 +164,11 @@ class TestRouteRegistry:
 
             # Register a route
             registry.register_route(
-                path="/test",
+                path='/test',
                 request_model=TestRequestModel,
                 response_model=TestResponseModel,
                 service_factory=service_factory,
-                tags=["test"],
+                tags=['test'],
             )
 
             # Check that the route function was captured
@@ -178,20 +178,20 @@ class TestRouteRegistry:
             request = mock.MagicMock(spec=Request)
 
             # Mock the ServiceHandler.handle method to raise QuotaExceededException
-            with mock.patch("src.routes.service_handler.ServiceHandler.handle") as mock_handle:
+            with mock.patch('src.routes.service_handler.ServiceHandler.handle') as mock_handle:
                 # Configure the mock to raise QuotaExceededException
                 from src.utils.exceptions import QuotaExceededException
 
-                mock_handle.side_effect = QuotaExceededException(detail="Token quota exceeded")
+                mock_handle.side_effect = QuotaExceededException(detail='Token quota exceeded')
 
                 # Call the route function - should raise HTTPException
                 # Mock the token
-                token = "test_token"
+                token = 'test_token'
                 with pytest.raises(HTTPException) as excinfo:
                     await route_function(
-                        request=request, token=token, request_model=TestRequestModel(query="test")
+                        request=request, token=token, request_model=TestRequestModel(query='test')
                     )
 
                 # Check that the exception has the correct status code and detail
                 assert excinfo.value.status_code == 402
-                assert "Token quota exceeded" in excinfo.value.detail
+                assert 'Token quota exceeded' in excinfo.value.detail

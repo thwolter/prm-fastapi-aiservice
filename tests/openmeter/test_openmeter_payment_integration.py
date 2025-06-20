@@ -23,14 +23,14 @@ def test_openmeter_payment_client_initialization():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         sync_client, async_client = OpenMeterPaymentClient.create_clients()
         payment_client = OpenMeterPaymentClient(sync_client, async_client)
         assert payment_client is not None
     except Exception as exc:
-        pytest.fail(f"OpenMeter payment client initialization failed: {exc}")
+        pytest.fail(f'OpenMeter payment client initialization failed: {exc}')
 
 
 @pytest.mark.integration
@@ -46,7 +46,7 @@ async def test_payment_service_process_payment():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the payment client and service
@@ -57,9 +57,9 @@ async def test_payment_service_process_payment():
         # Process a payment
         subscription_id = uuid.uuid4()
         amount = 100.0
-        currency = "USD"
-        payment_method = "credit_card"
-        metadata = {"test": "integration", "timestamp": datetime.now().isoformat()}
+        currency = 'USD'
+        payment_method = 'credit_card'
+        metadata = {'test': 'integration', 'timestamp': datetime.now().isoformat()}
 
         payment = await payment_service.process_payment(
             subscription_id=subscription_id,
@@ -75,7 +75,7 @@ async def test_payment_service_process_payment():
         assert payment.amount == amount
         assert payment.currency == currency
         assert payment.payment_method == payment_method
-        assert payment.status == "processed"
+        assert payment.status == 'processed'
         assert payment.metadata == metadata
 
         # Get the payment by ID
@@ -90,7 +90,7 @@ async def test_payment_service_process_payment():
         assert any(p.id == payment.id for p in payments)
 
     except Exception as exc:
-        pytest.fail(f"Payment service integration test failed: {exc}")
+        pytest.fail(f'Payment service integration test failed: {exc}')
 
 
 @pytest.mark.integration
@@ -106,7 +106,7 @@ async def test_payment_service_refund_payment():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the payment client and service
@@ -117,9 +117,9 @@ async def test_payment_service_refund_payment():
         # Process a payment
         subscription_id = uuid.uuid4()
         amount = 200.0
-        currency = "USD"
-        payment_method = "credit_card"
-        metadata = {"test": "refund_integration", "timestamp": datetime.now().isoformat()}
+        currency = 'USD'
+        payment_method = 'credit_card'
+        metadata = {'test': 'refund_integration', 'timestamp': datetime.now().isoformat()}
 
         payment = await payment_service.process_payment(
             subscription_id=subscription_id,
@@ -131,22 +131,22 @@ async def test_payment_service_refund_payment():
 
         # Verify the payment was processed successfully
         assert payment is not None
-        assert payment.status == "processed"
+        assert payment.status == 'processed'
 
         # Refund the payment
         refunded_payment = await payment_service.refund_payment(payment.id)
         assert refunded_payment is not None
         assert refunded_payment.id == payment.id
-        assert refunded_payment.status == "refunded"
+        assert refunded_payment.status == 'refunded'
 
         # Get the payment by ID to verify the refund
         retrieved_payment = await payment_service.get_payment(payment.id)
         assert retrieved_payment is not None
         assert retrieved_payment.id == payment.id
-        assert retrieved_payment.status == "refunded"
+        assert retrieved_payment.status == 'refunded'
 
     except Exception as exc:
-        pytest.fail(f"Payment refund integration test failed: {exc}")
+        pytest.fail(f'Payment refund integration test failed: {exc}')
 
 
 @pytest.mark.integration
@@ -162,7 +162,7 @@ async def test_payment_service_partial_refund():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the payment client and service
@@ -173,9 +173,9 @@ async def test_payment_service_partial_refund():
         # Process a payment
         subscription_id = uuid.uuid4()
         amount = 300.0
-        currency = "USD"
-        payment_method = "credit_card"
-        metadata = {"test": "partial_refund_integration", "timestamp": datetime.now().isoformat()}
+        currency = 'USD'
+        payment_method = 'credit_card'
+        metadata = {'test': 'partial_refund_integration', 'timestamp': datetime.now().isoformat()}
 
         payment = await payment_service.process_payment(
             subscription_id=subscription_id,
@@ -187,25 +187,25 @@ async def test_payment_service_partial_refund():
 
         # Verify the payment was processed successfully
         assert payment is not None
-        assert payment.status == "processed"
+        assert payment.status == 'processed'
 
         # Partially refund the payment
         refund_amount = 150.0
         refunded_payment = await payment_service.refund_payment(payment.id, refund_amount)
         assert refunded_payment is not None
         assert refunded_payment.id == payment.id
-        assert refunded_payment.status == "partially_refunded"
-        assert refunded_payment.metadata.get("refunded_amount") == refund_amount
+        assert refunded_payment.status == 'partially_refunded'
+        assert refunded_payment.metadata.get('refunded_amount') == refund_amount
 
         # Get the payment by ID to verify the partial refund
         retrieved_payment = await payment_service.get_payment(payment.id)
         assert retrieved_payment is not None
         assert retrieved_payment.id == payment.id
-        assert retrieved_payment.status == "partially_refunded"
-        assert retrieved_payment.metadata.get("refunded_amount") == refund_amount
+        assert retrieved_payment.status == 'partially_refunded'
+        assert retrieved_payment.metadata.get('refunded_amount') == refund_amount
 
     except Exception as exc:
-        pytest.fail(f"Payment partial refund integration test failed: {exc}")
+        pytest.fail(f'Payment partial refund integration test failed: {exc}')
 
 
 @pytest.mark.integration
@@ -221,7 +221,7 @@ async def test_payment_service_update_status():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the payment client and service
@@ -232,9 +232,9 @@ async def test_payment_service_update_status():
         # Process a payment
         subscription_id = uuid.uuid4()
         amount = 400.0
-        currency = "USD"
-        payment_method = "credit_card"
-        metadata = {"test": "update_status_integration", "timestamp": datetime.now().isoformat()}
+        currency = 'USD'
+        payment_method = 'credit_card'
+        metadata = {'test': 'update_status_integration', 'timestamp': datetime.now().isoformat()}
 
         payment = await payment_service.process_payment(
             subscription_id=subscription_id,
@@ -246,10 +246,10 @@ async def test_payment_service_update_status():
 
         # Verify the payment was processed successfully
         assert payment is not None
-        assert payment.status == "processed"
+        assert payment.status == 'processed'
 
         # Update the payment status
-        new_status = "failed"
+        new_status = 'failed'
         updated_payment = await payment_service.update_payment_status(payment.id, new_status)
         assert updated_payment is not None
         assert updated_payment.id == payment.id
@@ -262,4 +262,4 @@ async def test_payment_service_update_status():
         assert retrieved_payment.status == new_status
 
     except Exception as exc:
-        pytest.fail(f"Payment status update integration test failed: {exc}")
+        pytest.fail(f'Payment status update integration test failed: {exc}')

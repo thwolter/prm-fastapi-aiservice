@@ -41,7 +41,7 @@ class UsageEvent(BaseModel):
         Convert the usage event to a dictionary format suitable for external APIs.
         """
         return {
-            "tokens": self.tokens,
-            "model": self.model or "unknown_model",
-            "prompt": self.prompt or "unknown_prompt",
+            'tokens': self.tokens,
+            'model': self.model or 'unknown_model',
+            'prompt': self.prompt or 'unknown_prompt',
         }

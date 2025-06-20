@@ -6,6 +6,7 @@ in a consistent way throughout the application.
 
 It re-exports the standard logutils module for backward compatibility.
 """
+
 # Import the standard logutils module first to avoid circular imports
 import logging
 
@@ -22,14 +23,11 @@ __all__ = [
     'get_logger',
 ]
 
+from src.utils.logutils.config import configure_root_logger, create_console_handler, get_log_level
+
 # Now import the rest of the modules
 from src.utils.logutils.formatters import CustomFormatter, create_default_formatter
-from src.utils.logutils.config import (
-    get_log_level,
-    create_console_handler,
-    configure_root_logger,
-)
-from src.utils.logutils.setup import setup_logging, get_logger
+from src.utils.logutils.setup import get_logger, setup_logging
 
 # Set up logutils when the package is imported
 setup_logging()

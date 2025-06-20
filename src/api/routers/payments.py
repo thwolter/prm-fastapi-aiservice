@@ -11,10 +11,10 @@ from src.api.dependencies import get_payment_service
 from src.domain.models.payment import Payment
 from src.domain.services.payment_service import PaymentService
 
-router = APIRouter(prefix="/payments", tags=["Payments"])
+router = APIRouter(prefix='/payments', tags=['Payments'])
 
 
-@router.post("/{subscription_id}", status_code=status.HTTP_201_CREATED, response_model=Payment)
+@router.post('/{subscription_id}', status_code=status.HTTP_201_CREATED, response_model=Payment)
 async def process_payment(
     subscription_id: UUID,
     amount: float,
@@ -38,11 +38,11 @@ async def process_payment(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to process payment: {str(e)}",
+            detail=f'Failed to process payment: {str(e)}',
         )
 
 
-@router.get("/{payment_id}", response_model=Payment)
+@router.get('/{payment_id}', response_model=Payment)
 async def get_payment(
     payment_id: UUID,
     payment_service: PaymentService = Depends(get_payment_service),
@@ -55,7 +55,7 @@ async def get_payment(
         if not payment:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Payment with ID {payment_id} not found",
+                detail=f'Payment with ID {payment_id} not found',
             )
         return payment
     except HTTPException:
@@ -63,11 +63,11 @@ async def get_payment(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get payment: {str(e)}",
+            detail=f'Failed to get payment: {str(e)}',
         )
 
 
-@router.get("/subscription/{subscription_id}", response_model=List[Payment])
+@router.get('/subscription/{subscription_id}', response_model=List[Payment])
 async def get_payments_for_subscription(
     subscription_id: UUID,
     payment_service: PaymentService = Depends(get_payment_service),
@@ -80,11 +80,11 @@ async def get_payments_for_subscription(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get payments for subscription: {str(e)}",
+            detail=f'Failed to get payments for subscription: {str(e)}',
         )
 
 
-@router.post("/{payment_id}/refund", response_model=Payment)
+@router.post('/{payment_id}/refund', response_model=Payment)
 async def refund_payment(
     payment_id: UUID,
     amount: Optional[float] = None,
@@ -104,11 +104,11 @@ async def refund_payment(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to refund payment: {str(e)}",
+            detail=f'Failed to refund payment: {str(e)}',
         )
 
 
-@router.patch("/{payment_id}/status", response_model=Payment)
+@router.patch('/{payment_id}/status', response_model=Payment)
 async def update_payment_status(
     payment_id: UUID,
     status: str,
@@ -128,5 +128,5 @@ async def update_payment_status(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update payment status: {str(e)}",
+            detail=f'Failed to update payment status: {str(e)}',
         )

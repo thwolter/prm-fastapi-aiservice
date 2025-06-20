@@ -36,7 +36,7 @@ class BaseService:
             ExternalServiceException: If the service is unavailable and no fallback is provided.
         """
         if self.chain_fn is None:
-            raise RuntimeError("riskgpt is not installed")
+            raise RuntimeError('riskgpt is not installed')
 
         # Use the resilient execution decorator to handle fallbacks and circuit breaking
         result = await self._execute_with_resilience(query)
@@ -66,9 +66,9 @@ class BaseService:
 
                 consumed_tokens: int = 0
                 total_cost: float = 0.0
-                prompt_name: str = ""
-                model_name: str = ""
-                error: str = ""
+                prompt_name: str = ''
+                model_name: str = ''
+                error: str = ''
 
         def default_for_annotation(annotation: type | None) -> Any:
             if annotation is None:
@@ -92,7 +92,7 @@ class BaseService:
                 }
                 return annotation(**values)
             if annotation is str:
-                return ""
+                return ''
             if annotation is bool:
                 return False
             if annotation is int:
@@ -103,11 +103,11 @@ class BaseService:
 
         # Get the schema to identify required fields
         schema = self.ResultModel.model_json_schema()
-        required_fields = schema.get("required", [])
+        required_fields = schema.get('required', [])
 
         values = {}
         for name, field in self.ResultModel.model_fields.items():
-            if name == "response_info":
+            if name == 'response_info':
                 continue
 
             # If the field is required, ensure it has a non-None value
@@ -118,13 +118,13 @@ class BaseService:
                     and field.default is not PydanticUndefined
                 ):
                     values[name] = field.default
-                elif field.annotation is str or getattr(field, "annotation_type", None) is str:
-                    values[name] = ""
-                elif field.annotation is int or getattr(field, "annotation_type", None) is int:
+                elif field.annotation is str or getattr(field, 'annotation_type', None) is str:
+                    values[name] = ''
+                elif field.annotation is int or getattr(field, 'annotation_type', None) is int:
                     values[name] = 0
-                elif field.annotation is float or getattr(field, "annotation_type", None) is float:
+                elif field.annotation is float or getattr(field, 'annotation_type', None) is float:
                     values[name] = 0.0
-                elif field.annotation is bool or getattr(field, "annotation_type", None) is bool:
+                elif field.annotation is bool or getattr(field, 'annotation_type', None) is bool:
                     values[name] = False
                 else:
                     values[name] = default_for_annotation(field.annotation)
@@ -144,31 +144,31 @@ class BaseService:
 
         circuit = get_circuit_breaker(self.__class__.__name__)
         if circuit.state.state == CircuitBreakerState.OPEN:
-            error_msg = f"Service {self.__class__.__name__} is currently unavailable"
+            error_msg = f'Service {self.__class__.__name__} is currently unavailable'
         else:
-            error_msg = f"Service {self.__class__.__name__} is temporarily unavailable"
+            error_msg = f'Service {self.__class__.__name__} is temporarily unavailable'
 
-        if "response_info" in self.ResultModel.model_fields:
-            values["response_info"] = ResponseInfo(
+        if 'response_info' in self.ResultModel.model_fields:
+            values['response_info'] = ResponseInfo(
                 consumed_tokens=0,
                 total_cost=0.0,
-                prompt_name="",
-                model_name="",
+                prompt_name='',
+                model_name='',
                 error=error_msg,
             )
 
-        if "error" in self.ResultModel.model_fields:
-            values["error"] = error_msg
+        if 'error' in self.ResultModel.model_fields:
+            values['error'] = error_msg
 
         # Try to create the model with the values we have
         try:
             result = self.ResultModel(**values)
             if not isinstance(result, BaseModel):
-                raise TypeError("Result is not a BaseModel instance")
+                raise TypeError('Result is not a BaseModel instance')
             return typing.cast(BaseModel, result)
         except Exception:
-            if "example" in schema:
-                example = schema["example"]
+            if 'example' in schema:
+                example = schema['example']
                 # Update our values with example values for any missing required fields
                 for name in required_fields:
                     if name not in values or values[name] is None:
@@ -177,7 +177,7 @@ class BaseService:
             # Try again with updated values
             result = self.ResultModel(**values)
             if not isinstance(result, BaseModel):
-                raise TypeError("Result is not a BaseModel instance after fallback")
+                raise TypeError('Result is not a BaseModel instance after fallback')
             return typing.cast(BaseModel, result)
 
     @with_resilient_execution(

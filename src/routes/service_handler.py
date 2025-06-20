@@ -9,8 +9,8 @@ from src.routes.validation import validate_model
 from src.utils import logutils
 from src.utils.exceptions import BaseServiceException, InternalServerException, RequestException
 
-TRequest = TypeVar("TRequest", bound=BaseModel)
-TResponse = TypeVar("TResponse", bound=BaseModel)
+TRequest = TypeVar('TRequest', bound=BaseModel)
+TResponse = TypeVar('TResponse', bound=BaseModel)
 
 
 @runtime_checkable
@@ -86,25 +86,25 @@ class ServiceHandler(Generic[TRequest, TResponse]):
             return cast(TResponse, validated)
 
         except AttributeError as ae:
-            logger.error(f"Attribute error in {self._get_service_name()}: {ae}")
-            raise RequestException(detail=f"Invalid request structure: {ae}")
+            logger.error(f'Attribute error in {self._get_service_name()}: {ae}')
+            raise RequestException(detail=f'Invalid request structure: {ae}')
 
         except BaseServiceException as bse:
-            logger.warning(f"Service exception in {self._get_service_name()}: {bse.detail}")
+            logger.warning(f'Service exception in {self._get_service_name()}: {bse.detail}')
             # Re-raise the custom exception as is
             raise
 
         except HTTPException as he:
-            logger.warning(f"HTTP exception in {self._get_service_name()}: {he.detail}")
+            logger.warning(f'HTTP exception in {self._get_service_name()}: {he.detail}')
             # Re-raise the HTTP exception as is
             raise
 
         except TypeError as te:
-            logger.error(f"Type error in {self._get_service_name()}: {te}")
-            raise RequestException(detail=f"Invalid request structure: {te}")
+            logger.error(f'Type error in {self._get_service_name()}: {te}')
+            raise RequestException(detail=f'Invalid request structure: {te}')
 
         except Exception as e:
-            logger.error(f"Unexpected error in {self._get_service_name()}: {e}")
+            logger.error(f'Unexpected error in {self._get_service_name()}: {e}')
             raise InternalServerException()
 
     def _get_service_name(self) -> str:

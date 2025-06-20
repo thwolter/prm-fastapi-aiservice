@@ -12,7 +12,7 @@ from src.main import app
 def override_auth(monkeypatch, request):
     """Override authentication dependencies for tests."""
 
-    if request.node.get_closest_marker("integration"):
+    if request.node.get_closest_marker('integration'):
         yield
     else:
 
@@ -25,7 +25,7 @@ def override_auth(monkeypatch, request):
             )
 
         monkeypatch.setattr(
-            "src.domain.services.entitlement_service.EntitlementService.get_entitlement_value",
+            'src.domain.services.entitlement_service.EntitlementService.get_entitlement_value',
             _get_entitlement_value,
         )
 
@@ -39,10 +39,10 @@ def auth_token():
     # Create token payload
     expiry = datetime.utcnow() + timedelta(minutes=60)
     payload = {
-        "sub": "00000000-0000-0000-0000-000000000000",
-        "email": "test@example.com",
-        "exp": expiry,
-        "aud": settings.AUTH_TOKEN_AUDIENCE,
+        'sub': '00000000-0000-0000-0000-000000000000',
+        'email': 'test@example.com',
+        'exp': expiry,
+        'aud': settings.AUTH_TOKEN_AUDIENCE,
     }
 
     # Encode the token
@@ -57,4 +57,4 @@ def auth_token():
 @pytest.fixture
 def auth_headers(auth_token):
     """Return headers with a valid JWT token."""
-    return {"Authorization": f"Bearer {auth_token}"}
+    return {'Authorization': f'Bearer {auth_token}'}

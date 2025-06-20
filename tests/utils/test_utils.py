@@ -8,8 +8,8 @@ def test_override_settings_resets_after_use(monkeypatch):
 
     original = config.settings.REDIS_URL
     # Directly patch the REDIS_URL for testing
-    monkeypatch.setattr(config.settings, "REDIS_URL", "redis://example:6380")
-    assert config.settings.REDIS_URL == "redis://example:6380"
+    monkeypatch.setattr(config.settings, 'REDIS_URL', 'redis://example:6380')
+    assert config.settings.REDIS_URL == 'redis://example:6380'
     # Reset
-    monkeypatch.setattr(config.settings, "REDIS_URL", original)
+    monkeypatch.setattr(config.settings, 'REDIS_URL', original)
     assert config.settings.REDIS_URL == original

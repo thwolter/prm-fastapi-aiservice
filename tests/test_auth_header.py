@@ -8,20 +8,20 @@ app = FastAPI()
 app.add_middleware(AuthorizationMiddleware)
 
 
-@app.get("/protected")
+@app.get('/protected')
 async def protected():
-    return {"user": ""}
+    return {'user': ''}
 
 
 def test_missing_authorization_header(monkeypatch):
-    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(settings, 'ENVIRONMENT', 'production')
     with TestClient(app) as client:
-        res = client.get("/protected")
+        res = client.get('/protected')
         assert res.status_code == 401
 
 
 def test_invalid_authorization_header(monkeypatch):
-    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(settings, 'ENVIRONMENT', 'production')
     with TestClient(app) as client:
-        res = client.get("/protected", headers={"Authorization": "Token invalid"})
+        res = client.get('/protected', headers={'Authorization': 'Token invalid'})
         assert res.status_code == 401

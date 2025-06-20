@@ -39,8 +39,8 @@ class OpenMeterClient(AbstractMeteringClient):
             A tuple of (sync_client, async_client).
         """
         headers = {
-            "Accept": "application/json",
-            "Authorization": f"Bearer {settings.OPENMETER_API_KEY}",
+            'Accept': 'application/json',
+            'Authorization': f'Bearer {settings.OPENMETER_API_KEY}',
         }
 
         sync_client = Client(
@@ -76,17 +76,17 @@ class OpenMeterClient(AbstractMeteringClient):
 
             event = CloudEvent(
                 attributes={
-                    "id": str(uuid.uuid4()),
-                    "type": settings.OPENMETER_EVENT_TYPE,
-                    "source": settings.OPENMETER_SOURCE,
-                    "subject": subject_id,
+                    'id': str(uuid.uuid4()),
+                    'type': settings.OPENMETER_EVENT_TYPE,
+                    'source': settings.OPENMETER_SOURCE,
+                    'subject': subject_id,
                 },
                 data=usage_event.to_dict(),
             )
             self.sync_client.ingest_events(to_dict(event))
             return True
         except Exception as e:
-            logger.error(f"Error recording usage for subject {subject_id}: {e}")
+            logger.error(f'Error recording usage for subject {subject_id}: {e}')
             return False
 
     def get_usage(self, subject_id: str) -> TokenQuotaResponse:
@@ -106,15 +106,15 @@ class OpenMeterClient(AbstractMeteringClient):
 
             # Convert the response to a TokenQuotaResponse object
             return TokenQuotaResponse(
-                sufficient=response.get("sufficient", False),
-                token_limit=response.get("token_limit", 0),
-                consumed_tokens=response.get("consumed_tokens", 0),
-                remaining_tokens=response.get("remaining_tokens", 0),
+                sufficient=response.get('sufficient', False),
+                token_limit=response.get('token_limit', 0),
+                consumed_tokens=response.get('consumed_tokens', 0),
+                remaining_tokens=response.get('remaining_tokens', 0),
             )
         except AttributeError:
             # The OpenMeter client library might not have a get_usage method
             logger.warning(
-                "get_usage method not found in OpenMeter client, returning default TokenQuotaResponse"
+                'get_usage method not found in OpenMeter client, returning default TokenQuotaResponse'
             )
             return TokenQuotaResponse(
                 sufficient=True,
@@ -123,7 +123,7 @@ class OpenMeterClient(AbstractMeteringClient):
                 remaining_tokens=1000,
             )
         except Exception as e:
-            logger.error(f"Error getting usage for subject {subject_id}: {e}")
+            logger.error(f'Error getting usage for subject {subject_id}: {e}')
             return TokenQuotaResponse(
                 sufficient=True,
                 token_limit=1000,
@@ -163,14 +163,14 @@ class OpenMeterClient(AbstractMeteringClient):
         for item in response:
             try:
                 subject = Subject(
-                    id=UUID(item.get("key")),
-                    email=item.get("displayName"),
-                    display_name=item.get("displayName"),
+                    id=UUID(item.get('key')),
+                    email=item.get('displayName'),
+                    display_name=item.get('displayName'),
                 )
                 subjects.append(subject)
             except ValueError as e:
                 logger.warning(
-                    f"Error converting subject key to UUID: {e}. Skipping subject with key: {item.get('key')}"
+                    f'Error converting subject key to UUID: {e}. Skipping subject with key: {item.get("key")}'
                 )
                 continue
 
@@ -190,7 +190,7 @@ class OpenMeterClient(AbstractMeteringClient):
             self.sync_client.ingest_events(events)
             return True
         except Exception as e:
-            logger.error(f"Error ingesting events: {e}")
+            logger.error(f'Error ingesting events: {e}')
             return False
 
     def list_entitlements(self, subject: Optional[List[str]] = None) -> List[Entitlement]:
@@ -209,9 +209,9 @@ class OpenMeterClient(AbstractMeteringClient):
         except AttributeError:
             # The OpenMeter client library might not have a list_entitlements method
             logger.warning(
-                "list_entitlements method not found in OpenMeter client, returning empty list"
+                'list_entitlements method not found in OpenMeter client, returning empty list'
             )
             return []
         except Exception as e:
-            logger.error(f"Error listing entitlements: {e}")
+            logger.error(f'Error listing entitlements: {e}')
             return []

@@ -21,8 +21,8 @@ class TestResultModel(BaseModel):
     """Test result model."""
 
     success: bool
-    result: str = ""
-    error: str = ""
+    result: str = ''
+    error: str = ''
     response_info: ResponseInfo = Field(default_factory=ResponseInfo)
 
 
@@ -30,7 +30,7 @@ class TestService(BaseService):
     """Test service implementation."""
 
     chain_fn = None
-    route_path = "/test"
+    route_path = '/test'
     QueryModel = TestQueryModel
     ResultModel = TestResultModel
 
@@ -42,12 +42,12 @@ async def test_base_service_execute_query_success():
     mock_chain_fn = AsyncMock(
         return_value=TestResultModel(
             success=True,
-            result="test result",
+            result='test result',
             response_info=ResponseInfo(
                 consumed_tokens=100,
                 total_cost=0.02,
-                prompt_name="test_prompt",
-                model_name="test_model",
+                prompt_name='test_prompt',
+                model_name='test_model',
             ),
         )
     )
@@ -57,12 +57,12 @@ async def test_base_service_execute_query_success():
     service.__class__.chain_fn = mock_chain_fn
 
     # Execute a query
-    query = TestQueryModel(query="test query")
+    query = TestQueryModel(query='test query')
     result = await service.execute_query(query)
 
     # Verify the result
     assert result.success is True
-    assert result.result == "test result"
+    assert result.result == 'test result'
     mock_chain_fn.assert_called_once_with(query)
 
 
@@ -70,19 +70,19 @@ async def test_base_service_execute_query_success():
 async def test_base_service_execute_query_failure():
     """Test that execute_query handles failures correctly."""
     # Create a mock chain function that raises an exception
-    mock_chain_fn = AsyncMock(side_effect=Exception("test error"))
+    mock_chain_fn = AsyncMock(side_effect=Exception('test error'))
 
     # Create a test service with the mock chain function
     service = TestService()
     service.__class__.chain_fn = mock_chain_fn
 
     # Execute a query - should return a fallback response
-    query = TestQueryModel(query="test query")
+    query = TestQueryModel(query='test query')
     result = await service.execute_query(query)
 
     # Verify the result
     assert result.success is False
-    assert "temporarily unavailable" in result.error
+    assert 'temporarily unavailable' in result.error
     mock_chain_fn.assert_called_once_with(query)
 
 
@@ -93,12 +93,12 @@ async def test_base_service_execute_query_circuit_open():
     mock_chain_fn = AsyncMock(
         return_value=TestResultModel(
             success=True,
-            result="test result",
+            result='test result',
             response_info=ResponseInfo(
                 consumed_tokens=100,
                 total_cost=0.02,
-                prompt_name="test_prompt",
-                model_name="test_model",
+                prompt_name='test_prompt',
+                model_name='test_model',
             ),
         )
     )
@@ -110,16 +110,16 @@ async def test_base_service_execute_query_circuit_open():
     # Open the circuit for the service
     from src.utils.circuit_breaker import get_circuit_breaker
 
-    cb = get_circuit_breaker("TestService")
+    cb = get_circuit_breaker('TestService')
     cb.open()
 
     # Execute a query - should return a fallback response without calling the chain function
-    query = TestQueryModel(query="test query")
+    query = TestQueryModel(query='test query')
     result = await service.execute_query(query)
 
     # Verify the result
     assert result.success is False
-    assert "currently unavailable" in result.error
+    assert 'currently unavailable' in result.error
     mock_chain_fn.assert_not_called()
 
 
@@ -131,6 +131,6 @@ async def test_base_service_execute_query_no_chain_fn():
     service.__class__.chain_fn = None
 
     # Execute a query - should raise RuntimeError
-    query = TestQueryModel(query="test query")
-    with pytest.raises(RuntimeError, match="riskgpt is not installed"):
+    query = TestQueryModel(query='test query')
+    with pytest.raises(RuntimeError, match='riskgpt is not installed'):
         await service.execute_query(query)

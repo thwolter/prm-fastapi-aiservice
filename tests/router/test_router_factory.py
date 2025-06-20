@@ -4,10 +4,9 @@ import pytest
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from src.routes import create_router
+from src.routes.router_factory import create_router
 from src.services.base_service import BaseService
 from src.utils import logutils
-
 
 # Configure logutils for tests
 logutils.logging.basicConfig(level=logutils.logging.DEBUG)
@@ -17,7 +16,7 @@ class MockService(BaseService):
     """Mock service for testing."""
 
     chain_fn = mock.MagicMock()
-    route_path = "/mock/service/"
+    route_path = '/mock/service/'
 
     class QueryModel(BaseModel):
         query: str
@@ -41,10 +40,10 @@ class TestRouterFactory:
         assert isinstance(router, APIRouter)
 
         # Verify that the router has the correct prefix
-        assert router.prefix == "/api"
+        assert router.prefix == '/api'
 
         # Verify that the router has the correct responses
-        assert router.responses == {404: {"description": "Not found"}}
+        assert router.responses == {404: {'description': 'Not found'}}
 
         # Verify that the service discovery function was called
         mock_discover_services.assert_called_once()
@@ -58,10 +57,10 @@ class TestRouterFactory:
         mock_discover_services = mock.MagicMock(return_value=[MockService])
 
         # Call the function with a custom prefix
-        router = create_router(prefix="/custom", service_discovery_fn=mock_discover_services)
+        router = create_router(prefix='/custom', service_discovery_fn=mock_discover_services)
 
         # Verify that the router has the correct prefix
-        assert router.prefix == "/custom"
+        assert router.prefix == '/custom'
 
     def test_create_router_custom_responses(self):
         """Test that create_router creates a router with custom responses."""
@@ -69,7 +68,7 @@ class TestRouterFactory:
         mock_discover_services = mock.MagicMock(return_value=[MockService])
 
         # Call the function with custom responses
-        custom_responses = {404: {"description": "Custom not found"}}
+        custom_responses = {404: {'description': 'Custom not found'}}
         router = create_router(
             responses=custom_responses, service_discovery_fn=mock_discover_services
         )
@@ -97,7 +96,7 @@ class TestRouterFactory:
     def test_create_router_service_discovery_error(self):
         """Test that create_router handles errors in service discovery."""
         # Mock the service discovery function to raise an exception
-        mock_discover_services = mock.MagicMock(side_effect=Exception("Test exception"))
+        mock_discover_services = mock.MagicMock(side_effect=Exception('Test exception'))
 
         # Call the function - it should not raise an exception
         router = create_router(service_discovery_fn=mock_discover_services)
@@ -116,7 +115,7 @@ class TestRouterFactory:
 
         # Create a mock service class that will cause an error during route registration
         class ErrorService(BaseService):
-            route_path = "/error/service/"
+            route_path = '/error/service/'
             # Missing required attributes
 
         # Mock the service discovery function to return the error service
@@ -135,5 +134,5 @@ class TestRouterFactory:
         assert len(router.routes) == 0
 
 
-if __name__ == "__main__":
-    pytest.main(["-v", "test_router_factory.py"])
+if __name__ == '__main__':
+    pytest.main(['-v', 'test_router_factory.py'])

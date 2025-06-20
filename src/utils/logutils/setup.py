@@ -1,4 +1,5 @@
 """Setup functions for logutils."""
+
 import logging
 
 from src.utils.logutils.config import configure_root_logger

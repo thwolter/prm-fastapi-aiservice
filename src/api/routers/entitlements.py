@@ -12,10 +12,10 @@ from src.domain.models import Entitlement, EntitlementCreate
 from src.domain.services import EntitlementService
 from src.utils.exceptions import ResourceNotFoundException
 
-router = APIRouter(prefix="/entitlements", tags=["Entitlements"])
+router = APIRouter(prefix='/entitlements', tags=['Entitlements'])
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_entitlement(
     entitlement: EntitlementCreate,
     request: Request,
@@ -31,15 +31,15 @@ async def create_entitlement(
             entitlement_service.user_id = subject_id
 
         await entitlement_service.set_entitlement(entitlement)
-        return {"message": "Entitlement created successfully"}
+        return {'message': 'Entitlement created successfully'}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create entitlement: {str(e)}",
+            detail=f'Failed to create entitlement: {str(e)}',
         )
 
 
-@router.get("/{feature_key}", response_model=Entitlement)
+@router.get('/{feature_key}', response_model=Entitlement)
 async def get_entitlement(
     feature_key: str,
     request: Request,
@@ -58,16 +58,16 @@ async def get_entitlement(
     except ResourceNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Entitlement for feature {feature_key} not found",
+            detail=f'Entitlement for feature {feature_key} not found',
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get entitlement: {str(e)}",
+            detail=f'Failed to get entitlement: {str(e)}',
         )
 
 
-@router.get("/check/{feature_key}", response_model=bool)
+@router.get('/check/{feature_key}', response_model=bool)
 async def check_entitlement(
     feature_key: str,
     request: Request,
@@ -86,16 +86,16 @@ async def check_entitlement(
     except ResourceNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Entitlement for feature {feature_key} not found",
+            detail=f'Entitlement for feature {feature_key} not found',
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to check entitlement: {str(e)}",
+            detail=f'Failed to check entitlement: {str(e)}',
         )
 
 
-@router.get("/token-quota/status", response_model=bool)
+@router.get('/token-quota/status', response_model=bool)
 async def get_token_quota_status(
     request: Request,
     subject_id: UUID = None,
@@ -115,10 +115,10 @@ async def get_token_quota_status(
     except ResourceNotFoundException:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Token quota entitlement not found",
+            detail='Token quota entitlement not found',
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to check token quota entitlement: {str(e)}",
+            detail=f'Failed to check token quota entitlement: {str(e)}',
         )

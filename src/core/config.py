@@ -9,7 +9,7 @@ class RiskGPTSettings(BaseSettings):
     """Settings for RiskGPT related configuration."""
 
     model_config = SettingsConfigDict(
-        env_file=[".env", "../.env"], env_prefix="RISKGPT_", env_ignore_empty=True, extra="ignore"
+        env_file=['.env', '../.env'], env_prefix='RISKGPT_', env_ignore_empty=True, extra='ignore'
     )
 
     OPENAI_API_KEY: str | None = None
@@ -23,15 +23,15 @@ def parse_cors(v: Any) -> list[str] | str:
         return []
 
     if isinstance(v, str):
-        if v == "*":
+        if v == '*':
             return v
-        if v.startswith("["):
+        if v.startswith('['):
             try:
                 origins = json.loads(v)
             except ValueError as e:  # pragma: no cover - invalid env value
                 raise ValueError(v) from e
         else:
-            origins = v.split(",")
+            origins = v.split(',')
     elif isinstance(v, list):
         origins = v
     else:
@@ -39,7 +39,7 @@ def parse_cors(v: Any) -> list[str] | str:
 
     cleaned = []
     for origin in origins:
-        s = str(origin).strip().rstrip("/")
+        s = str(origin).strip().rstrip('/')
         if s and s not in cleaned:
             cleaned.append(s)
     return cleaned
@@ -47,53 +47,53 @@ def parse_cors(v: Any) -> list[str] | str:
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=[".env", "../.env"], env_ignore_empty=True, extra="ignore"
+        env_file=['.env', '../.env'], env_ignore_empty=True, extra='ignore'
     )
-    DOMAIN: str = "localhost"
-    ENVIRONMENT: Literal["local", "debug", "staging", "production"] = "production"
+    DOMAIN: str = 'localhost'
+    ENVIRONMENT: Literal['local', 'debug', 'staging', 'production'] = 'production'
 
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
     @computed_field
     @property
     def IS_PRODUCTION(self) -> bool:
-        return self.ENVIRONMENT == "production"
+        return self.ENVIRONMENT == 'production'
 
     APP_PORT: int = 8001
-    APP_HOST: str = "localhost"
+    APP_HOST: str = 'localhost'
     OPENAI_API_KEY: str
     LANGCHAIN_API_KEY: str
     LANGCHAIN_TRACING_V2: bool = False
     LANGCHAIN_CALLBACKS_BACKGROUND: bool = False
     LANGCHAIN_PROJECT: str
 
-    OPENAI_MODEL_NAME: str = "gpt-4o-mini"
+    OPENAI_MODEL_NAME: str = 'gpt-4o-mini'
     OPENAI_TEMPERATURE: float = 0.7
 
-    REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_URL: str = 'redis://localhost:6379/0'
     CACHE_TIMEOUT: int = 60 * 60 * 24
 
     SENTRY_DSN: str
-    LOG_LEVEL: str = "ERROR"
+    LOG_LEVEL: str = 'ERROR'
 
     SECRET_KEY: str
     SERVICE_SECRET: str
     AUTH_TOKEN_LEEWAY: int = 0  # in seconds
-    AUTH_TOKEN_ALGORITHM: str = "HS256"
-    AUTH_TOKEN_AUDIENCE: str = "fastapi-users:auth"
+    AUTH_TOKEN_ALGORITHM: str = 'HS256'
+    AUTH_TOKEN_AUDIENCE: str = 'fastapi-users:auth'
 
     # Vendor configuration
-    METERING_VENDOR: str = "openmeter"
-    ENTITLEMENT_VENDOR: str = "openmeter"
-    PAYMENT_VENDOR: str = "openmeter"
+    METERING_VENDOR: str = 'openmeter'
+    ENTITLEMENT_VENDOR: str = 'openmeter'
+    PAYMENT_VENDOR: str = 'openmeter'
 
     # OpenMeter configuration
     OPENMETER_API_KEY: str
-    OPENMETER_API_URL: str = "https://openmeter.cloud"
-    OPENMETER_SOURCE: str = "prm-ai-service"
+    OPENMETER_API_URL: str = 'https://openmeter.cloud'
+    OPENMETER_SOURCE: str = 'prm-ai-service'
     OPENMETER_TIMEOUT: float = 1.0
-    OPENMETER_FEATURE_KEY: str = "ai_tokens"
-    OPENMETER_EVENT_TYPE: str = "tokens"
+    OPENMETER_FEATURE_KEY: str = 'ai_tokens'
+    OPENMETER_EVENT_TYPE: str = 'tokens'
 
     @classmethod
     def from_env(cls):

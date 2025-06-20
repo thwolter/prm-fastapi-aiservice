@@ -12,10 +12,10 @@ from src.api.dependencies import get_subscription_service
 from src.domain.models import Subscription
 from src.domain.services import SubscriptionService
 
-router = APIRouter(prefix="/subscriptions", tags=["Subscriptions"])
+router = APIRouter(prefix='/subscriptions', tags=['Subscriptions'])
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=Subscription)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=Subscription)
 async def create_subscription(
     subject_id: UUID,
     plan_id: str,
@@ -24,8 +24,8 @@ async def create_subscription(
     auto_renew: bool = False,
     metadata: Optional[dict] = None,
     amount: Optional[float] = None,
-    currency: str = "USD",
-    payment_method: str = "credit_card",
+    currency: str = 'USD',
+    payment_method: str = 'credit_card',
     subscription_service: SubscriptionService = Depends(get_subscription_service),
 ):
     """
@@ -49,11 +49,11 @@ async def create_subscription(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create subscription: {str(e)}",
+            detail=f'Failed to create subscription: {str(e)}',
         )
 
 
-@router.get("/{subscription_id}", response_model=Subscription)
+@router.get('/{subscription_id}', response_model=Subscription)
 async def get_subscription(
     subscription_id: UUID,
     subscription_service: SubscriptionService = Depends(get_subscription_service),
@@ -66,7 +66,7 @@ async def get_subscription(
         if not subscription:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Subscription with ID {subscription_id} not found",
+                detail=f'Subscription with ID {subscription_id} not found',
             )
         return subscription
     except HTTPException:
@@ -74,11 +74,11 @@ async def get_subscription(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get subscription: {str(e)}",
+            detail=f'Failed to get subscription: {str(e)}',
         )
 
 
-@router.get("/subject/{subject_id}", response_model=List[Subscription])
+@router.get('/subject/{subject_id}', response_model=List[Subscription])
 async def get_subscriptions_for_subject(
     subject_id: UUID,
     subscription_service: SubscriptionService = Depends(get_subscription_service),
@@ -91,11 +91,11 @@ async def get_subscriptions_for_subject(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get subscriptions for subject: {str(e)}",
+            detail=f'Failed to get subscriptions for subject: {str(e)}',
         )
 
 
-@router.patch("/{subscription_id}", response_model=Subscription)
+@router.patch('/{subscription_id}', response_model=Subscription)
 async def update_subscription(
     subscription_id: UUID,
     status: Optional[str] = None,
@@ -118,7 +118,7 @@ async def update_subscription(
         if not subscription:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Subscription with ID {subscription_id} not found",
+                detail=f'Subscription with ID {subscription_id} not found',
             )
         return subscription
     except HTTPException:
@@ -126,11 +126,11 @@ async def update_subscription(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update subscription: {str(e)}",
+            detail=f'Failed to update subscription: {str(e)}',
         )
 
 
-@router.post("/{subscription_id}/cancel", response_model=Subscription)
+@router.post('/{subscription_id}/cancel', response_model=Subscription)
 async def cancel_subscription(
     subscription_id: UUID,
     refund: bool = False,
@@ -150,7 +150,7 @@ async def cancel_subscription(
         if not subscription:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Subscription with ID {subscription_id} not found",
+                detail=f'Subscription with ID {subscription_id} not found',
             )
         return subscription
     except HTTPException:
@@ -158,5 +158,5 @@ async def cancel_subscription(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to cancel subscription: {str(e)}",
+            detail=f'Failed to cancel subscription: {str(e)}',
         )

@@ -11,8 +11,8 @@ from riskgpt.models.schemas import ResponseInfo
 from src.routes.service_handler import ServiceHandler, ServiceProtocol
 from src.utils import logutils
 
-TRequest = TypeVar("TRequest", bound=BaseModel)
-TResponse = TypeVar("TResponse", bound=BaseModel)
+TRequest = TypeVar('TRequest', bound=BaseModel)
+TResponse = TypeVar('TResponse', bound=BaseModel)
 
 logger = logutils.get_logger(__name__)
 
@@ -85,10 +85,10 @@ class RouteRegistry:
             result = await handler.handle(request_model)
 
             # Store the result in the request state for the middleware to access
-            if not hasattr(result, "response_info") or not isinstance(
+            if not hasattr(result, 'response_info') or not isinstance(
                 result.response_info, ResponseInfo
             ):
-                raise ValueError("Response info not found in response")
+                raise ValueError('Response info not found in response')
 
             request.state.response_info = result.response_info
 
@@ -101,4 +101,4 @@ class RouteRegistry:
             tags=tags,
         )(route_function)
 
-        logger.debug(f"Registered route: {path} with tags: {tags}")
+        logger.debug(f'Registered route: {path} with tags: {tags}')

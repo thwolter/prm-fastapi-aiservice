@@ -13,15 +13,15 @@ from pydantic import BaseModel
 from src.routes.route_registry import RouteRegistry
 from src.utils import logutils
 
-TRequest = TypeVar("TRequest", bound=BaseModel)
-TResponse = TypeVar("TResponse", bound=BaseModel)
+TRequest = TypeVar('TRequest', bound=BaseModel)
+TResponse = TypeVar('TResponse', bound=BaseModel)
 
 logger = logutils.get_logger(__name__)
 
 # Show deprecation warning
 warnings.warn(
-    "The registrar module is deprecated. "
-    "Use src.core.routes.validation, src.core.routes.service_handler, and src.core.routes.route_registry instead.",
+    'The registrar module is deprecated. '
+    'Use src.core.routes.validation, src.core.routes.service_handler, and src.core.routes.route_registry instead.',
     DeprecationWarning,
     stacklevel=2,
 )
@@ -34,7 +34,7 @@ class RouteRegistrar:
 
     def __init__(self, api_router: APIRouter):
         warnings.warn(
-            "RouteRegistrar is deprecated. Use RouteRegistry from src.core.routes.route_registry instead.",
+            'RouteRegistrar is deprecated. Use RouteRegistry from src.core.routes.route_registry instead.',
             DeprecationWarning,
             stacklevel=2,
         )
@@ -60,9 +60,9 @@ class RouteRegistrar:
 
 # Create APIRouter instance
 router = APIRouter(
-    prefix="/api",
-    tags=["api"],
-    responses={404: {"description": "Not found"}},
+    prefix='/api',
+    tags=['api'],
+    responses={404: {'description': 'Not found'}},
 )
 
 # Create route registrar

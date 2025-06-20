@@ -3,7 +3,7 @@ import importlib
 import pytest
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope='session', autouse=True)
 def load_env():
     """
     Ensure that the application's config is reloaded and required environment variables are set before any tests run.
@@ -16,8 +16,8 @@ def load_env():
     # keep original settings instance to avoid breaking references
     old_settings.__dict__.update(config.settings.__dict__)
     config.settings = old_settings
-    assert config.settings.OPENAI_API_KEY, "OPENAI_API_KEY is not set"
-    assert config.settings.LANGCHAIN_API_KEY, "LANGCHAIN_API_KEY is not set"
+    assert config.settings.OPENAI_API_KEY, 'OPENAI_API_KEY is not set'
+    assert config.settings.LANGCHAIN_API_KEY, 'LANGCHAIN_API_KEY is not set'
 
 
 @pytest.fixture(autouse=True)
@@ -29,11 +29,11 @@ def override_settings(request):
     """
     from src.core import config
 
-    redis_url = getattr(request, "param", "redis://localhost:6379")
+    redis_url = getattr(request, 'param', 'redis://localhost:6379')
     original_redis_url = config.settings.REDIS_URL
     original_environment = config.settings.ENVIRONMENT
     config.settings.REDIS_URL = redis_url
-    config.settings.ENVIRONMENT = "local"
+    config.settings.ENVIRONMENT = 'local'
     yield
     config.settings.REDIS_URL = original_redis_url
     config.settings.ENVIRONMENT = original_environment
@@ -45,6 +45,6 @@ def e2e_environment():
     from src.core import config
 
     original_environment = config.settings.ENVIRONMENT
-    config.settings.ENVIRONMENT = "testing"  # or "staging"
+    config.settings.ENVIRONMENT = 'testing'  # or "staging"
     yield
     config.settings.ENVIRONMENT = original_environment

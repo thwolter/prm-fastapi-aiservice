@@ -14,7 +14,7 @@ def mock_service_handler_handle():
     Returns:
         A mock object that can be configured with return_value or side_effect.
     """
-    with mock.patch.object(ServiceHandler, "handle") as mock_handle:
+    with mock.patch.object(ServiceHandler, 'handle') as mock_handle:
         yield mock_handle
 
 

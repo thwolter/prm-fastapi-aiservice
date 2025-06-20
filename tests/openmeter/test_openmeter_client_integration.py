@@ -25,14 +25,14 @@ def test_openmeter_client_initialization():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         sync_client, async_client = OpenMeterClient.create_clients()
         client = OpenMeterClient(sync_client, async_client)
         assert client is not None
     except Exception as exc:
-        pytest.fail(f"OpenMeter client initialization failed: {exc}")
+        pytest.fail(f'OpenMeter client initialization failed: {exc}')
 
 
 @pytest.mark.integration
@@ -46,7 +46,7 @@ def test_openmeter_client_record_usage():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the client
@@ -55,11 +55,11 @@ def test_openmeter_client_record_usage():
 
         # Create a subject
         subject_id = str(uuid.uuid4())
-        subject_email = f"test-{subject_id}@example.com"
-        client.upsert_subject([{"key": subject_id, "displayName": subject_email}])
+        subject_email = f'test-{subject_id}@example.com'
+        client.upsert_subject([{'key': subject_id, 'displayName': subject_email}])
 
         # Record usage
-        usage_event = UsageEvent(tokens=100, model="test-model", prompt="test-prompt")
+        usage_event = UsageEvent(tokens=100, model='test-model', prompt='test-prompt')
         result = client.record_usage(subject_id, usage_event)
 
         # Verify the usage was recorded successfully
@@ -68,7 +68,7 @@ def test_openmeter_client_record_usage():
         # Clean up
         client.delete_subject(subject_id)
     except Exception as exc:
-        pytest.fail(f"OpenMeter client record_usage test failed: {exc}")
+        pytest.fail(f'OpenMeter client record_usage test failed: {exc}')
 
 
 @pytest.mark.integration
@@ -82,7 +82,7 @@ def test_openmeter_client_ingest_events():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the client
@@ -91,18 +91,18 @@ def test_openmeter_client_ingest_events():
 
         # Create a subject
         subject_id = str(uuid.uuid4())
-        subject_email = f"test-{subject_id}@example.com"
-        client.upsert_subject([{"key": subject_id, "displayName": subject_email}])
+        subject_email = f'test-{subject_id}@example.com'
+        client.upsert_subject([{'key': subject_id, 'displayName': subject_email}])
 
         # Create a cloud event
         event = CloudEvent(
             attributes={
-                "id": str(uuid.uuid4()),
-                "type": settings.OPENMETER_EVENT_TYPE,
-                "source": settings.OPENMETER_SOURCE,
-                "subject": subject_id,
+                'id': str(uuid.uuid4()),
+                'type': settings.OPENMETER_EVENT_TYPE,
+                'source': settings.OPENMETER_SOURCE,
+                'subject': subject_id,
             },
-            data={"tokens": 100, "model": "test-model", "prompt": "test-prompt"},
+            data={'tokens': 100, 'model': 'test-model', 'prompt': 'test-prompt'},
         )
 
         # Ingest the event
@@ -114,7 +114,7 @@ def test_openmeter_client_ingest_events():
         # Clean up
         client.delete_subject(subject_id)
     except Exception as exc:
-        pytest.fail(f"OpenMeter client ingest_events test failed: {exc}")
+        pytest.fail(f'OpenMeter client ingest_events test failed: {exc}')
 
 
 @pytest.mark.integration
@@ -128,7 +128,7 @@ def test_openmeter_client_upsert_and_list_subjects():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the client
@@ -137,14 +137,14 @@ def test_openmeter_client_upsert_and_list_subjects():
 
         # Create subjects
         subject1_id = str(uuid.uuid4())
-        subject1_email = f"test-{subject1_id}@example.com"
+        subject1_email = f'test-{subject1_id}@example.com'
         subject2_id = str(uuid.uuid4())
-        subject2_email = f"test-{subject2_id}@example.com"
+        subject2_email = f'test-{subject2_id}@example.com'
 
         client.upsert_subject(
             [
-                {"key": subject1_id, "displayName": subject1_email},
-                {"key": subject2_id, "displayName": subject2_email},
+                {'key': subject1_id, 'displayName': subject1_email},
+                {'key': subject2_id, 'displayName': subject2_email},
             ]
         )
 
@@ -167,14 +167,14 @@ def test_openmeter_client_upsert_and_list_subjects():
                 subject2_found = True
                 assert subject.email == subject2_email or subject.display_name == subject2_email
 
-        assert subject1_found, f"Subject {subject1_id} not found in the list"
-        assert subject2_found, f"Subject {subject2_id} not found in the list"
+        assert subject1_found, f'Subject {subject1_id} not found in the list'
+        assert subject2_found, f'Subject {subject2_id} not found in the list'
 
         # Clean up
         client.delete_subject(subject1_id)
         client.delete_subject(subject2_id)
     except Exception as exc:
-        pytest.fail(f"OpenMeter client upsert_and_list_subjects test failed: {exc}")
+        pytest.fail(f'OpenMeter client upsert_and_list_subjects test failed: {exc}')
 
 
 @pytest.mark.integration
@@ -188,7 +188,7 @@ def test_openmeter_client_delete_subject():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the client
@@ -197,13 +197,13 @@ def test_openmeter_client_delete_subject():
 
         # Create a subject
         subject_id = str(uuid.uuid4())
-        subject_email = f"test-{subject_id}@example.com"
-        client.upsert_subject([{"key": subject_id, "displayName": subject_email}])
+        subject_email = f'test-{subject_id}@example.com'
+        client.upsert_subject([{'key': subject_id, 'displayName': subject_email}])
 
         # List subjects to verify the subject was created
         subjects_before = client.list_subjects()
         subject_found_before = any(str(subject.id) == subject_id for subject in subjects_before)
-        assert subject_found_before, f"Subject {subject_id} not found before deletion"
+        assert subject_found_before, f'Subject {subject_id} not found before deletion'
 
         # Delete the subject
         client.delete_subject(subject_id)
@@ -211,9 +211,9 @@ def test_openmeter_client_delete_subject():
         # List subjects to verify the subject was deleted
         subjects_after = client.list_subjects()
         subject_found_after = any(str(subject.id) == subject_id for subject in subjects_after)
-        assert not subject_found_after, f"Subject {subject_id} still found after deletion"
+        assert not subject_found_after, f'Subject {subject_id} still found after deletion'
     except Exception as exc:
-        pytest.fail(f"OpenMeter client delete_subject test failed: {exc}")
+        pytest.fail(f'OpenMeter client delete_subject test failed: {exc}')
 
 
 @pytest.mark.integration
@@ -226,7 +226,7 @@ def test_openmeter_client_list_entitlements():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the client
@@ -240,7 +240,7 @@ def test_openmeter_client_list_entitlements():
         assert entitlements is not None
         assert isinstance(entitlements, list)
     except Exception as exc:
-        pytest.fail(f"OpenMeter client list_entitlements test failed: {exc}")
+        pytest.fail(f'OpenMeter client list_entitlements test failed: {exc}')
 
 
 @pytest.mark.integration
@@ -254,7 +254,7 @@ def test_openmeter_client_get_usage():
     """
     api_key = settings.OPENMETER_API_KEY
     if not api_key:
-        pytest.skip("OPENMETER_API_KEY not provided")
+        pytest.skip('OPENMETER_API_KEY not provided')
 
     try:
         # Initialize the client
@@ -263,11 +263,11 @@ def test_openmeter_client_get_usage():
 
         # Create a subject
         subject_id = str(uuid.uuid4())
-        subject_email = f"test-{subject_id}@example.com"
-        client.upsert_subject([{"key": subject_id, "displayName": subject_email}])
+        subject_email = f'test-{subject_id}@example.com'
+        client.upsert_subject([{'key': subject_id, 'displayName': subject_email}])
 
         # Record usage
-        usage_event = UsageEvent(tokens=100, model="test-model", prompt="test-prompt")
+        usage_event = UsageEvent(tokens=100, model='test-model', prompt='test-prompt')
         client.record_usage(subject_id, usage_event)
 
         # Get usage
@@ -275,12 +275,12 @@ def test_openmeter_client_get_usage():
 
         # Verify the usage was retrieved correctly
         assert usage is not None
-        assert hasattr(usage, "sufficient")
-        assert hasattr(usage, "token_limit")
-        assert hasattr(usage, "consumed_tokens")
-        assert hasattr(usage, "remaining_tokens")
+        assert hasattr(usage, 'sufficient')
+        assert hasattr(usage, 'token_limit')
+        assert hasattr(usage, 'consumed_tokens')
+        assert hasattr(usage, 'remaining_tokens')
 
         # Clean up
         client.delete_subject(subject_id)
     except Exception as exc:
-        pytest.fail(f"OpenMeter client get_usage test failed: {exc}")
+        pytest.fail(f'OpenMeter client get_usage test failed: {exc}')

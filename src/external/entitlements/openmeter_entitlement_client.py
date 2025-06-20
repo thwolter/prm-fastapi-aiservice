@@ -36,8 +36,8 @@ class OpenMeterEntitlementClient(AbstractEntitlementClient):
             A tuple of (sync_client, async_client).
         """
         headers = {
-            "Accept": "application/json",
-            "Authorization": f"Bearer {settings.OPENMETER_API_KEY}",
+            'Accept': 'application/json',
+            'Authorization': f'Bearer {settings.OPENMETER_API_KEY}',
         }
 
         sync_client = Client(

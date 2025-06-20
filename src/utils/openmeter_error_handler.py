@@ -9,7 +9,7 @@ from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from src.utils import logutils
 from src.utils.exceptions import ExternalServiceException, ResourceNotFoundException
 
-T = TypeVar("T")
+T = TypeVar('T')
 logger = logutils.get_logger(__name__)
 
 
@@ -34,15 +34,15 @@ async def handle_openmeter_errors(
     try:
         return await func(*args, **kwargs)
     except ResourceNotFoundError as e:
-        logger.error(f"OpenMeter resource not found: {e}")
-        raise ResourceNotFoundException(detail="Resource not found in OpenMeter")
+        logger.error(f'OpenMeter resource not found: {e}')
+        raise ResourceNotFoundException(detail='Resource not found in OpenMeter')
     except HttpResponseError as e:
-        logger.error(f"OpenMeter API error: {e}")
+        logger.error(f'OpenMeter API error: {e}')
         raise ExternalServiceException(
-            detail=f"OpenMeter API error: {str(e)}", service_name="OpenMeter"
+            detail=f'OpenMeter API error: {str(e)}', service_name='OpenMeter'
         )
     except Exception as e:
-        logger.error(f"Unexpected error in OpenMeter API call: {e}")
+        logger.error(f'Unexpected error in OpenMeter API call: {e}')
         raise ExternalServiceException(
-            detail=f"Unexpected error in OpenMeter API call: {str(e)}", service_name="OpenMeter"
+            detail=f'Unexpected error in OpenMeter API call: {str(e)}', service_name='OpenMeter'
         )

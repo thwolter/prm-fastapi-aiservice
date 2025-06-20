@@ -13,11 +13,11 @@ def get_jwt_payload(request: Request) -> dict[str, Any]:
     Extract and verify the JWT token from the ``Authorization`` header.
     """
 
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
         raise AuthenticationException(detail="Missing 'Authorization: Bearer <token>' header")
 
-    token = auth_header.split(" ", 1)[1]
+    token = auth_header.split(' ', 1)[1]
 
     try:
         payload = jwt.decode(
@@ -30,7 +30,7 @@ def get_jwt_payload(request: Request) -> dict[str, Any]:
         return typing.cast(dict[str, Any], payload)
 
     except jwt.ExpiredSignatureError:
-        raise AuthenticationException(detail="Token has expired")
+        raise AuthenticationException(detail='Token has expired')
 
     except jwt.InvalidTokenError:
-        raise AuthenticationException(detail="Invalid token")
+        raise AuthenticationException(detail='Invalid token')

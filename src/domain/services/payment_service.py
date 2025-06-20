@@ -57,7 +57,7 @@ class PaymentService:
             )
             return self.payment_client.process_payment(payment_event)
         except Exception as e:
-            logger.error(f"Error processing payment for subscription {subscription_id}: {e}")
+            logger.error(f'Error processing payment for subscription {subscription_id}: {e}')
             raise
 
     async def get_payment(self, payment_id: UUID) -> Optional[Payment]:
@@ -73,7 +73,7 @@ class PaymentService:
         try:
             return self.payment_client.get_payment(payment_id)
         except Exception as e:
-            logger.error(f"Error getting payment {payment_id}: {e}")
+            logger.error(f'Error getting payment {payment_id}: {e}')
             raise
 
     async def get_payments_for_subscription(self, subscription_id: UUID) -> List[Payment]:
@@ -89,7 +89,7 @@ class PaymentService:
         try:
             return self.payment_client.get_payments_for_subscription(subscription_id)
         except Exception as e:
-            logger.error(f"Error getting payments for subscription {subscription_id}: {e}")
+            logger.error(f'Error getting payments for subscription {subscription_id}: {e}')
             raise
 
     async def refund_payment(self, payment_id: UUID, amount: Optional[float] = None) -> Payment:
@@ -106,7 +106,7 @@ class PaymentService:
         try:
             return self.payment_client.refund_payment(payment_id, amount)
         except Exception as e:
-            logger.error(f"Error refunding payment {payment_id}: {e}")
+            logger.error(f'Error refunding payment {payment_id}: {e}')
             raise
 
     async def update_payment_status(self, payment_id: UUID, status: str) -> Payment:
@@ -123,5 +123,5 @@ class PaymentService:
         try:
             return self.payment_client.update_payment_status(payment_id, status)
         except Exception as e:
-            logger.error(f"Error updating payment status for {payment_id}: {e}")
+            logger.error(f'Error updating payment status for {payment_id}: {e}')
             raise

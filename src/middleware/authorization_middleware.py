@@ -32,12 +32,12 @@ class AuthorizationMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
 
         try:
             payload = get_jwt_payload(request)
-            request.state.user_id = payload.get("sub")
-            request.state.user_email = payload.get("email")
+            request.state.user_id = payload.get('sub')
+            request.state.user_email = payload.get('email')
         except HTTPException as exc:
             return JSONResponse(
                 status_code=exc.status_code,
-                content={"detail": exc.detail},
+                content={'detail': exc.detail},
             )
 
         response: Response = await call_next(request)
