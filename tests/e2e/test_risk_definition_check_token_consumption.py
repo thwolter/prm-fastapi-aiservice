@@ -3,20 +3,34 @@ Integration tests for RiskDefinitionCheckService with token consumption.
 """
 
 import uuid
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import jwt
 import pytest
 import pytest_asyncio
-from fastapi.testclient import TestClient
 from riskgpt.models.schemas import DefinitionCheckResponse, ResponseInfo
 
 from src.core.config import settings
-from src.main import app
 from src.services.services import RiskDefinitionCheckService
 
-client = TestClient(app)
+
+@dataclass
+class Entitlement:
+    """
+    Represents an entitlement for a feature.
+
+    This is a simple dataclass used for testing purposes to mock the response
+    from the EntitlementService.get_entitlement_value method.
+    """
+
+    feature_key: str
+    has_access: bool
+    balance: int
+    limit: int
+    usage: int
+    period: str
 
 
 @pytest_asyncio.fixture
@@ -65,8 +79,19 @@ def create_mock_definition_response(consumed_tokens):
     )
 
 
-async def call_risk_definition_check(client, payload, headers):
-    response = client.post('/api/risk/check/definition/', json=payload, headers=headers)
+async def call_risk_definition_check(test_client, payload, headers):
+    """
+    Call the risk definition check endpoint with the given payload and headers.
+
+    Args:
+        test_client: The TestClient instance to use for the request.
+        payload: The request payload.
+        headers: The request headers.
+
+    Returns:
+        dict: The JSON response from the endpoint.
+    """
+    response = test_client.post('/api/risk/check/definition/', json=payload, headers=headers)
     assert response is not None
     return response.json()
 
@@ -80,6 +105,7 @@ async def test_risk_definition_check_sufficient_tokens(
     risk_definition_check_service,
     test_user_id,
     mock_get_entitlement_value,
+    test_client,
 ):
     """
     Test that RiskDefinitionCheckService correctly consumes tokens when a user has sufficient tokens.
@@ -104,7 +130,7 @@ async def test_risk_definition_check_sufficient_tokens(
     auth_headers = await get_auth_token(test_user_id)
 
     # Call the risk definition check endpoint
-    response_data = await call_risk_definition_check(client, payload, auth_headers)
+    response_data = await call_risk_definition_check(test_client, payload, auth_headers)
 
     # Verify the response
     assert response_data is not None
@@ -143,7 +169,12 @@ async def get_auth_token(test_user_id: uuid.UUID) -> dict:
 @pytest.mark.asyncio
 @pytest.mark.usefixtures('e2e_environment')
 async def test_risk_definition_check_insufficient_tokens(
-    subject_service, entitlement_service, metering_service, test_user_id, mock_get_entitlement_value
+    subject_service,
+    entitlement_service,
+    metering_service,
+    test_user_id,
+    mock_get_entitlement_value,
+    test_client,
 ):
     """
     Test that requests are rejected when a user has insufficient tokens.
@@ -173,7 +204,7 @@ async def test_risk_definition_check_insufficient_tokens(
     auth_headers = await get_auth_token(test_user_id)
 
     # Call the risk definition check endpoint
-    response = client.post('/api/risk/check/definition/', json=payload, headers=auth_headers)
+    response = test_client.post('/api/risk/check/definition/', json=payload, headers=auth_headers)
 
     # Verify that the request was rejected with a 403 Forbidden status code
     assert response.status_code == 403

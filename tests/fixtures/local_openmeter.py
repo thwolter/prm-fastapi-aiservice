@@ -1,3 +1,11 @@
+"""
+OpenMeter fixtures for integration testing.
+
+This file contains fixtures for setting up and interacting with a local OpenMeter instance
+for integration testing. These fixtures are only used when tests are marked with the
+'integration' marker.
+"""
+
 import uuid
 
 import pytest
@@ -9,17 +17,19 @@ from src.core.config import settings
 from src.services.metering_service import MeteringService
 
 
-# Session-scoped fixture for local OpenMeter clients
 @pytest_asyncio.fixture(scope='session')
 def local_openmeter_clients():
     """
-    Fixture that provides OpenMeter clients configured to use the local instance.
+    Provide OpenMeter clients configured to use the local instance.
 
     This fixture connects to the local OpenMeter instance running at http://localhost:8888
     as described in the README.md. No authentication is required for the local instance.
 
+    The fixture is session-scoped to avoid creating new clients for each test,
+    which improves test performance.
+
     Returns:
-        A tuple containing (sync_client, async_client)
+        tuple: A tuple containing (sync_client, async_client)
     """
     # Local OpenMeter instance URL
     local_endpoint = 'http://localhost:8888'
@@ -40,7 +50,13 @@ def local_openmeter_clients():
 @pytest.mark.integration
 def test_subject_id():
     """
-    Fixture that provides a unique subject ID for testing.
+    Provide a unique subject ID for testing.
+
+    This fixture generates a random UUID to use as a subject ID in tests,
+    ensuring that each test has a unique subject ID to avoid conflicts.
+
+    Returns:
+        str: A unique subject ID as a string.
     """
     return str(uuid.uuid4())
 
@@ -48,10 +64,17 @@ def test_subject_id():
 @pytest_asyncio.fixture
 async def local_meter(local_openmeter_clients):
     """
-    Fixture that creates a meter in the local OpenMeter instance.
+    Create a meter in the local OpenMeter instance for testing.
 
-    Returns:
-        The created meter object
+    This fixture creates a meter with a unique ID in the local OpenMeter instance,
+    and automatically cleans it up after the test is complete. The meter is configured
+    to count tokens as defined in the application settings.
+
+    Args:
+        local_openmeter_clients: The OpenMeter clients from the local_openmeter_clients fixture.
+
+    Yields:
+        str: The ID of the created meter.
     """
     sync_client, _ = local_openmeter_clients
 
@@ -85,10 +108,18 @@ async def local_meter(local_openmeter_clients):
 @pytest.mark.integration
 async def local_feature(local_openmeter_clients, local_meter):
     """
-    Fixture that creates a feature in the local OpenMeter instance.
+    Create a feature in the local OpenMeter instance for testing.
 
-    Returns:
-        The created feature object
+    This fixture creates a feature with a unique ID in the local OpenMeter instance,
+    linked to the meter created by the local_meter fixture. The feature is configured
+    with a monthly reset period, and is automatically cleaned up after the test is complete.
+
+    Args:
+        local_openmeter_clients: The OpenMeter clients from the local_openmeter_clients fixture.
+        local_meter: The meter ID from the local_meter fixture.
+
+    Yields:
+        str: The ID of the created feature.
     """
     sync_client, _ = local_openmeter_clients
 
@@ -119,10 +150,19 @@ async def local_feature(local_openmeter_clients, local_meter):
 @pytest_asyncio.fixture
 async def local_entitlement(local_openmeter_clients, local_feature, test_subject_id):
     """
-    Fixture that creates an entitlement in the local OpenMeter instance.
+    Create an entitlement in the local OpenMeter instance for testing.
 
-    Returns:
-        The created entitlement object
+    This fixture creates an entitlement for the test subject with the specified feature,
+    giving the subject an initial token balance of 1000. The entitlement is automatically
+    cleaned up after the test is complete.
+
+    Args:
+        local_openmeter_clients: The OpenMeter clients from the local_openmeter_clients fixture.
+        local_feature: The feature ID from the local_feature fixture.
+        test_subject_id: The subject ID from the test_subject_id fixture.
+
+    Yields:
+        dict: The created entitlement object with subject_id, feature_id, and limit.
     """
     sync_client, _ = local_openmeter_clients
 
@@ -153,13 +193,23 @@ async def local_metering_service(
     local_openmeter_clients, local_feature, local_entitlement, test_subject_id
 ):
     """
-    Fixture that provides a MeteringService instance configured to use the local OpenMeter instance.
+    Provide a MeteringService instance configured to use the local OpenMeter instance.
 
-    This fixture overrides the default MeteringService configuration to use the local OpenMeter instance.
-    It also ensures a meter, feature, and entitlement are created for the test subject.
+    This fixture creates a custom MeteringService subclass that connects to the local
+    OpenMeter instance instead of the production instance. It also temporarily overrides
+    the OPENMETER_FEATURE_KEY setting to use the feature created by the local_feature fixture.
 
-    Returns:
-        A configured MeteringService instance
+    The fixture ensures that a meter, feature, and entitlement are created for the test subject
+    before the MeteringService is used, and restores the original settings afterward.
+
+    Args:
+        local_openmeter_clients: The OpenMeter clients from the local_openmeter_clients fixture.
+        local_feature: The feature ID from the local_feature fixture.
+        local_entitlement: The entitlement from the local_entitlement fixture.
+        test_subject_id: The subject ID from the test_subject_id fixture.
+
+    Yields:
+        MeteringService: A configured MeteringService instance that uses the local OpenMeter.
     """
 
     # Create a custom MeteringService that uses the local OpenMeter instance
