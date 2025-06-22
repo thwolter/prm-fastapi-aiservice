@@ -4,7 +4,6 @@ pytest_plugins = [
     'tests.fixtures.env',
     'tests.fixtures.auth',
     'tests.fixtures.client',
-    'tests.fixtures.meter',
     'tests.fixtures.service_handler',
     'tests.fixtures.local_openmeter',
 ]

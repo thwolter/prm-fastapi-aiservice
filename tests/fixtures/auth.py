@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
+from unittest.mock import AsyncMock
 
 import jwt
 import pytest
 
 from src.core.config import settings
-from src.main import app
 
 
 @pytest.fixture(autouse=True)
@@ -14,17 +14,15 @@ def override_auth(monkeypatch, request):
     if request.node.get_closest_marker('integration'):
         yield
     else:
-
-        async def _get_metering_service():
-            return
-
         monkeypatch.setattr(
-            'src.api.dependencies.get_metering_service',
-            _get_metering_service,
+            'src.services.metering_service.MeteringService.check_entitlement',
+            AsyncMock(return_value={'has_access': True, 'balance': 100}),
         )
-
+        monkeypatch.setattr(
+            'src.services.metering_service.MeteringService.consume_tokens',
+            AsyncMock(return_value=True),
+        )
         yield
-        app.dependency_overrides.clear()
 
 
 @pytest.fixture
