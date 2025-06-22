@@ -3,8 +3,8 @@ from uuid import UUID
 
 from openmeter.aio import Client
 
-from models.usage import UsageEvent
 from src.core.config import settings
+from src.models.usage import UsageEvent
 from src.utils import logutils
 
 logger = logutils.get_logger(__name__)

@@ -10,7 +10,7 @@ client = TestClient(app)
 
 
 @patch('src.services.services.RiskBiasCheckService.execute_query')
-def test_risk_bias_check_endpoint(mock_execute_query, auth_headers):
+def test_risk_bias_check_endpoint(mock_execute_query, mock_metering_service, auth_headers):
     """Test that the risk bias check endpoint works correctly with mocking."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.BiasCheckResponse(
@@ -49,7 +49,7 @@ def test_risk_bias_check_endpoint(mock_execute_query, auth_headers):
 
 
 @patch('src.services.services.RiskBiasCheckService.execute_query')
-def test_risk_bias_check_no_biases(mock_execute_query, auth_headers):
+def test_risk_bias_check_no_biases(mock_execute_query, mock_metering_service, auth_headers):
     """Test risk bias check with no biases found."""
     # Mock the service response
     mock_execute_query.return_value = rg_schemas.BiasCheckResponse(

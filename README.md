@@ -28,6 +28,32 @@ To run only the integration tests:
 
 poetry run pytest -m integration
 
+### Local OpenMeter Testing
+
+For integration tests that require OpenMeter, we provide a set of fixtures that connect to the local OpenMeter instance:
+
+- `local_openmeter_clients`: Provides sync and async clients configured for the local instance
+- `test_subject_id`: Generates a unique subject ID for testing
+- `local_meter`: Creates a meter in the local OpenMeter instance
+- `local_feature`: Creates a feature linked to the meter
+- `local_entitlement`: Creates an entitlement for the test subject with an initial balance of 1000 tokens
+- `local_metering_service`: Provides a MeteringService instance configured to use the local OpenMeter instance
+
+To use these fixtures in your tests, mark them with `@pytest.mark.integration`:
+
+```python
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_token_consumption(local_metering_service, test_subject_id):
+    # Check entitlement
+    entitlement = await local_metering_service.check_entitlement(uuid.UUID(test_subject_id))
+    assert entitlement["has_access"] is True
+
+    # Your test code here
+```
+
+See `tests/integration/test_local_openmeter.py` for complete examples.
+
 
 ### Testing APIs without Protection
 

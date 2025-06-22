@@ -4,8 +4,8 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
 
+from src.api.dependencies import get_metering_service
 from src.middleware.middleware_mixins import MiddlewareSkipMixin
-from src.services.metering_service import MeteringService
 from src.utils import logutils
 
 logger = logutils.get_logger(__name__)
@@ -18,7 +18,7 @@ class TokenMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
 
     def __init__(self, app):
         super().__init__(app)
-        self.metering_service = MeteringService()
+        self.metering = get_metering_service()
 
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
@@ -46,10 +46,10 @@ class TokenMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
             )
 
         # Check token entitlement
-        entitlement = await self.metering_service.check_entitlement(request.state.user_id)
+        entitlement = await self.metering.check_entitlement(request.state.user_id)
 
         # Check if user has sufficient tokens
-        if not entitlement.get('has_access', False):
+        if not entitlement['has_access']:
             return JSONResponse(
                 status_code=403,
                 content={
@@ -57,7 +57,7 @@ class TokenMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
                 },
             )
 
-        if entitlement.get('balance', 0) <= 0:
+        if entitlement['balance'] <= 0:
             return JSONResponse(
                 status_code=403,
                 content={
@@ -72,7 +72,7 @@ class TokenMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
         # Only consume tokens if the response was successful
         if response.status_code < 400:
             if hasattr(request.state, 'response_info'):
-                await self.metering_service.consume_tokens(
+                await self.metering.consume_tokens(
                     subject_id=request.state.user_id,
                     tokens=request.state.response_info.consumed_tokens,
                     model=getattr(request.state.response_info, 'model_name', None),

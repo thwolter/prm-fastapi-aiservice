@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 
 import jwt
 import pytest
-from billing_services.models import Entitlement
 
 from src.core.config import settings
 from src.main import app
@@ -16,19 +15,12 @@ def override_auth(monkeypatch, request):
         yield
     else:
 
-        async def _get_entitlement_value(self, subject_id, feature_key):
-            return Entitlement(
-                feature_key=feature_key,
-                has_access=True,
-                balance=100,
-                usage=0,
-                limit=100,
-                period='MONTH',
-            )
+        async def _get_metering_service():
+            return
 
         monkeypatch.setattr(
-            'billing_services.services.entitlement_service.EntitlementService.get_entitlement_value',
-            _get_entitlement_value,
+            'src.api.dependencies.get_metering_service',
+            _get_metering_service,
         )
 
         yield

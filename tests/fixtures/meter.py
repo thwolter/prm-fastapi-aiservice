@@ -43,3 +43,24 @@ async def metering_service(openmeter_clients, test_user_id, subject_service):
     """
 
     yield MeteringService()
+
+
+class MockMeteringService:
+    def __init__(self, has_access_return=True):
+        self.has_access_return = has_access_return
+
+    async def check_entitlement(self, subject_id, feature_key=None):
+        return {
+            'has_access': self.has_access_return,
+            'balance': 100 if self.has_access_return else 0,
+        }
+
+    async def consume_tokens(self, subject_id, tokens, model=None, prompt=None):
+        return True
+
+
+@pytest.fixture
+def mock_metering_service(monkeypatch, has_access_return=True):
+    mock_service = MockMeteringService(has_access_return)
+    monkeypatch.setattr('src.api.dependencies.get_metering_service', lambda: mock_service)
+    return mock_service

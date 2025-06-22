@@ -9,7 +9,6 @@ from unittest.mock import patch
 import jwt
 import pytest
 import pytest_asyncio
-from billing_services.models import Entitlement
 from fastapi.testclient import TestClient
 from riskgpt.models.schemas import DefinitionCheckResponse, ResponseInfo
 
@@ -72,7 +71,6 @@ async def call_risk_definition_check(client, payload, headers):
     return response.json()
 
 
-@pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.usefixtures('e2e_environment')
 async def test_risk_definition_check_sufficient_tokens(
