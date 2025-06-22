@@ -22,8 +22,9 @@ def local_openmeter_clients():
     """
     Provide OpenMeter clients configured to use the local instance.
 
-    This fixture connects to the local OpenMeter instance running at http://localhost:8888
-    as described in the README.md. No authentication is required for the local instance.
+    This fixture connects to the local OpenMeter instance specified by
+    ``settings.OPENMETER_API_URL`` (e.g., ``http://localhost:8888``) as described
+    in the README.md. No authentication is required for the local instance.
 
     The fixture is session-scoped to avoid creating new clients for each test,
     which improves test performance.
@@ -32,7 +33,7 @@ def local_openmeter_clients():
         tuple: A tuple containing (sync_client, async_client)
     """
     # Local OpenMeter instance URL
-    local_endpoint = 'http://localhost:8888'
+    local_endpoint = settings.OPENMETER_API_URL
 
     # No authentication headers needed for local instance
     headers = {

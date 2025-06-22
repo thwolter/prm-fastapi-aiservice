@@ -90,14 +90,16 @@ class Settings(BaseSettings):
     # OpenMeter configuration
     OPENMETER_API_KEY: str
     OPENMETER_API_URL: str = 'https://openmeter.cloud'
+    OPENMETER_LOCAL_API_URL: str = 'http://localhost:8888'
     OPENMETER_SOURCE: str = 'prm-ai-service'
     OPENMETER_TIMEOUT: float = 1.0
     OPENMETER_FEATURE_KEY: str = 'ai_tokens'
     OPENMETER_EVENT_TYPE: str = 'tokens'
 
-    @classmethod
-    def from_env(cls):
-        return cls()
+    def __init__(self, **values: Any):
+        super().__init__(**values)
+        if self.ENVIRONMENT == 'local':
+            object.__setattr__(self, 'OPENMETER_API_URL', self.OPENMETER_LOCAL_API_URL)
 
 
 settings = Settings()

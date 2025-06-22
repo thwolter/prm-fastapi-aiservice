@@ -20,7 +20,8 @@ Launch OpenMeter and its dependencies:
 docker compose up -d
 The local OpenMeter instance will be available at http://localhost:8888. This URL is already configured in the .env file.
 
-No bearer token is required for the local instance.
+No bearer token is required for the local instance and the `OPENMETER_API_KEY`
+environment variable can be omitted when running tests locally.
 
 Running Tests
 poetry run pytest
@@ -69,16 +70,14 @@ To use this feature:
 2. Start the application normally
 3. Make API requests without authentication tokens
 
-### OpenMeter Sandbox Test
+### OpenMeter Integration Test
 
-The `tests/services/test_openmeter.py` integration test exercises the
-OpenMeter sandbox. It creates a temporary subject and issues an initial
-entitlement of 1000 tokens for that user. The subject and entitlement are
-deleted when the test completes.
-
-To run this test you must provide valid sandbox credentials via
-`OPENMETER_API_URL` and `OPENMETER_API_KEY` and have an active internet
-connection.
+The `tests/integration/test_local_openmeter.py` module exercises a local
+OpenMeter instance. It verifies that a test subject starts with an
+entitlement of 1000 tokens and demonstrates how token consumption affects
+the balance and access permissions. Ensure the local instance is running
+and that the connection details match the values in `.env` before running
+the test.
 
 ## Authentication
 

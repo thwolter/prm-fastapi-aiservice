@@ -28,6 +28,8 @@ poetry install
 3. Set up environment variables:
 
 ```bash
+# `OPENMETER_API_KEY` is only needed when using the OpenMeter cloud sandbox.
+# It can be omitted when testing against a local instance.
 export OPENMETER_API_URL=<your-openmeter-api-url>
 export OPENMETER_API_KEY=<your-openmeter-api-key>
 ```

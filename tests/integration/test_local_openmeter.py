@@ -3,6 +3,7 @@ import uuid
 import pytest
 
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_token_consumption_with_local_openmeter(local_metering_service, test_subject_id):
     """
