@@ -1,5 +1,7 @@
 # Subscription and Payment
 
+> **Note:** The functionality described in this document is not yet implemented, but is planned for future development.
+
 This document describes the process of creating a subscription and arranging payment in the AI Service project.
 
 ## Creating a Subscription

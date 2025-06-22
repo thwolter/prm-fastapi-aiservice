@@ -4,7 +4,7 @@ This document describes the external services used in the AI Service project.
 
 ## OpenMeter
 
-OpenMeter is a service used for metering, entitlements, and payments in the AI Service project.
+OpenMeter is a service used for metering and entitlements in the AI Service project. It is also planned to be used for payments in the future, but this functionality is not yet implemented.
 
 ### OpenMeterClient
 
@@ -96,4 +96,3 @@ Gets the entitlement value for a subject and feature using OpenMeter.
 
 - `subject_id`: The ID of the subject.
 - `feature_key`: The feature key to check.
-

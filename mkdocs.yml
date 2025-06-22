@@ -14,5 +14,6 @@ nav:
   - Middlewares: middlewares.md
   - Error Handling: error_handling.md
   - Resilient Execution: resilient_execution.md
+  - Subscription and Payment: subscription_payment.md
   - CLI Commands: cli_commands.md
   - Improvement Tasks: tasks.md
