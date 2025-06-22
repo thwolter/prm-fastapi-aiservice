@@ -13,7 +13,7 @@ from src.core.health_checks import router as core_router
 from src.keywords.router import router as keywords_router
 from src.middleware.authorization_middleware import AuthorizationMiddleware
 from src.middleware.custom_error_format import custom_error_format_middleware
-from src.middleware.token_entitlement_middleware import TokenEntitlementMiddleware
+from src.middleware.token_middleware import TokenMiddleware
 from src.router import router as base_router
 from src.utils import logutils
 
@@ -61,7 +61,7 @@ async def custom_middleware(request: Request, call_next: RequestResponseEndpoint
     return await custom_error_format_middleware(request, call_next)
 
 
-app.add_middleware(TokenEntitlementMiddleware)
+app.add_middleware(TokenMiddleware)
 app.add_middleware(AuthorizationMiddleware)
 
 

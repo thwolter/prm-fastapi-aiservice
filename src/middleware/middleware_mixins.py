@@ -35,8 +35,8 @@ class MiddlewareSkipMixin:
             r'^/static/.*',
         ]
 
-        logger.info(f'TokenEntitlementMiddleware will exclude paths: {self.excluded_paths}')
-        logger.info(f'TokenEntitlementMiddleware will exclude patterns: {self.excluded_patterns}')
+        logger.info(f'TokenMiddleware will exclude paths: {self.excluded_paths}')
+        logger.info(f'TokenMiddleware will exclude patterns: {self.excluded_patterns}')
 
     def should_skip_middleware(self, request: Request) -> bool:
         """

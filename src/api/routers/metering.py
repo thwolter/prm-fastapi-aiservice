@@ -7,8 +7,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.api.dependencies import get_metering_service
-from src.domain.models import UsageEvent
-from src.domain.services import MeteringService
+from src.models.usage import UsageEvent
+from src.services.metering_service import MeteringService
 
 router = APIRouter(prefix='/metering', tags=['Metering'])
 
@@ -23,11 +23,11 @@ async def record_usage(
     Record usage for a subject.
     """
     try:
-        success = await metering_service.consume_tokens_for_user(
-            user_id=subject_id,
-            token=usage_event.tokens,
-            model_name=usage_event.model,
-            prompt_name=usage_event.prompt,
+        success = await metering_service.consume_tokens(
+            subject_id=subject_id,
+            tokens=usage_event.tokens,
+            model=usage_event.model,
+            prompt=usage_event.prompt,
         )
         if success:
             return {'message': 'Usage recorded successfully'}

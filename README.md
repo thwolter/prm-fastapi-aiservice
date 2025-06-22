@@ -7,25 +7,27 @@
 3. Copy `.env.example` to `.env` and fill in the required values (`OPENAI_API_KEY`, `LANGCHAIN_API_KEY`, `LANGCHAIN_PROJECT`, `SENTRY_DSN`, `SECRET_KEY`, `SERVICE_SECRET`, `OPENMETER_API_KEY`, `BACKEND_CORS_ORIGINS`).
 4. (Optional) Copy `riskgpt.toml.example` to `riskgpt.toml` if you want to use the RiskGPT prompts locally.
 
-## Development
+Testing
+Local OpenMeter Instance
+Some tests require a local OpenMeter instance. To set up a local OpenMeter instance:
 
-Run the tests excluding webtests. Environment variables are loaded from
-`.env.test` using `pytest-dotenv`:
+Clone the OpenMeter repository:
 
-The `.env.test` file does not include an OpenMeter API key. When running the
-quota service tests you must provide `OPENMETER_API_KEY` via an external
-environment variable.
+git clone git@github.com:openmeterio/openmeter.git
+cd openmeter/quickstart
+Launch OpenMeter and its dependencies:
 
-```bash
-pytest -m "not webtest"
-```
+docker compose up -d
+The local OpenMeter instance will be available at http://localhost:8888. This URL is already configured in the .env file.
 
-To execute the webtests (which interact with OpenMeter's sandbox), set
-`OPENMETER_SANDBOX_API_KEY` and run pytest with the `--webtest` flag:
+No bearer token is required for the local instance.
 
-```bash
-OPENMETER_SANDBOX_API_KEY=<your_key> pytest --webtest
-```
+Running Tests
+poetry run pytest
+To run only the integration tests:
+
+poetry run pytest -m integration
+
 
 ### Testing APIs without Protection
 

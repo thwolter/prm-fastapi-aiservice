@@ -9,12 +9,11 @@ from unittest.mock import patch
 import jwt
 import pytest
 import pytest_asyncio
+from billing_services.models import Entitlement
 from fastapi.testclient import TestClient
 from riskgpt.models.schemas import DefinitionCheckResponse, ResponseInfo
 
-from domain.services.service_factory import DomainServiceFactory
 from src.core.config import settings
-from src.domain.models.entitlement import Entitlement
 from src.main import app
 from src.services.services import RiskDefinitionCheckService
 
@@ -26,9 +25,6 @@ async def risk_definition_check_service(test_user_id) -> RiskDefinitionCheckServ
     """
     Create a RiskDefinitionCheckService instance for testing.
     """
-    # Set up the token quota service provider with the test user ID
-    DomainServiceFactory.setup_for_testing(test_user_id)
-
     return RiskDefinitionCheckService()
 
 
@@ -41,7 +37,7 @@ def mock_get_entitlement_value():
         A mock object that can be configured with return_value or side_effect.
     """
     with patch(
-        'src.domain.services.entitlement_service.EntitlementService.get_entitlement_value'
+        'billing_services.services.entitlement_service.EntitlementService.get_entitlement_value'
     ) as mock_get_entitlement:
         # Default to a sufficient token balance
         mock_get_entitlement.return_value = Entitlement(
@@ -120,7 +116,9 @@ async def test_risk_definition_check_sufficient_tokens(
     assert response_data['response_info']['consumed_tokens'] == consumed_tokens
 
     # Verify that the entitlement service was called to check the token balance
-    mock_get_entitlement_value.assert_called_with(feature_key=settings.OPENMETER_FEATURE_KEY)
+    mock_get_entitlement_value.assert_called_with(
+        subject_id=test_user_id, feature_key=settings.OPENMETER_FEATURE_KEY
+    )
 
 
 async def get_auth_token(test_user_id: uuid.UUID) -> dict:
@@ -186,4 +184,6 @@ async def test_risk_definition_check_insufficient_tokens(
     assert 'Insufficient token balance' in response_data['detail']
 
     # Verify that the entitlement service was called to check the token balance
-    mock_get_entitlement_value.assert_called_with(feature_key=settings.OPENMETER_FEATURE_KEY)
+    mock_get_entitlement_value.assert_called_with(
+        subject_id=test_user_id, feature_key=settings.OPENMETER_FEATURE_KEY
+    )
