@@ -14,6 +14,19 @@ from riskgpt.models.schemas import DefinitionCheckResponse, ResponseInfo
 from src.core.config import settings
 
 
+@pytest.fixture
+def riskgpt_payload():
+    return {
+        'business_context': {
+            'project_id': 'test-project',
+            'project_description': 'Test project description',
+            'domain_knowledge': 'Test domain knowledge',
+            'language': 'en',
+        },
+        'risk_description': 'Test risk description',
+    }
+
+
 @pytest_asyncio.fixture
 async def metering_client():
     """
@@ -94,14 +107,14 @@ async def subject(metering_client):
 
 
 @pytest_asyncio.fixture
-async def entitlement(metering_client, subject, feature):
+async def entitlement(metering_client, subject, feature, issue_after_reset=10000):
     """
     Fixture to create an entitlement for a user for testing purposes.
     """
     entitlement_payload = {
         'subjectKey': 'user_001',
         'featureKey': settings.OPENMETER_FEATURE_KEY,
-        'issueAfterReset': 10000,
+        'issueAfterReset': issue_after_reset,
         'type': 'metered',
         'usagePeriod': {'interval': 'MONTH', 'startDay': 1},
     }
@@ -163,23 +176,6 @@ def create_mock_definition_response(consumed_tokens):
     )
 
 
-async def call_risk_definition_check(test_client, payload, headers):
-    """
-    Call the risk definition check endpoint with the given payload and headers.
-
-    Args:
-        test_client: The TestClient instance to use for the request.
-        payload: The request payload.
-        headers: The request headers.
-
-    Returns:
-        dict: The JSON response from the endpoint.
-    """
-    response = test_client.post('/api/risk/check/definition/', json=payload, headers=headers)
-    assert response is not None
-    return response.json()
-
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.usefixtures('e2e_environment')
@@ -188,6 +184,7 @@ async def test_risk_definition_check_sufficient_tokens(
     test_client,
     entitlement,
     auth_headers,
+    riskgpt_payload,
 ):
     """
     Test that RiskDefinitionCheckService correctly consumes tokens when a user has sufficient tokens.
@@ -197,19 +194,12 @@ async def test_risk_definition_check_sufficient_tokens(
     mock_response = create_mock_definition_response(consumed_tokens)
     configure_mock_handle(return_value=mock_response)
 
-    # Create a request payload
-    payload = {
-        'business_context': {
-            'project_id': 'test-project',
-            'project_description': 'Test project description',
-            'domain_knowledge': 'Test domain knowledge',
-            'language': 'en',
-        },
-        'risk_description': 'Test risk description',
-    }
-
     # Call the risk definition check endpoint
-    response_data = await call_risk_definition_check(test_client, payload, auth_headers)
+    response = test_client.post(
+        '/api/risk/check/definition/', json=riskgpt_payload, headers=auth_headers
+    )
+    assert response is not None
+    response_data = response.json()
 
     # Verify the response
     assert response_data is not None
@@ -222,51 +212,32 @@ async def test_risk_definition_check_sufficient_tokens(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.usefixtures('e2e_environment')
+@pytest.mark.parametrize('entitlement', [0])
 async def test_risk_definition_check_insufficient_tokens(
-    subject_service,
-    entitlement_service,
-    metering_service,
-    test_user_id,
-    mock_get_entitlement_value,
+    configure_mock_handle,
     test_client,
+    entitlement,
+    auth_headers,
+    riskgpt_payload,
 ):
     """
     Test that requests are rejected when a user has insufficient tokens.
     """
-    # Configure the mock to return an entitlement with insufficient tokens
-    mock_get_entitlement_value.return_value = Entitlement(
-        feature_key=settings.OPENMETER_FEATURE_KEY,
-        has_access=True,
-        balance=0,  # No tokens left
-        limit=1000,
-        usage=1000,
-        period='MONTH',
-    )
 
-    # Create a request payload
-    payload = {
-        'business_context': {
-            'project_id': 'test-project',
-            'project_description': 'Test project description',
-            'domain_knowledge': 'Test domain knowledge',
-            'language': 'en',
-        },
-        'risk_description': 'Test risk description',
-    }
-
-    # Get auth headers for the test user
-    auth_headers = await get_auth_token(test_user_id)
+    # Configure the mock to return a response with consumed tokens
+    consumed_tokens = 50
+    mock_response = create_mock_definition_response(consumed_tokens)
+    configure_mock_handle(return_value=mock_response)
 
     # Call the risk definition check endpoint
-    response = test_client.post('/api/risk/check/definition/', json=payload, headers=auth_headers)
+    response = test_client.post(
+        '/api/risk/check/definition/', json=riskgpt_payload, headers=auth_headers
+    )
+    assert response is not None
+    response_data = response.json()
 
     # Verify that the request was rejected with a 403 Forbidden status code
     assert response.status_code == 403
     response_data = response.json()
     assert 'detail' in response_data
-    assert 'Insufficient token balance' in response_data['detail']
-
-    # Verify that the entitlement service was called to check the token balance
-    mock_get_entitlement_value.assert_called_with(
-        subject_id=test_user_id, feature_key=settings.OPENMETER_FEATURE_KEY
-    )
+    assert 'Insufficient token entitlement' in response_data['detail']
