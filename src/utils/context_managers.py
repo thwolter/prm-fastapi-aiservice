@@ -9,7 +9,7 @@ logger = logutils.get_logger(__name__)
 
 
 @contextmanager
-def handle_resource_not_found(user_id):
+def handle_resource_not_found(user_id) -> None:
     try:
         yield
     except ResourceNotFoundError as e:

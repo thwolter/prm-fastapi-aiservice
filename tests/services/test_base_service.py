@@ -1,5 +1,6 @@
 """Tests for the BaseService class."""
 
+from typing import Awaitable, Callable, cast
 from unittest.mock import AsyncMock
 
 import pytest
@@ -23,13 +24,18 @@ class TestResultModel(BaseModel):
     success: bool
     result: str = ''
     error: str = ''
-    response_info: ResponseInfo = Field(default_factory=ResponseInfo)
+    response_info: ResponseInfo = Field(
+        default_factory=lambda: ResponseInfo(
+            consumed_tokens=0, total_cost=0.0, prompt_name='', model_name=''
+        )
+    )
 
 
 class TestService(BaseService):
     """Test service implementation."""
 
-    chain_fn = None
+    # Use typing.cast to ensure the type is compatible with the base class
+    chain_fn: Callable[[BaseModel], Awaitable[BaseModel]] = None  # type: ignore
     route_path = '/test'
     QueryModel = TestQueryModel
     ResultModel = TestResultModel
@@ -59,10 +65,11 @@ async def test_base_service_execute_query_success():
     # Execute a query
     query = TestQueryModel(query='test query')
     result = await service.execute_query(query)
+    result_model = cast(TestResultModel, result)
 
     # Verify the result
-    assert result.success is True
-    assert result.result == 'test result'
+    assert result_model.success is True
+    assert result_model.result == 'test result'
     mock_chain_fn.assert_called_once_with(query)
 
 
@@ -79,10 +86,11 @@ async def test_base_service_execute_query_failure():
     # Execute a query - should return a fallback response
     query = TestQueryModel(query='test query')
     result = await service.execute_query(query)
+    result_model = cast(TestResultModel, result)
 
     # Verify the result
-    assert result.success is False
-    assert 'temporarily unavailable' in result.error
+    assert result_model.success is False
+    assert 'temporarily unavailable' in result_model.error
     mock_chain_fn.assert_called_once_with(query)
 
 
@@ -116,10 +124,11 @@ async def test_base_service_execute_query_circuit_open():
     # Execute a query - should return a fallback response without calling the chain function
     query = TestQueryModel(query='test query')
     result = await service.execute_query(query)
+    result_model = cast(TestResultModel, result)
 
     # Verify the result
-    assert result.success is False
-    assert 'currently unavailable' in result.error
+    assert result_model.success is False
+    assert 'currently unavailable' in result_model.error
     mock_chain_fn.assert_not_called()
 
 
@@ -128,7 +137,7 @@ async def test_base_service_execute_query_no_chain_fn():
     """Test that execute_query raises RuntimeError when chain_fn is not set."""
     # Create a test service without a chain function
     service = TestService()
-    service.__class__.chain_fn = None
+    service.__class__.chain_fn = None  # type: ignore
 
     # Execute a query - should raise RuntimeError
     query = TestQueryModel(query='test query')

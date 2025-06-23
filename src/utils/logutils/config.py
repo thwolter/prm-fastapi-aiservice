@@ -2,7 +2,7 @@
 
 import logging
 import sys
-from typing import List, Optional
+from typing import IO, List, Optional
 
 from src.core.config import settings
 from src.utils.logutils.formatters import create_default_formatter
@@ -18,7 +18,7 @@ def get_log_level() -> int:
     return getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
 
 
-def create_console_handler(stream=sys.stdout) -> logging.StreamHandler:
+def create_console_handler(stream: Optional[IO[str]] = sys.stdout) -> logging.StreamHandler:
     """
     Create a console handler that writes to the specified stream.
 

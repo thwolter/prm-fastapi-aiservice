@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class BaseService:
     """Base service calling RiskGPT chains."""
 
-    chain_fn: typing.Callable[[BaseModel], typing.Awaitable[BaseModel]]
+    chain_fn: typing.Callable[typing.Awaitable[BaseModel]]
     route_path: str
     QueryModel: Type[BaseModel]
     ResultModel: Type[BaseModel]
@@ -57,11 +57,17 @@ class BaseService:
 
         from pydantic.fields import PydanticUndefined
 
-        try:  # riskgpt is optional in the test environment
-            from riskgpt.models.schemas import ResponseInfo
-        except Exception:  # pragma: no cover - optional dependency
+        # Define a local ResponseInfoClass variable to avoid name collision
+        # Define the type first
+        ResponseInfoClass: type[BaseModel]
 
-            class ResponseInfo(BaseModel):
+        try:  # riskgpt is optional in the test environment
+            from riskgpt.models.schemas import ResponseInfo as ImportedResponseInfo
+
+            ResponseInfoClass = ImportedResponseInfo
+        except Exception:  # pragma: no cover - optional dependency
+            # Create a fallback class if riskgpt is not available
+            class FallbackResponseInfo(BaseModel):
                 """Fallback ResponseInfo model when riskgpt is unavailable."""
 
                 consumed_tokens: int = 0
@@ -69,6 +75,8 @@ class BaseService:
                 prompt_name: str = ''
                 model_name: str = ''
                 error: str = ''
+
+            ResponseInfoClass = FallbackResponseInfo
 
         def default_for_annotation(annotation: type | None) -> Any:
             if annotation is None:
@@ -138,7 +146,7 @@ class BaseService:
                 else:
                     values[name] = default_for_annotation(field.annotation)
 
-        from aiobreaker.state import CircuitBreakerState
+        from aiobreaker.state import CircuitBreakerState  # type: ignore[import-untyped]
 
         from src.utils.circuit_breaker import get_circuit_breaker
 
@@ -149,7 +157,7 @@ class BaseService:
             error_msg = f'Service {self.__class__.__name__} is temporarily unavailable'
 
         if 'response_info' in self.ResultModel.model_fields:
-            values['response_info'] = ResponseInfo(
+            values['response_info'] = ResponseInfoClass(
                 consumed_tokens=0,
                 total_cost=0.0,
                 prompt_name='',

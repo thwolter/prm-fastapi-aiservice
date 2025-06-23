@@ -5,9 +5,9 @@ from __future__ import annotations
 import inspect
 import logging
 from functools import wraps
-from typing import Any, Callable, Coroutine, Optional, TypeVar, Union
+from typing import Any, Callable, Coroutine, Optional, TypeVar, Union, cast
 
-from aiobreaker import CircuitBreakerError
+from aiobreaker import CircuitBreakerError  # type: ignore[import-untyped]
 
 from src.utils.circuit_breaker import get_circuit_breaker
 from src.utils.exceptions import ExternalServiceException
@@ -32,14 +32,14 @@ def with_resilient_execution(
             breaker = get_circuit_breaker(svc_name)
 
             try:
-                return await breaker.call_async(func, *args, **kwargs)
+                return cast(T, await breaker.call_async(func, *args, **kwargs))
             except CircuitBreakerError:
                 logger.warning('Circuit breaker for %s is open, failing fast', svc_name)
                 if create_default_response:
                     result = create_default_response(*args, **kwargs)
                     if inspect.isawaitable(result):
                         result = await result
-                    return result
+                    return cast(T, result)
                 raise ExternalServiceException(
                     detail=f'Service {svc_name} is currently unavailable', service_name=svc_name
                 )
@@ -52,7 +52,7 @@ def with_resilient_execution(
                         result = create_default_response(*args, **kwargs)
                         if inspect.isawaitable(result):
                             result = await result
-                        return result
+                        return cast(T, result)
                     except Exception as fallback_error:
                         logger.error(f'Fallback for {svc_name} failed: {fallback_error}')
                         # If the fallback fails, raise the original error

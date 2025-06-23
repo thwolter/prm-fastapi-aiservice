@@ -11,7 +11,7 @@ class CustomFormatter(logging.Formatter):
     in the log output, making it easier to read and parse logs visually.
     """
 
-    def format(self, record) -> str:
+    def format(self, record: logging.LogRecord) -> str:
         """
         Format the log record by padding the level name.
 
@@ -36,7 +36,7 @@ class CustomFormatter(logging.Formatter):
         return super().format(record)
 
 
-def create_default_formatter():
+def create_default_formatter() -> CustomFormatter:
     """
     Create the default formatter used by the application.
 

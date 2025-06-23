@@ -1,9 +1,13 @@
-from fastapi import Request
+from typing import Awaitable, Callable, Union
+
+from fastapi import Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 
-async def custom_error_format_middleware(request: Request, call_next) -> JSONResponse:
+async def custom_error_format_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Union[Response, JSONResponse]:
     try:
         response = await call_next(request)
         return response

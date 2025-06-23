@@ -1,7 +1,7 @@
-import yake
+import yake  # type: ignore[import]
 
 try:  # pragma: no cover - highlight functionality is optional
-    from yake.highlight import TextHighlighter
+    from yake.highlight import TextHighlighter  # type: ignore[import]
 except Exception:  # pragma: no cover - not available in some versions
     TextHighlighter = None
 

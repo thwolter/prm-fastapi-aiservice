@@ -1,6 +1,6 @@
 import sentry_sdk
 from fastapi import APIRouter
-from openmeter import Client
+from openmeter.aio import Client
 
 from src.core.config import settings
 from src.utils.circuit_breaker import with_circuit_breaker
@@ -10,13 +10,13 @@ router = APIRouter(tags=['Health Check'])
 
 
 @router.get('/health-check')
-async def health_check():
+async def health_check() -> dict:
     return {'status': 'ok'}
 
 
 @router.get('/health-check/sentry/check-connection')
 @with_circuit_breaker(service_name='Sentry')
-async def check_sentry_connection():
+async def check_sentry_connection() -> dict:
     try:
         # Test if Sentry client is properly configured
         if sentry_sdk.Hub.current.client and sentry_sdk.Hub.current.client.dsn:
@@ -29,7 +29,7 @@ async def check_sentry_connection():
 
 @router.get('/health-check/openmeter/check-connection')
 @with_circuit_breaker(service_name='OpenMeter')
-async def check_openmeter_connection():
+async def check_openmeter_connection() -> dict:
     try:
         client = Client(
             endpoint=settings.OPENMETER_API_URL,
@@ -42,7 +42,7 @@ async def check_openmeter_connection():
         # Using a try/except block to catch any exceptions from the API call
         try:
             # Get meters list as a simple API call to verify connectivity
-            client.get_meters()
+            await client.list_meters()
             return {'message': 'OpenMeter connection successful'}
         except Exception as e:
             raise ExternalServiceException(detail=str(e), service_name='OpenMeter')

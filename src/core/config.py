@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = 'ERROR'
 
     SECRET_KEY: str = 'your-secret-key'
-    SERVICE_SECRET: str = ('your-service-secret',)
+    SERVICE_SECRET: str = 'your-service-secret'
 
     # Authentication configuration
     AUTH_TOKEN_LEEWAY: int = 0  # in seconds
