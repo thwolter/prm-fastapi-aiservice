@@ -60,9 +60,9 @@ def override_settings(request):
 
 
 @pytest.fixture
-def e2e_environment():
+def local_openmeter_environment():
     """
-    Set environment specifically for e2e tests.
+    Set environment specifically for openmeter tests.
 
     This fixture temporarily changes the environment setting to 'testing'
     for end-to-end tests, and restores the original setting afterward.

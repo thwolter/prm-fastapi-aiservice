@@ -29,7 +29,7 @@ def override_auth(monkeypatch, request):
     Yields:
         None
     """
-    if request.node.get_closest_marker('integration'):
+    if request.node.get_closest_marker('openmeter'):
         # For integration tests, don't mock anything
         yield
     else:

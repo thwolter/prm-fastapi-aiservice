@@ -7,9 +7,12 @@ for integration testing. These fixtures are only used when tests are marked with
 """
 
 import uuid
+from datetime import datetime, timedelta
 
+import jwt
 import pytest
 import pytest_asyncio
+from azure.core.exceptions import ResourceExistsError
 from openmeter import Client
 from openmeter.aio import Client as AsyncClient
 
@@ -190,6 +193,172 @@ async def local_entitlement(local_openmeter_clients, local_feature, test_subject
 
 @pytest_asyncio.fixture
 @pytest.mark.integration
+async def local_metering_client():
+    """
+    Fixture to create an OpenMeter client for testing purposes.
+
+    This fixture creates an async OpenMeter client that connects to the local
+    OpenMeter instance specified by settings.OPENMETER_LOCAL_API_URL.
+    """
+    client = AsyncClient(endpoint=settings.OPENMETER_LOCAL_API_URL)
+    yield client
+    await client.close()
+
+
+@pytest_asyncio.fixture
+@pytest.mark.integration
+async def local_meter_for_tokens(local_metering_client):
+    """
+    Fixture to create a meter for token testing purposes.
+
+    This fixture creates a meter specifically for testing token consumption
+    with the risk definition check service.
+    """
+    meter_payload = {
+        'name': 'ai_tokens',
+        'slug': 'ai_tokens',
+        'description': 'LLM tokens',
+        'eventType': 'tokens',
+        'valueProperty': '$.tokens',
+        'aggregation': 'SUM',
+        'groupBy': {
+            'model': '$.model',
+            'prompt': '$.prompt',
+        },
+        'metadata': None,
+    }
+    try:
+        created_meter = await local_metering_client.create_meter(meter_payload)
+        assert created_meter is not None, 'Meter creation failed'
+    except ResourceExistsError:
+        created_meter = await local_metering_client.get_meter(meter_payload['slug'])
+
+    yield created_meter
+
+    try:
+        await local_metering_client.delete_meter(meter_payload['slug'])
+    except ResourceExistsError:
+        # If an active feature is present, we cannot delete the entitlement
+        pass
+
+
+@pytest_asyncio.fixture
+@pytest.mark.integration
+async def local_feature_for_tokens(local_metering_client, local_meter_for_tokens):
+    """
+    Fixture to create a feature for token testing purposes.
+
+    This fixture creates a feature specifically for testing token consumption
+    with the risk definition check service.
+    """
+    feature_payload = {
+        'key': settings.OPENMETER_FEATURE_KEY,
+        'meterSlug': 'ai_tokens',
+        'name': 'Ai Tokens',
+    }
+
+    try:
+        created_feature = await local_metering_client.create_feature(feature_payload)
+        assert created_feature is not None, 'Feature creation failed'
+    except ResourceExistsError:
+        created_feature = await local_metering_client.get_feature(feature_payload['key'])
+    yield created_feature
+    local_metering_client.delete_feature(feature_payload['key'])
+
+
+@pytest_asyncio.fixture
+@pytest.mark.integration
+async def local_subject_for_tokens(local_metering_client):
+    """
+    Fixture to create a subject for token testing purposes.
+
+    This fixture creates a subject specifically for testing token consumption
+    with the risk definition check service.
+    """
+    subject_payload = {
+        'key': 'user_001',
+        'displayname': 'Test User',
+    }
+
+    created_subject = await local_metering_client.upsert_subject([subject_payload])
+    assert created_subject is not None, 'Subject creation failed'
+    yield created_subject[0]
+    local_metering_client.delete_subject(created_subject[0]['id'])
+
+
+@pytest_asyncio.fixture
+@pytest.mark.integration
+async def local_entitlement_for_tokens(
+    local_metering_client,
+    local_subject_for_tokens,
+    local_feature_for_tokens,
+    issue_after_reset=10000,
+):
+    """
+    Fixture to create an entitlement for token testing purposes.
+
+    This fixture creates an entitlement specifically for testing token consumption
+    with the risk definition check service. The issue_after_reset parameter controls
+    the initial token balance.
+    """
+    entitlement_payload = {
+        'subjectKey': 'user_001',
+        'featureKey': settings.OPENMETER_FEATURE_KEY,
+        'issueAfterReset': issue_after_reset,
+        'type': 'metered',
+        'usagePeriod': {'interval': 'MONTH', 'startDay': 1},
+    }
+
+    created_entitlement = await local_metering_client.create_entitlement(
+        local_subject_for_tokens['key'], entitlement_payload
+    )
+    if created_entitlement.get('title') == 'Conflict':
+        entitlement_id = created_entitlement['extensions']['conflictingEntityId']
+        created_entitlement = await local_metering_client.get_entitlement(
+            local_subject_for_tokens['key'], entitlement_id
+        )
+    assert created_entitlement is not None, 'Entitlement creation failed'
+
+    yield created_entitlement
+
+    try:
+        await local_metering_client.delete_entitlement(
+            local_subject_for_tokens['id'], created_entitlement['id']
+        )
+    except ResourceExistsError:
+        # If an active feature is present, we cannot delete the entitlement
+        pass
+
+
+@pytest_asyncio.fixture
+@pytest.mark.integration
+async def local_auth_headers(local_subject_for_tokens):
+    """
+    Fixture to create authentication headers for the test user.
+
+    This fixture creates authentication headers with a JWT token for the test user,
+    which can be used to make authenticated requests to the application.
+    """
+    expiry = datetime.utcnow() + timedelta(minutes=60)
+    payload = {
+        'sub': local_subject_for_tokens['key'],
+        'email': 'test@example.com',
+        'exp': expiry,
+        'aud': settings.AUTH_TOKEN_AUDIENCE,
+    }
+    # Encode the token
+    token = jwt.encode(
+        payload,
+        settings.SECRET_KEY,
+        algorithm=settings.AUTH_TOKEN_ALGORITHM,
+    )
+
+    auth_headers = {'Authorization': f'Bearer {token}'}
+
+    return auth_headers
+
+
+@pytest_asyncio.fixture
 async def local_metering_service(
     local_openmeter_clients, local_feature, local_entitlement, test_subject_id
 ):

@@ -76,10 +76,7 @@ py_version = "312"
 
 [tool.pytest.ini_options]
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "tryfirst: marks tests that should be run first",
-    "no_quota_patch: do not patch quota service in this test",
-    "integration: marks end-to-end tests that hit external services",
+    'openmeter: marks tests that use OpenMeter for rate limiting',
 ]
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"

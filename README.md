@@ -33,6 +33,7 @@ poetry run pytest -m integration
 
 For integration tests that require OpenMeter, we provide a set of fixtures that connect to the local OpenMeter instance:
 
+#### Basic OpenMeter Fixtures:
 - `local_openmeter_clients`: Provides sync and async clients configured for the local instance
 - `test_subject_id`: Generates a unique subject ID for testing
 - `local_meter`: Creates a meter in the local OpenMeter instance
@@ -40,9 +41,18 @@ For integration tests that require OpenMeter, we provide a set of fixtures that 
 - `local_entitlement`: Creates an entitlement for the test subject with an initial balance of 1000 tokens
 - `local_metering_service`: Provides a MeteringService instance configured to use the local OpenMeter instance
 
+#### Token Consumption Testing Fixtures:
+- `local_metering_client`: Creates an async OpenMeter client for token testing
+- `local_meter_for_tokens`: Creates a meter specifically for token consumption testing
+- `local_feature_for_tokens`: Creates a feature for token consumption testing
+- `local_subject_for_tokens`: Creates a subject for token consumption testing
+- `local_entitlement_for_tokens`: Creates an entitlement with configurable token balance
+- `local_auth_headers`: Creates authentication headers for the test user
+
 To use these fixtures in your tests, mark them with `@pytest.mark.integration`:
 
 ```python
+# Basic usage
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_token_consumption(local_metering_service, test_subject_id):
@@ -51,9 +61,24 @@ async def test_token_consumption(local_metering_service, test_subject_id):
     assert entitlement["has_access"] is True
 
     # Your test code here
+
+# Token consumption testing with default token balance (10000)
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_with_tokens(local_entitlement_for_tokens, local_auth_headers):
+    # Test with sufficient tokens
+    # ...
+
+# Token consumption testing with zero token balance
+@pytest.mark.integration
+@pytest.mark.asyncio
+@pytest.mark.parametrize('local_entitlement_for_tokens', [0], indirect=True)
+async def test_without_tokens(local_entitlement_for_tokens, local_auth_headers):
+    # Test with insufficient tokens
+    # ...
 ```
 
-See `tests/integration/test_local_openmeter.py` for complete examples.
+See `tests/e2e/test_risk_definition_check_token_consumption.py` for complete examples.
 
 
 ### Testing APIs without Protection
@@ -72,12 +97,13 @@ To use this feature:
 
 ### OpenMeter Integration Test
 
-The `tests/integration/test_local_openmeter.py` module exercises a local
-OpenMeter instance. It verifies that a test subject starts with an
-entitlement of 1000 tokens and demonstrates how token consumption affects
+The `tests/e2e/test_risk_definition_check_token_consumption.py` module exercises a local
+OpenMeter instance for token consumption testing. It verifies that a test subject with
+sufficient tokens can access the risk definition check endpoint, while a subject with
+insufficient tokens is rejected. The tests demonstrate how token consumption affects
 the balance and access permissions. Ensure the local instance is running
 and that the connection details match the values in `.env` before running
-the test.
+the tests.
 
 ## Authentication
 
