@@ -3,7 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 
-async def custom_error_format_middleware(request: Request, call_next):
+async def custom_error_format_middleware(request: Request, call_next) -> JSONResponse:
     try:
         response = await call_next(request)
         return response

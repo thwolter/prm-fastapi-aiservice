@@ -33,7 +33,7 @@ class MeteringService:
         )
 
     async def check_entitlement(
-        self, subject_id: UUID, feature_key: Optional[str] = None
+        self, subject_id: UUID, feature_key: str | None = None
     ) -> Dict[str, Any]:
         """
         Check if a subject has sufficient tokens for the specified feature.
