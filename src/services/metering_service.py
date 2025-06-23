@@ -15,7 +15,7 @@ class MeteringService:
     Service for managing token entitlements and consumption.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the MeteringService with an OpenMeter client."""
         self.client = self._create_client()
 
@@ -32,7 +32,9 @@ class MeteringService:
             headers=headers,
         )
 
-    async def check_entitlement(self, subject_id: UUID, feature_key: str = None) -> Dict[str, Any]:
+    async def check_entitlement(
+        self, subject_id: UUID, feature_key: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Check if a subject has sufficient tokens for the specified feature.
 

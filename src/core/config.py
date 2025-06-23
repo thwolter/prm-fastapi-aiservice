@@ -47,22 +47,21 @@ class Settings(BaseSettings):
         env_file=['.env', '../.env'], env_ignore_empty=True, extra='ignore'
     )
     DOMAIN: str = 'localhost'
-    ENVIRONMENT: Literal['local', 'debug', 'staging', 'production'] = 'production'
+    ENVIRONMENT: Literal['local', 'debug', 'testing', 'staging', 'production'] = 'production'
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
     @computed_field
-    @property
     def IS_PRODUCTION(self) -> bool:
         return self.ENVIRONMENT == 'production'
 
     APP_PORT: int = 8001
     APP_HOST: str = 'localhost'
 
-    SENTRY_DSN: str
+    SENTRY_DSN: str = 'your-dsn-here'
     LOG_LEVEL: str = 'ERROR'
 
-    SECRET_KEY: str
-    SERVICE_SECRET: str
+    SECRET_KEY: str = 'your-secret-key'
+    SERVICE_SECRET: str = ('your-service-secret',)
 
     # Authentication configuration
     AUTH_TOKEN_LEEWAY: int = 0  # in seconds
@@ -73,7 +72,7 @@ class Settings(BaseSettings):
     METERING_VENDOR: str = 'openmeter'
 
     # OpenMeter configuration
-    OPENMETER_API_KEY: str
+    OPENMETER_API_KEY: str = 'your-apikey'
     OPENMETER_API_URL: str = 'https://openmeter.cloud'
     OPENMETER_LOCAL_API_URL: str = 'http://localhost:8888'
     OPENMETER_SOURCE: str = 'prm-ai-service'
