@@ -47,7 +47,8 @@ class MeteringService:
         """
         feature = feature_key or settings.OPENMETER_FEATURE_KEY
         try:
-            return await self.client.get_entitlement_value(str(subject_id), feature)
+            result = await self.client.get_entitlement_value(str(subject_id), feature)
+            return dict(result)
         except Exception as e:
             logger.error(
                 f'Error checking entitlement for subject {subject_id}, feature {feature}: {e}'
@@ -80,11 +81,12 @@ class MeteringService:
             prompt=prompt,
         )
 
+        event_dict = usage_event.to_dict()
+        event_dict['subject_id'] = str(subject_id)
+
         try:
-            return self.client.ingest_event(
-                subject_id=str(subject_id),
-                usage_event=usage_event.to_dict(),
-            )
+            await self.client.ingest_events([event_dict])
+            return True
         except Exception as e:
             logger.error(f'Error consuming tokens for subject {subject_id}: {e}')
             return False

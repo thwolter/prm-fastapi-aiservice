@@ -1,5 +1,7 @@
 """Tests for the validation module."""
 
+from typing import cast
+
 import pytest
 from fastapi import HTTPException
 from pydantic import BaseModel
@@ -24,7 +26,7 @@ class TestValidation:
         model = TestModel(name='Test', age=30)
 
         # Validate the model
-        validated = validate_model(model, TestModel)
+        validated = cast(TestModel, validate_model(model, TestModel))
 
         # Check that the validated model is correct
         assert validated.name == 'Test'

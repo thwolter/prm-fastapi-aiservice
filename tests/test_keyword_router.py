@@ -77,7 +77,7 @@ def test_extract_keywords_valid_input_with_deduplication_threshold():
 
 @pytest.mark.skip  # Skip this test as the TokenEntitlementMiddleware is not yet applicable to Keyword extraction
 def test_extract_keywords_missing_text():
-    request_data = {}
+    request_data: dict = {}
     response = client.post('/api/keywords/extract/', json=request_data)
     assert response.status_code == 422
 

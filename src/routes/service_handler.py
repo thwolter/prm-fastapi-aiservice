@@ -53,9 +53,9 @@ class ServiceHandler(Generic[TRequest, TResponse]):
         self.service_factory = service_factory
         self.request_model = request_model
         self.response_model = response_model
-        self.request = None
+        self.request: Request | None = None
 
-    def set_request(self, request: Request):
+    def set_request(self, request: Request) -> None:
         """Set the request for this handler."""
         self.request = request
 

@@ -1,5 +1,6 @@
 """Factory for creating routers with routes for all discovered services."""
 
+from enum import Enum
 from typing import Callable, List, Optional, Type
 
 from fastapi import APIRouter
@@ -59,7 +60,8 @@ def create_router(
                 module_name = module_parts[-2]
             else:
                 module_name = module_parts[0] if module_parts else service_class.__name__
-            tags = [module_name.capitalize()]
+
+            tags: list[str | Enum] = [module_name.capitalize()]
 
             registry.register_route(
                 path=service_class.route_path,  # Use route path defined in the service

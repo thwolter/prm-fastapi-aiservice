@@ -15,7 +15,7 @@ class MiddlewareSkipMixin:
     """
 
     def __init__(self, app: ASGIApp) -> None:
-        super().__init__(app)
+        super().__init__(app)  # type: ignore
 
         # Define paths and patterns to exclude
         self.excluded_paths = {

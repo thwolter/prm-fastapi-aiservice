@@ -1,9 +1,12 @@
+import logging
+
 from fastapi import APIRouter
 
 from src.keywords.keywords import get_keywords
 from src.keywords.models import KeywordRequest, KeywordResponse
-from src.utils import logutils
 from src.utils.exceptions import InternalServerException
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix='/api',
@@ -18,5 +21,5 @@ def extract_keywords(request: KeywordRequest) -> KeywordResponse:
         result = get_keywords(request)
         return result
     except Exception as e:
-        logutils.error(f'Error extracting keywords: {e}')
+        logger.error(f'Error extracting keywords: {e}')
         raise InternalServerException(detail='Error extracting keywords')

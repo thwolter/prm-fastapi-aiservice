@@ -10,7 +10,7 @@ from src.utils.exceptions import ValidationException
 logger = logutils.get_logger(__name__)
 
 
-def validate_model(data, model: Type[BaseModel]) -> BaseModel:
+def validate_model(data: BaseModel, model: Type[BaseModel]) -> BaseModel:
     """
     Validate data against a Pydantic model.
 
@@ -28,4 +28,5 @@ def validate_model(data, model: Type[BaseModel]) -> BaseModel:
         return model(**data.model_dump())
     except ValidationError as ve:
         logger.warning(f'Validation error: {ve.errors()}')
-        raise ValidationException(detail='Validation Error', errors=ve.errors())
+        errors = [dict(err) for err in ve.errors()]
+        raise ValidationException(detail='Validation Error', errors=errors)

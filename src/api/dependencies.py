@@ -2,10 +2,12 @@
 Dependencies for FastAPI.
 """
 
+from uuid import UUID
+
 from src.services.metering_service import MeteringService
 
 
-def get_metering_service():
+def get_metering_service() -> MeteringService:
     """
     Get a MeteringService instance.
 
@@ -19,7 +21,7 @@ def get_metering_service():
 _test_request = None
 
 
-def setup_for_testing(test_user_id):
+def setup_for_testing(test_user_id: UUID) -> None:
     """
     Set up the dependencies for testing with a test user ID.
 

@@ -3,6 +3,7 @@ from typing import Awaitable, Callable
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
+from starlette.types import ASGIApp
 
 from src.api.dependencies import get_metering_service
 from src.middleware.middleware_mixins import MiddlewareSkipMixin
@@ -16,7 +17,7 @@ class TokenMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
     Middleware to check token entitlement and consume tokens after request processing.
     """
 
-    def __init__(self, app):
+    def __init__(self, app: ASGIApp) -> None:
         super().__init__(app)
         self.metering = get_metering_service()
 

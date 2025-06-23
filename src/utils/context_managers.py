@@ -1,4 +1,6 @@
 from contextlib import contextmanager
+from typing import Iterator
+from uuid import UUID
 
 from azure.core.exceptions import ResourceNotFoundError
 
@@ -9,7 +11,7 @@ logger = logutils.get_logger(__name__)
 
 
 @contextmanager
-def handle_resource_not_found(user_id) -> None:
+def handle_resource_not_found(user_id: UUID) -> Iterator[None]:
     try:
         yield
     except ResourceNotFoundError as e:

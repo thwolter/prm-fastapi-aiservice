@@ -7,6 +7,7 @@ which is used to handle service requests in the application.
 
 from typing import Any, Callable, Optional
 from unittest import mock
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -28,6 +29,15 @@ def mock_service_handler_handle():
         yield mock_handle
 
 
+# Dummy model classes for testing
+class DummyRequest:
+    pass
+
+
+class DummyResponse:
+    pass
+
+
 @pytest.fixture
 def service_handler_with_mock_handle(mock_service_handler_handle):
     """
@@ -43,11 +53,13 @@ def service_handler_with_mock_handle(mock_service_handler_handle):
     Returns:
         tuple: A tuple containing (ServiceHandler instance, mock_handle).
     """
+    mock_service: MagicMock = MagicMock()
+
     # Create a minimal ServiceHandler instance
-    handler = ServiceHandler(
-        service_factory=lambda: None,  # Dummy factory
-        request_model=None,  # Will be overridden by the mock
-        response_model=None,  # Will be overridden by the mock
+    handler: ServiceHandler = ServiceHandler(
+        service_factory=lambda: mock_service,  # Dummy factory
+        request_model=DummyRequest,  # Will be overridden by the mock
+        response_model=DummyResponse,  # Will be overridden by the mock
     )
 
     return handler, mock_service_handler_handle

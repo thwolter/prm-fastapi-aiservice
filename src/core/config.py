@@ -1,7 +1,7 @@
 import json
 from typing import Annotated, Any, Literal
 
-from pydantic import AnyUrl, BeforeValidator, computed_field
+from pydantic import AnyUrl, BeforeValidator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from riskgpt.config.settings import RiskGPTSettings as BaseRiskGPTSettings
 
@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal['local', 'debug', 'testing', 'staging', 'production'] = 'production'
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
-    @computed_field
+    @property
     def IS_PRODUCTION(self) -> bool:
         return self.ENVIRONMENT == 'production'
 

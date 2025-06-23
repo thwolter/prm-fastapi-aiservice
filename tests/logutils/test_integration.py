@@ -46,7 +46,7 @@ def test_logger_integration():
         stream = io.StringIO()
 
         # Configure logutils with a custom handler
-        handler = logging.StreamHandler(stream)
+        handler: logging.Handler = logging.StreamHandler(stream)
         formatter = CustomFormatter('%(levelname)s [%(name)s] %(message)s')
         handler.setFormatter(formatter)
 

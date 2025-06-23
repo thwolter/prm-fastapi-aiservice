@@ -4,6 +4,7 @@ Use src.core.routes.validation, src.core.routes.service_handler, and src.core.ro
 """
 
 import warnings
+from enum import Enum
 from typing import Callable, List, Optional, Type, TypeVar
 
 from fastapi import APIRouter
@@ -11,6 +12,7 @@ from pydantic import BaseModel
 
 # Import the new modules
 from src.routes.route_registry import RouteRegistry
+from src.routes.service_handler import ServiceProtocol
 from src.utils import logutils
 
 TRequest = TypeVar('TRequest', bound=BaseModel)
@@ -46,9 +48,9 @@ class RouteRegistrar:
         path: str,
         request_model: Type[TRequest],
         response_model: Type[TResponse],
-        service_factory: Callable[[], object],
-        tags: Optional[List[str]] = None,
-    ):
+        service_factory: Callable[[], ServiceProtocol],
+        tags: Optional[List[str | Enum]] = None,
+    ) -> None:
         return self._registry.register_route(
             path=path,
             request_model=request_model,

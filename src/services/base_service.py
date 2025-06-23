@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class BaseService:
     """Base service calling RiskGPT chains."""
 
-    chain_fn: typing.Callable[typing.Awaitable[BaseModel]]
+    chain_fn: typing.ClassVar[typing.Callable[[BaseModel], typing.Awaitable[BaseModel]]]
     route_path: str
     QueryModel: Type[BaseModel]
     ResultModel: Type[BaseModel]
@@ -35,7 +35,7 @@ class BaseService:
             RuntimeError: If riskgpt is not installed.
             ExternalServiceException: If the service is unavailable and no fallback is provided.
         """
-        if self.chain_fn is None:
+        if self.__class__.chain_fn is None:
             raise RuntimeError('riskgpt is not installed')
 
         # Use the resilient execution decorator to handle fallbacks and circuit breaking
