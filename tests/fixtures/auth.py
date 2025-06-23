@@ -36,7 +36,7 @@ def override_auth(monkeypatch, request):
         # For non-integration tests, mock the metering service
         monkeypatch.setattr(
             'src.services.metering_service.MeteringService.check_entitlement',
-            AsyncMock(return_value={'has_access': True, 'balance': 100}),
+            AsyncMock(return_value={'hasAccess': True, 'balance': 100}),
         )
         monkeypatch.setattr(
             'src.services.metering_service.MeteringService.consume_tokens',

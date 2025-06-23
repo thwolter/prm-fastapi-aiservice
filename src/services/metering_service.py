@@ -51,7 +51,7 @@ class MeteringService:
                 f'Error checking entitlement for subject {subject_id}, feature {feature}: {e}'
             )
             # Return a default response indicating no access
-            return {'has_access': False, 'balance': 0}
+            return {'hasAccess': False, 'balance': 0}
 
     async def consume_tokens(
         self,

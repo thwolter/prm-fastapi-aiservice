@@ -96,11 +96,6 @@ class Settings(BaseSettings):
     OPENMETER_FEATURE_KEY: str = 'ai_tokens'
     OPENMETER_EVENT_TYPE: str = 'tokens'
 
-    def __init__(self, **values: Any):
-        super().__init__(**values)
-        if self.ENVIRONMENT == 'local':
-            object.__setattr__(self, 'OPENMETER_API_URL', self.OPENMETER_LOCAL_API_URL)
-
 
 settings = Settings()
 

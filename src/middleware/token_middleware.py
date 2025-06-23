@@ -49,7 +49,7 @@ class TokenMiddleware(MiddlewareSkipMixin, BaseHTTPMiddleware):
         entitlement = await self.metering.check_entitlement(request.state.user_id)
 
         # Check if user has sufficient tokens
-        if not entitlement['has_access']:
+        if not entitlement['hasAccess']:
             return JSONResponse(
                 status_code=403,
                 content={

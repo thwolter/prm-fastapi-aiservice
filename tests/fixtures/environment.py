@@ -72,7 +72,13 @@ def e2e_environment():
     """
     from src.core import config
 
+    original_openmeter_url = config.settings.OPENMETER_API_URL
     original_environment = config.settings.ENVIRONMENT
+
     config.settings.ENVIRONMENT = 'testing'  # or "staging"
+    config.settings.OPENMETER_API_URL = config.settings.OPENMETER_LOCAL_API_URL
+
     yield
+
     config.settings.ENVIRONMENT = original_environment
+    config.settings.OPENMETER_API_URL = original_openmeter_url
